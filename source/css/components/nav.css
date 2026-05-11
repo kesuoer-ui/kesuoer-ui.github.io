@@ -1,0 +1,27 @@
+#nav {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+
+  border-bottom: 1px solid var(--border);
+}
+
+/* logo */
+#nav .site-name {
+  justify-self: start;
+  margin-left: 20px;
+}
+
+/* menu */
+#nav .menus_items {
+  justify-self: center;
+}
+
+/* right area reserved */
+.nav-right {
+  justify-self: end;
+  margin-right: 20px;
+}

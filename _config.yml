@@ -3,17 +3,22 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
+title: kesuoer的技术博客
 subtitle: ""
-description: ""
+description: "全栈开发 / AI Agent / 系统设计"
 keywords:
-author: John Doe
-language: en
-timezone: ""
+  - AI Agent
+  - Python
+  - Reverse
+  - FastAPI
+author: kesuoer
+language: zh-CN
+timezone: Asia/Shanghai
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: http://example.com
+url: https://kesuoer-ui.github.io
+root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
@@ -43,8 +48,9 @@ render_drafts: false
 post_asset_folder: false
 relative_link: false
 future: true
-syntax_highlighter: highlight.js
+syntax_highlighter: prismjs
 highlight:
+  enable: false
   line_number: true
   auto_detect: false
   tab_replace: ""
@@ -67,6 +73,16 @@ index_generator:
 # Category & Tag
 default_category: uncategorized
 category_map:
+  AI: ai
+  后端开发: backend
+  前端开发: frontend
+  系统与运维: ops
+  网络与安全: network
+  数据与中间件: database
+  工具与效率: tools
+  项目实战: project
+  生活随笔: life
+  未分类: other
 tag_map:
 
 # Metadata elements
@@ -101,3 +117,11 @@ theme: butterfly
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: ""
+search:
+  path: search.xml
+  field: post
+  content: true
+feed:
+  type: atom
+  path: atom.xml
+  limit: 20

@@ -15,9 +15,14 @@ nav:
   display_title: true
   display_post_title: true
   # Whether to fix navigation bar
-  fixed: false
+  fixed: true
 
 menu:
+  首页: /
+  分类: /categories/
+  标签: /tags/
+  归档: /archives/
+  关于: /about/
   # Home: / || fas fa-home
   # List||fas fa-list:
   #   Music: /music/ || fas fa-music
@@ -46,7 +51,7 @@ code_blocks:
 # Formal:
 #   icon: link || the description || color
 social:
-  # fab fa-github: https://github.com/xxxxx || Github || '#24292e'
+  fab fa-github: https://github.com/kesuoer-ui || Github || '#24292e'
   # fas fa-envelope: mailto:xxxxxx@gmail.com || Email || '#4a7dbe'
 
 # --------------------------------------
@@ -56,7 +61,7 @@ social:
 favicon: /img/favicon.png
 
 avatar:
-  img: /img/butterfly-icon.png
+  img: /img/avatar.png
   effect: false
 
 # Disable all banner images
@@ -66,7 +71,7 @@ disable_top_img: false
 default_top_img:
 
 # The banner image of index page
-index_img:
+index_img: /img/banner.png
 
 # The banner image of archive page
 archive_img:
@@ -112,7 +117,7 @@ error_img:
 # A simple 404 page
 error_404:
   enable: false
-  subtitle: 'Page Not Found'
+  subtitle: "Page Not Found"
   background: /img/error-page.png
 
 post_meta:
@@ -149,12 +154,20 @@ index_top_img_height:
 
 # The subtitle on homepage
 subtitle:
-  enable: false
+  enable: true
   # Typewriter Effect
   effect: true
   # Customize typed.js
   # https://github.com/mattboldt/typed.js/#customization
   typed_option:
+    loop: true
+    typeSpeed: 70
+    backSpeed: 40
+    strings:
+      - "AI Agent / 软件工程 / 自动化系统"
+      - "构建真实可运行的系统"
+      - "记录工程实践与踩坑"
+      - "分享生活随笔"
   # Source - Call the third-party service API (Chinese only)
   # It will show the source first, then show the content of sub
   # Choose: false/1/2/3
@@ -286,12 +299,12 @@ aside:
     enable: true
     description:
     button:
-      enable: true
+      enable: false
       icon: fab fa-github
       text: Follow Me
-      link: https://github.com/xxxxxx
+      link: https://github.com/kesuoer-ui
   card_announcement:
-    enable: true
+    enable: false
     content: This is my Blog
   card_recent_post:
     enable: true
@@ -312,13 +325,13 @@ aside:
     # If set 0 will show all
     limit: 8
     # Choose: none / true / false
-    expand: none
+    expand: true
     sort_order:
   card_tags:
     enable: true
     # If set 0 will show all
-    limit: 40
-    color: false
+    limit: 20
+    color: true
     custom_colors:
     # Order of tags, random/name/length
     orderby: random
@@ -341,7 +354,7 @@ aside:
     # The title shows the series name
     series_title: false
     # Order by title or date
-    orderBy: 'date'
+    orderBy: "date"
     # Sort of order. 1, asc for ascending; -1, desc for descending
     order: -1
   card_webinfo:
@@ -371,9 +384,9 @@ translate:
   # Time delay
   translateDelay: 0
   # The text of the button when the language is Simplified Chinese
-  msgToTraditionalChinese: '繁'
+  msgToTraditionalChinese: "繁"
   # The text of the button when the language is Traditional Chinese
-  msgToSimplifiedChinese: '簡'
+  msgToSimplifiedChinese: "簡"
 
 # Read Mode
 readmode: true
@@ -474,7 +487,7 @@ math:
 search:
   # Choose: algolia_search / local_search / docsearch
   # leave it empty if you don't need search
-  use:
+  use: local_search
   placeholder:
 
   # Algolia Search
@@ -484,6 +497,7 @@ search:
 
   # Local Search
   local_search:
+    enable: true
     # Preload the search data when the page loads.
     preload: false
     # Show top n results per article, show all results by setting to -1
@@ -533,7 +547,7 @@ comments:
   # Leave it empty if you don't need comments
   # Choose: Disqus/Disqusjs/Livere/Gitalk/Valine/Waline/Utterances/Facebook Comments/Twikoo/Giscus/Remark42/Artalk
   # Format of two comments system : Disqus,Waline
-  use:
+  use: giscus
   # Display the comment name next to the button
   text: true
   # Lazyload: The comment system will be load when comment element enters the browser's viewport.
@@ -630,13 +644,19 @@ twikoo:
 # Giscus
 # https://giscus.app/
 giscus:
-  repo:
-  repo_id:
-  category_id:
+  repo: kesuoer-ui/kesuoer-ui.github.io
+  repo_id: R_kgDOSXiEqw
+  category: Announcements
+  category_id: DIC_kwDOSXiEq84C8oeA
+  mapping: pathname
+  strict: 0
+  reactions_enabled: 1
+  emit_metadata: 0
+  input_position: bottom
+  theme: light
   light_theme: light
   dark_theme: dark
-  js:
-  option:
+  lang: zh-CN
 
 # Remark42
 # https://remark42.com/docs/configuration/frontend/
@@ -755,7 +775,14 @@ site_verification:
 
 # Theme color for customize
 # Notice: color value must in double quotes like "#000" or may cause error!
-
+theme_color:
+  enable: true
+  main: "#7c6cf6"
+  paginator: "#8b7cf8"
+  button_hover: "#9f91ff"
+  text_selection: "#c7d2fe"
+  link_color: "#7c6cf6"
+  meta_color: "#94a3b8"
 # theme_color:
 #   enable: true
 #   main: "#49B1F5"
@@ -870,7 +897,7 @@ canvas_fluttering_ribbon:
 canvas_nest:
   enable: false
   # Color of lines, default: '0,0,0'; RGB values: (R,G,B).(note: use ',' to separate.)
-  color: '0,0,255'
+  color: "0,0,255"
   # The opacity of line (0~1)
   opacity: 0.7
   # The z-index property of the background
@@ -919,7 +946,7 @@ lightbox:
 series:
   enable: false
   # Order by title or date
-  orderBy: 'title'
+  orderBy: "title"
   # Sort of order. 1, asc for ascending; -1, desc for descending
   order: 1
   number: true
@@ -933,7 +960,7 @@ abcjs:
 # Mermaid
 # https://github.com/mermaid-js/mermaid
 mermaid:
-  enable: false
+  enable: true
   # Write Mermaid diagrams using code blocks
   code_write: false
   # built-in themes: default / forest / dark / neutral
@@ -953,16 +980,16 @@ chartjs:
   # The default settings are only used when the MD syntax is not specified.
   # General font color for the chart
   fontColor:
-    light: 'rgba(0, 0, 0, 0.8)'
-    dark: 'rgba(255, 255, 255, 0.8)'
+    light: "rgba(0, 0, 0, 0.8)"
+    dark: "rgba(255, 255, 255, 0.8)"
   # General border color for the chart
   borderColor:
-    light: 'rgba(0, 0, 0, 0.1)'
-    dark: 'rgba(255, 255, 255, 0.2)'
+    light: "rgba(0, 0, 0, 0.1)"
+    dark: "rgba(255, 255, 255, 0.2)"
   # Background color for scale labels on radar and polar area charts
   scale_ticks_backdropColor:
-    light: 'transparent'
-    dark: 'transparent'
+    light: "transparent"
+    dark: "transparent"
 
 # Note - Bootstrap Callout
 note:
@@ -1001,8 +1028,8 @@ snackbar:
   enable: false
   position: bottom-left
   # The background color of Toast Notification in light mode and dark mode
-  bg_light: '#49b1f5'
-  bg_dark: '#1f1f1f'
+  bg_light: "#49b1f5"
+  bg_dark: "#1f1f1f"
 
 # Instant.page
 # https://instant.page/
@@ -1058,9 +1085,9 @@ css_prefix: true
 # Insert the code to head (before '</head>' tag) and the bottom (before '</body>' tag)
 inject:
   head:
+    - <link rel="stylesheet" href="/css/custom.css">
     # - <link rel="stylesheet" href="/xxx.css">
   bottom:
-    # - <script src="xxxx"></script>
 
 # CDN Settings
 # Don't modify the following settings unless you know how they work
@@ -1134,3 +1161,5 @@ CDN:
     # valine:
     # waline_css:
     # waline_js:
+# 代码高亮（重要）
+highlight_theme: mac

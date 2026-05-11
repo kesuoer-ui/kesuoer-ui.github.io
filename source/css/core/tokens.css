@@ -1,0 +1,31 @@
+:root {
+  /* ========== Colors ========== */
+  --bg: #f5f7fb;
+  --card-bg: rgba(255, 255, 255, 0.65);
+  --text: #1e293b;
+  --text-secondary: #64748b;
+
+  --primary: #7c6cf6;
+  --primary-light: #a5a0ff;
+
+  --border: rgba(0, 0, 0, 0.06);
+
+  /* ========== Radius ========== */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-full: 999px;
+
+  /* ========== Shadow ========== */
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+  /* ========== Motion ========== */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --t-fast: 0.15s;
+  --t-normal: 0.25s;
+  --t-slow: 0.4s;
+
+  /* ========== Layout ========== */
+  --container: 1200px;
+}
