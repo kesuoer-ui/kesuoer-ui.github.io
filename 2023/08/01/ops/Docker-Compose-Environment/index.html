@@ -1,0 +1,839 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Docker 与 Compose：从能跑到可交付的工程化转变 | thchen的闲言碎语堆积处</title><meta name="author" content="thchen"><meta name="copyright" content="thchen"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="从环境不可复现到标准化交付，记录 Docker &#x2F; Compose 使用过程中的工程认知升级与真实踩坑经验。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker 与 Compose：从能跑到可交付的工程化转变">
+<meta property="og:url" content="https://kesuoer-ui.github.io/2023/08/01/ops/Docker-Compose-Environment/index.html">
+<meta property="og:site_name" content="thchen的闲言碎语堆积处">
+<meta property="og:description" content="从环境不可复现到标准化交付，记录 Docker &#x2F; Compose 使用过程中的工程认知升级与真实踩坑经验。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kesuoer-ui.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-08-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-11T13:28:55.283Z">
+<meta property="article:author" content="thchen">
+<meta property="article:tag" content="DevOps">
+<meta property="article:tag" content="Docker">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kesuoer-ui.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Docker 与 Compose：从能跑到可交付的工程化转变",
+  "url": "https://kesuoer-ui.github.io/2023/08/01/ops/Docker-Compose-Environment/",
+  "image": "https://kesuoer-ui.github.io/img/avatar.png",
+  "datePublished": "2023-08-01T16:00:00.000Z",
+  "dateModified": "2026-05-11T13:28:55.283Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "thchen",
+      "url": "https://kesuoer-ui.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://kesuoer-ui.github.io/2023/08/01/ops/Docker-Compose-Environment/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Docker 与 Compose：从能跑到可交付的工程化转变',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 8.1.2"><link rel="alternate" href="/atom.xml" title="thchen的闲言碎语堆积处" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">thchen的闲言碎语堆积处</span></a><a class="nav-page-title" href="/"><span class="site-name">Docker 与 Compose：从能跑到可交付的工程化转变</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Docker 与 Compose：从能跑到可交付的工程化转变</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-08-01T16:00:00.000Z" title="发表于 2023-08-02 00:00:00">2023-08-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-11T13:28:55.283Z" title="更新于 2026-05-11 21:28:55">2026-05-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%BF%90%E7%BB%B4/">运维</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Docker-与-Compose：从能跑到可交付的工程化转变"><a href="#Docker-与-Compose：从能跑到可交付的工程化转变" class="headerlink" title="Docker 与 Compose：从能跑到可交付的工程化转变"></a>Docker 与 Compose：从能跑到可交付的工程化转变</h1><p>经典问题始终没变：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">你本地能跑
+我本地不能跑
+服务器直接炸<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>排查一圈之后通常会发现：</p>
+<ul>
+<li>Python &#x2F; Node 版本不一致</li>
+<li>系统库差异（glibc &#x2F; openssl）</li>
+<li>依赖版本漂移</li>
+<li>环境变量缺失</li>
+<li>数据库版本不一致</li>
+<li>甚至时区都不一致</li>
+</ul>
+<p>最后沟通会变成一句：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">“要不你把环境打包给我？”<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>Docker 本质就是把这句话变成现实。</p>
+<hr>
+<h1 id="一、Docker-解决的不是“部署问题”，而是“环境不可控问题”"><a href="#一、Docker-解决的不是“部署问题”，而是“环境不可控问题”" class="headerlink" title="一、Docker 解决的不是“部署问题”，而是“环境不可控问题”"></a>一、Docker 解决的不是“部署问题”，而是“环境不可控问题”</h1><p>早期理解 Docker 很容易停留在：</p>
+<blockquote>
+<p>打包代码 + 运行</p>
+</blockquote>
+<p>但实际本质是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">应用 + 依赖 + 运行时 + 系统行为 = 可重复执行单元<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>它解决的是：</p>
+<blockquote>
+<p>“环境不可复现导致的工程不确定性”</p>
+</blockquote>
+<hr>
+<h1 id="二、虚拟机-vs-Docker：本质差异"><a href="#二、虚拟机-vs-Docker：本质差异" class="headerlink" title="二、虚拟机 vs Docker：本质差异"></a>二、虚拟机 vs Docker：本质差异</h1><h2 id="虚拟机"><a href="#虚拟机" class="headerlink" title="虚拟机"></a>虚拟机</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">宿主机
+ └── 虚拟硬件
+      └── 完整操作系统<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>特点：</p>
+<ul>
+<li>重</li>
+<li>慢</li>
+<li>隔离强但成本高</li>
+</ul>
+<hr>
+<h2 id="Docker"><a href="#Docker" class="headerlink" title="Docker"></a>Docker</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">宿主机 Linux 内核
+ └── Namespace + Cgroups 隔离的进程<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>特点：</p>
+<ul>
+<li>共享内核</li>
+<li>轻量</li>
+<li>启动快</li>
+<li>更偏“进程级隔离”</li>
+</ul>
+<hr>
+<p>关键认知：</p>
+<blockquote>
+<p>Docker 不是虚拟机，是“受控进程”。</p>
+</blockquote>
+<hr>
+<h1 id="三、Docker-的核心抽象模型"><a href="#三、Docker-的核心抽象模型" class="headerlink" title="三、Docker 的核心抽象模型"></a>三、Docker 的核心抽象模型</h1><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>本质</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>image</td>
+<td>只读分层文件系统</td>
+</tr>
+<tr>
+<td>container</td>
+<td>运行中的进程实例</td>
+</tr>
+<tr>
+<td>volume</td>
+<td>持久化数据映射</td>
+</tr>
+<tr>
+<td>network</td>
+<td>容器间通信抽象</td>
+</tr>
+<tr>
+<td>dockerfile</td>
+<td>构建规则</td>
+</tr>
+<tr>
+<td>compose</td>
+<td>多进程系统编排</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="四、镜像构建：真正重要的是“分层缓存”"><a href="#四、镜像构建：真正重要的是“分层缓存”" class="headerlink" title="四、镜像构建：真正重要的是“分层缓存”"></a>四、镜像构建：真正重要的是“分层缓存”</h1><p>很多人写 Dockerfile 是这样的：</p>
+<pre class="line-numbers language-docker" data-language="docker"><code class="language-docker"><span class="token instruction"><span class="token keyword">COPY</span> . .</span>
+<span class="token instruction"><span class="token keyword">RUN</span> pip install -r requirements.txt</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>问题：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">代码一变 → 依赖全部重装<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h2 id="正确结构（关键优化点）"><a href="#正确结构（关键优化点）" class="headerlink" title="正确结构（关键优化点）"></a>正确结构（关键优化点）</h2><pre class="line-numbers language-docker" data-language="docker"><code class="language-docker"><span class="token instruction"><span class="token keyword">FROM</span> python:3.11</span>
+
+<span class="token instruction"><span class="token keyword">WORKDIR</span> /app</span>
+
+<span class="token instruction"><span class="token keyword">COPY</span> requirements.txt .</span>
+
+<span class="token instruction"><span class="token keyword">RUN</span> pip install -r requirements.txt</span>
+
+<span class="token instruction"><span class="token keyword">COPY</span> . .</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h3 id="核心原因"><a href="#核心原因" class="headerlink" title="核心原因"></a>核心原因</h3><p>Docker build 是分层缓存机制：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">每一层都是可缓存的 snapshot<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>只要前一层不变，后面都可以复用。</p>
+<hr>
+<h1 id="五、容器不是“运行环境”，而是“受控进程”"><a href="#五、容器不是“运行环境”，而是“受控进程”" class="headerlink" title="五、容器不是“运行环境”，而是“受控进程”"></a>五、容器不是“运行环境”，而是“受控进程”</h1><p>一个关键误区：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run ubuntu<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>然后发现：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">容器秒退<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>原因不是报错，而是：</p>
+<blockquote>
+<p>容器生命周期 &#x3D; 主进程生命周期</p>
+</blockquote>
+<hr>
+<p>如果没有前台进程：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">容器直接退出<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="六、网络模型：localhost-的认知陷阱"><a href="#六、网络模型：localhost-的认知陷阱" class="headerlink" title="六、网络模型：localhost 的认知陷阱"></a>六、网络模型：localhost 的认知陷阱</h1><p>这是最经典坑之一：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">redis<span class="token punctuation">:</span><span class="token operator">//</span>localhost<span class="token punctuation">:</span><span class="token number">6379</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>在容器里意味着：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">容器自身<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>而不是宿主机。</p>
+<hr>
+<h2 id="Compose-下正确方式"><a href="#Compose-下正确方式" class="headerlink" title="Compose 下正确方式"></a>Compose 下正确方式</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python">redis<span class="token punctuation">:</span><span class="token operator">//</span>redis<span class="token punctuation">:</span><span class="token number">6379</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>原因：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Compose 自动创建 DNS 内部解析
+服务名 = hostname<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="七、Docker-Compose：从“单容器”到“系统建模”"><a href="#七、Docker-Compose：从“单容器”到“系统建模”" class="headerlink" title="七、Docker Compose：从“单容器”到“系统建模”"></a>七、Docker Compose：从“单容器”到“系统建模”</h1><p>如果说 Docker 是运行单元，那么 Compose 是：</p>
+<blockquote>
+<p>“系统结构描述语言”</p>
+</blockquote>
+<hr>
+<h2 id="示例结构"><a href="#示例结构" class="headerlink" title="示例结构"></a>示例结构</h2><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">services</span><span class="token punctuation">:</span>
+  <span class="token key atrule">app</span><span class="token punctuation">:</span>
+    <span class="token key atrule">build</span><span class="token punctuation">:</span> .
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token string">"8000:8000"</span>
+
+  <span class="token key atrule">redis</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> redis<span class="token punctuation">:</span><span class="token number">7</span>
+
+  <span class="token key atrule">db</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> postgres<span class="token punctuation">:</span><span class="token number">15</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h2 id="本质变化"><a href="#本质变化" class="headerlink" title="本质变化"></a>本质变化</h2><p>从：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">docker run xxx<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>变成：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">声明式系统拓扑<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="八、Compose-的真正价值：服务间关系建模"><a href="#八、Compose-的真正价值：服务间关系建模" class="headerlink" title="八、Compose 的真正价值：服务间关系建模"></a>八、Compose 的真正价值：服务间关系建模</h1><p>现代系统不是单程序，而是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">API + DB + Cache + MQ + Gateway<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>Compose 提供的是：</p>
+<blockquote>
+<p>本地微服务编排能力</p>
+</blockquote>
+<hr>
+<h1 id="九、数据卷：容器“无状态”的关键解耦"><a href="#九、数据卷：容器“无状态”的关键解耦" class="headerlink" title="九、数据卷：容器“无状态”的关键解耦"></a>九、数据卷：容器“无状态”的关键解耦</h1><p>如果数据库不挂载 volume：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">rm</span> mysql<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>数据直接消失。</p>
+<hr>
+<h2 id="正确方式"><a href="#正确方式" class="headerlink" title="正确方式"></a>正确方式</h2><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">-v</span> /data/mysql:/var/lib/mysql<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>核心思想：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">计算与数据解耦<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="十、构建缓存失效：隐性成本"><a href="#十、构建缓存失效：隐性成本" class="headerlink" title="十、构建缓存失效：隐性成本"></a>十、构建缓存失效：隐性成本</h1><p>常见问题：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">明明改了代码，镜像没变<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>原因：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Docker layer cache 命中<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h2 id="强制构建"><a href="#强制构建" class="headerlink" title="强制构建"></a>强制构建</h2><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> build --no-cache <span class="token builtin class-name">.</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>但更重要的是：</p>
+<blockquote>
+<p>理解缓存链路，而不是依赖命令。</p>
+</blockquote>
+<hr>
+<h1 id="十一、容器日志模型：stdout-才是标准"><a href="#十一、容器日志模型：stdout-才是标准" class="headerlink" title="十一、容器日志模型：stdout 才是标准"></a>十一、容器日志模型：stdout 才是标准</h1><p>错误方式：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">写文件日志<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>问题：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">docker logs 看不到<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<p>正确方式：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">标准输出 / stderr<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>Docker 才能统一收集。</p>
+<hr>
+<h1 id="十二、时区-环境变量：典型“隐性差异源”"><a href="#十二、时区-环境变量：典型“隐性差异源”" class="headerlink" title="十二、时区 &#x2F; 环境变量：典型“隐性差异源”"></a>十二、时区 &#x2F; 环境变量：典型“隐性差异源”</h1><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">environment</span><span class="token punctuation">:</span>
+  <span class="token key atrule">TZ</span><span class="token punctuation">:</span> Asia/Shanghai<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>或者：</p>
+<pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> /etc/localtime<span class="token punctuation">:</span>/etc/localtime<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<p>这类问题本质不是 Docker bug，而是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">环境默认值不一致<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="十三、权限问题：容器用户-≠-宿主用户"><a href="#十三、权限问题：容器用户-≠-宿主用户" class="headerlink" title="十三、权限问题：容器用户 ≠ 宿主用户"></a>十三、权限问题：容器用户 ≠ 宿主用户</h1><p>典型问题：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">容器创建的文件无法删除<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>原因：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">UID/GID 不一致<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<p>解决方式：</p>
+<pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">user</span><span class="token punctuation">:</span> <span class="token string">"1000:1000"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="十四、Docker-的工程意义：不是工具，而是交付标准"><a href="#十四、Docker-的工程意义：不是工具，而是交付标准" class="headerlink" title="十四、Docker 的工程意义：不是工具，而是交付标准"></a>十四、Docker 的工程意义：不是工具，而是交付标准</h1><p>Docker 的价值逐渐从：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">开发工具<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>变成：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">软件交付标准单元<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<p>现代链路通常是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Git push
+  ↓
+CI build
+  ↓
+Docker image
+  ↓
+Registry
+  ↓
+Server pull
+  ↓
+Compose / K8s deploy<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="十五、真正的认知变化"><a href="#十五、真正的认知变化" class="headerlink" title="十五、真正的认知变化"></a>十五、真正的认知变化</h1><p>从 Docker 开始，开发视角会发生变化：</p>
+<h2 id="1-从“写代码”变成“交付系统”"><a href="#1-从“写代码”变成“交付系统”" class="headerlink" title="1. 从“写代码”变成“交付系统”"></a>1. 从“写代码”变成“交付系统”</h2><hr>
+<h2 id="2-从“运行成功”变成“可重复运行”"><a href="#2-从“运行成功”变成“可重复运行”" class="headerlink" title="2. 从“运行成功”变成“可重复运行”"></a>2. 从“运行成功”变成“可重复运行”</h2><hr>
+<h2 id="3-从“本地环境”变成“环境定义”"><a href="#3-从“本地环境”变成“环境定义”" class="headerlink" title="3. 从“本地环境”变成“环境定义”"></a>3. 从“本地环境”变成“环境定义”</h2><hr>
+<h1 id="十六、总结"><a href="#十六、总结" class="headerlink" title="十六、总结"></a>十六、总结</h1><p>Docker 并不是解决“部署麻烦”的工具。</p>
+<p>它解决的是：</p>
+<blockquote>
+<p>环境不可复现导致的软件工程不确定性。</p>
+</blockquote>
+<p>而 Compose 的意义也不只是“多容器启动”，而是：</p>
+<blockquote>
+<p>把系统结构从口头描述变成机器可执行定义。</p>
+</blockquote>
+<p>最终带来的变化是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">开发者开始具备系统交付能力，而不仅仅是编码能力<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io">thchen</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io/2023/08/01/ops/Docker-Compose-Environment/">https://kesuoer-ui.github.io/2023/08/01/ops/Docker-Compose-Environment/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://kesuoer-ui.github.io" target="_blank">thchen的闲言碎语堆积处</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Docker/">Docker</a><a class="post-meta__tags" href="/tags/DevOps/">DevOps</a><a class="post-meta__tags" href="/tags/Linux/">Linux</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/10/04/ai/AI-Voice-SVC-VITS-Workflow/" title="AI 语音、AI 翻唱与音色转换技术整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">AI 语音、AI 翻唱与音色转换技术整理</div></div><div class="info-2"><div class="info-item-1">AI 语音、AI 翻唱与音色转换技术整理AI绘画火起来之前，其实 AI 语音这边我就已经玩挺久了。 而且这玩意相比 AI 绘画，更容易让人产生一种“技术已经突破次元壁”的感觉。 尤其第一次：  输入一句文本 生成角色语音 再到把自己的歌翻唱成别人的声音  那个冲击感其实非常强。 这几年 AI 语音方向也迭代得非常快： TTS（文本转语音） ↓ VITS ↓ SVC ↓ DDSP-SVC ↓ Diffusion-SVC ↓ RVC / GPT-SoVITS / OpenVoice  整个领域已经从：  “能发声”  变成了：  “越来越像真人”   一、我接触 AI 语音的整个过程我最早接触的是：  文本转语音（TTS） VTuber 语音 日语角色语音合成  后来开始接触：  AI翻唱 歌声音色转换 干声提取 模型训练 推理部署  再后来：  开始自己收集训练集 自己训练模型 自己做整套 workflow  然后才意识到： AI语音最难的不是训练。 而是： “数据处理。”尤其是：  干净的人声 无背景音 无混响 无BGM 无电流麦 无环境噪声  这个真的比训练模型难太多了。  二...</div></div></div></a><a class="pagination-related" href="/2023/07/09/database/BigData-Middleware-Kafka-RabbitMQ-ES/" title="Kafka、RabbitMQ、ES 与大数据组件认知整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Kafka、RabbitMQ、ES 与大数据组件认知整理</div></div><div class="info-2"><div class="info-item-1">Kafka、RabbitMQ、ES 与大数据组件认知整理这篇基本是我在项目逐渐变复杂之后，开始被迫接触的一组东西。 前期开发其实很简单： 接口 + 数据库 = 完成需求  但一旦系统稍微大一点，就会开始出现一些很现实的问题：  接口变慢 数据库开始吃不消 同步调用互相阻塞 搜索越来越慢 数据越来越大之后开始扛不住  然后就会自然进入一个阶段：  开始被迫理解“系统不是一条直线，而是一堆数据在流动”。   一、为什么开始接触这些组件最开始的问题其实很具体，不是架构问题，而是“卡住了”。 比如我当时遇到的情况：  注册接口越来越慢 一次请求要做很多事（发短信、初始化数据、写日志） 某些接口互相依赖导致阻塞 搜索功能直接 LIKE 查询扛不住 数据量一大 MySQL 开始明显变慢  这时候才开始意识到：  同步调用这条链路是有上限的。   二、消息队列到底解决了什么问题一开始我对 MQ 的理解很粗糙，就是“异步”。 后来在项目里踩过一次比较典型的坑： 注册接口里做了太多事情：  写用户表 初始化配置 发邮件 发短信 写日志 风控检查  全部同步执行。 结果就是： 用户请求 -> 一直卡...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/02/19/ops/Docker-To-Kubernetes/" title="从 Docker 到 K8S：我对容器化的理解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-02-20</div><div class="info-item-2">从 Docker 到 K8S：我对容器化的理解</div></div><div class="info-2"><div class="info-item-1">修改说明（精简）这篇文章主要做了三类调整：  结构问题修正：原内容偏“概念堆叠”，调整为“问题 → 演进 → K8S 解决方式”的工程路径。 认知层强化：补齐 Docker → K8S 的核心断层（从运行到编排，从单机到声明式系统）。 表达一致性修正：统一为第一人称视角，避免第三方总结式口吻。   从 Docker 到 K8S：我对容器化的理解很多人第一次接触 Docker 时都会觉得： “终于不用配环境了”  但真正做项目之后很快会发现问题变了：  一个容器挂了怎么办？ 多机器如何部署？ 如何自动扩容？ 如何做负载均衡？ 如何滚动更新？ 如何服务发现？ 如何保证高可用？  问题从： “怎么运行”  变成： “怎么管理大量运行中的容器”  Kubernetes（K8S）就是为这个阶段设计的。  一、Docker 解决的问题Docker 本质解决的是： 环境一致性问题在 Docker 之前，环境问题是常态： 开发环境 / 测试环境 / 生产环境  经常出现：  依赖版本不一致 系统库不一致 Python &#x2F; Node 版本不一致 OpenSSL &#x2F; libc 差...</div></div></div></a><a class="pagination-related" href="/2022/07/17/ops/Linux-WSL-Windows-Dev-Environment/" title="Linux、WSL 与 Windows 开发环境折腾记录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-18</div><div class="info-item-2">Linux、WSL 与 Windows 开发环境折腾记录</div></div><div class="info-2"><div class="info-item-1">Linux、WSL 与 Windows 开发环境折腾记录现在我的开发环境基本是：  Windows 做日常使用 WSL 跑 Linux 开发环境 SSH 连远程服务器 Docker 跑服务 VSCode Remote 做远程开发  于是一个很现实的问题一直存在：  为什么本地能跑，服务器不能跑？  随着这个问题反复出现，我开始逐步踩到一堆系统层面的差异：  操作系统差异 shell 差异 文件系统差异 权限模型差异 环境变量差异 换行符差异 网络栈差异  这篇不讲 Linux 概念本身，只记录我是怎么从 Windows 开发，一路“被迫”折腾成半个 Linux 使用者的。  一、为什么最后还是绕不开 Linux最开始我的开发环境是： Windows + IDE + cmd  但项目稍微复杂一点后，问题开始集中爆发：    场景 表现    Python 依赖 编译失败 &#x2F; wheel 构建报错   Node 原生模块 编译失败   Docker 性能和兼容问题   shell 脚本 不兼容   nginx 配置别扭   ssh&#x2F;scp 使用不顺手   服务器模...</div></div></div></a><a class="pagination-related" href="/2022/02/07/ops/Nginx-Practice-and-Configuration/" title="Nginx 在实际开发中的用途整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-08</div><div class="info-item-2">Nginx 在实际开发中的用途整理</div></div><div class="info-2"><div class="info-item-1">Nginx 在实际开发中的用途整理前言我第一次认真接触 Nginx，其实不是因为“想学 Web Server”，而是因为一堆线上问题开始集中爆发：  前端部署后 404 API 跨域 502 Bad Gateway WebSocket 连不上 Docker 容器互相访问失败 静态资源加载异常  这些问题最后都指向同一个东西：  Nginx 是整个请求链路的入口。  后来在实际项目里，我逐渐把它理解成一个“流量分发与边界控制层”，而不只是静态文件服务器。  一、Nginx 到底是什么本质上我对它的定义是：  一个高性能 HTTP 服务器 + 反向代理 + 流量入口控制器  它在我的项目里通常承担这些角色：  静态资源服务 反向代理 负载均衡 HTTPS 终止 API 网关雏形 WebSocket 转发入口  典型链路是： 用户  ↓ Nginx  ↓ 后端服务（FastAPI / SpringBoot / Node）  ↓ 数据库   二、为什么实际项目离不开 Nginx在纯开发阶段，我最初其实是直接跑后端服务的，比如： uvicorn main:app  但一旦进入部署阶段，会立...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">thchen</div><div class="author-info-description">全栈开发 / AI Agent / 系统设计</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/kesuoer-ui" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Docker-%E4%B8%8E-Compose%EF%BC%9A%E4%BB%8E%E8%83%BD%E8%B7%91%E5%88%B0%E5%8F%AF%E4%BA%A4%E4%BB%98%E7%9A%84%E5%B7%A5%E7%A8%8B%E5%8C%96%E8%BD%AC%E5%8F%98"><span class="toc-number">1.</span> <span class="toc-text">Docker 与 Compose：从能跑到可交付的工程化转变</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81Docker-%E8%A7%A3%E5%86%B3%E7%9A%84%E4%B8%8D%E6%98%AF%E2%80%9C%E9%83%A8%E7%BD%B2%E9%97%AE%E9%A2%98%E2%80%9D%EF%BC%8C%E8%80%8C%E6%98%AF%E2%80%9C%E7%8E%AF%E5%A2%83%E4%B8%8D%E5%8F%AF%E6%8E%A7%E9%97%AE%E9%A2%98%E2%80%9D"><span class="toc-number">2.</span> <span class="toc-text">一、Docker 解决的不是“部署问题”，而是“环境不可控问题”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E8%99%9A%E6%8B%9F%E6%9C%BA-vs-Docker%EF%BC%9A%E6%9C%AC%E8%B4%A8%E5%B7%AE%E5%BC%82"><span class="toc-number">3.</span> <span class="toc-text">二、虚拟机 vs Docker：本质差异</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="toc-number">3.1.</span> <span class="toc-text">虚拟机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Docker"><span class="toc-number">3.2.</span> <span class="toc-text">Docker</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81Docker-%E7%9A%84%E6%A0%B8%E5%BF%83%E6%8A%BD%E8%B1%A1%E6%A8%A1%E5%9E%8B"><span class="toc-number">4.</span> <span class="toc-text">三、Docker 的核心抽象模型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA%EF%BC%9A%E7%9C%9F%E6%AD%A3%E9%87%8D%E8%A6%81%E7%9A%84%E6%98%AF%E2%80%9C%E5%88%86%E5%B1%82%E7%BC%93%E5%AD%98%E2%80%9D"><span class="toc-number">5.</span> <span class="toc-text">四、镜像构建：真正重要的是“分层缓存”</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E7%A1%AE%E7%BB%93%E6%9E%84%EF%BC%88%E5%85%B3%E9%94%AE%E4%BC%98%E5%8C%96%E7%82%B9%EF%BC%89"><span class="toc-number">5.1.</span> <span class="toc-text">正确结构（关键优化点）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E5%8E%9F%E5%9B%A0"><span class="toc-number">5.1.1.</span> <span class="toc-text">核心原因</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E5%AE%B9%E5%99%A8%E4%B8%8D%E6%98%AF%E2%80%9C%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E2%80%9D%EF%BC%8C%E8%80%8C%E6%98%AF%E2%80%9C%E5%8F%97%E6%8E%A7%E8%BF%9B%E7%A8%8B%E2%80%9D"><span class="toc-number">6.</span> <span class="toc-text">五、容器不是“运行环境”，而是“受控进程”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%EF%BC%9Alocalhost-%E7%9A%84%E8%AE%A4%E7%9F%A5%E9%99%B7%E9%98%B1"><span class="toc-number">7.</span> <span class="toc-text">六、网络模型：localhost 的认知陷阱</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Compose-%E4%B8%8B%E6%AD%A3%E7%A1%AE%E6%96%B9%E5%BC%8F"><span class="toc-number">7.1.</span> <span class="toc-text">Compose 下正确方式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%83%E3%80%81Docker-Compose%EF%BC%9A%E4%BB%8E%E2%80%9C%E5%8D%95%E5%AE%B9%E5%99%A8%E2%80%9D%E5%88%B0%E2%80%9C%E7%B3%BB%E7%BB%9F%E5%BB%BA%E6%A8%A1%E2%80%9D"><span class="toc-number">8.</span> <span class="toc-text">七、Docker Compose：从“单容器”到“系统建模”</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B%E7%BB%93%E6%9E%84"><span class="toc-number">8.1.</span> <span class="toc-text">示例结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%AC%E8%B4%A8%E5%8F%98%E5%8C%96"><span class="toc-number">8.2.</span> <span class="toc-text">本质变化</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%AB%E3%80%81Compose-%E7%9A%84%E7%9C%9F%E6%AD%A3%E4%BB%B7%E5%80%BC%EF%BC%9A%E6%9C%8D%E5%8A%A1%E9%97%B4%E5%85%B3%E7%B3%BB%E5%BB%BA%E6%A8%A1"><span class="toc-number">9.</span> <span class="toc-text">八、Compose 的真正价值：服务间关系建模</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E6%95%B0%E6%8D%AE%E5%8D%B7%EF%BC%9A%E5%AE%B9%E5%99%A8%E2%80%9C%E6%97%A0%E7%8A%B6%E6%80%81%E2%80%9D%E7%9A%84%E5%85%B3%E9%94%AE%E8%A7%A3%E8%80%A6"><span class="toc-number">10.</span> <span class="toc-text">九、数据卷：容器“无状态”的关键解耦</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E7%A1%AE%E6%96%B9%E5%BC%8F"><span class="toc-number">10.1.</span> <span class="toc-text">正确方式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E3%80%81%E6%9E%84%E5%BB%BA%E7%BC%93%E5%AD%98%E5%A4%B1%E6%95%88%EF%BC%9A%E9%9A%90%E6%80%A7%E6%88%90%E6%9C%AC"><span class="toc-number">11.</span> <span class="toc-text">十、构建缓存失效：隐性成本</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%BA%E5%88%B6%E6%9E%84%E5%BB%BA"><span class="toc-number">11.1.</span> <span class="toc-text">强制构建</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E4%B8%80%E3%80%81%E5%AE%B9%E5%99%A8%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9E%8B%EF%BC%9Astdout-%E6%89%8D%E6%98%AF%E6%A0%87%E5%87%86"><span class="toc-number">12.</span> <span class="toc-text">十一、容器日志模型：stdout 才是标准</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E4%BA%8C%E3%80%81%E6%97%B6%E5%8C%BA-%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%EF%BC%9A%E5%85%B8%E5%9E%8B%E2%80%9C%E9%9A%90%E6%80%A7%E5%B7%AE%E5%BC%82%E6%BA%90%E2%80%9D"><span class="toc-number">13.</span> <span class="toc-text">十二、时区 &#x2F; 环境变量：典型“隐性差异源”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E4%B8%89%E3%80%81%E6%9D%83%E9%99%90%E9%97%AE%E9%A2%98%EF%BC%9A%E5%AE%B9%E5%99%A8%E7%94%A8%E6%88%B7-%E2%89%A0-%E5%AE%BF%E4%B8%BB%E7%94%A8%E6%88%B7"><span class="toc-number">14.</span> <span class="toc-text">十三、权限问题：容器用户 ≠ 宿主用户</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E5%9B%9B%E3%80%81Docker-%E7%9A%84%E5%B7%A5%E7%A8%8B%E6%84%8F%E4%B9%89%EF%BC%9A%E4%B8%8D%E6%98%AF%E5%B7%A5%E5%85%B7%EF%BC%8C%E8%80%8C%E6%98%AF%E4%BA%A4%E4%BB%98%E6%A0%87%E5%87%86"><span class="toc-number">15.</span> <span class="toc-text">十四、Docker 的工程意义：不是工具，而是交付标准</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E4%BA%94%E3%80%81%E7%9C%9F%E6%AD%A3%E7%9A%84%E8%AE%A4%E7%9F%A5%E5%8F%98%E5%8C%96"><span class="toc-number">16.</span> <span class="toc-text">十五、真正的认知变化</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E4%BB%8E%E2%80%9C%E5%86%99%E4%BB%A3%E7%A0%81%E2%80%9D%E5%8F%98%E6%88%90%E2%80%9C%E4%BA%A4%E4%BB%98%E7%B3%BB%E7%BB%9F%E2%80%9D"><span class="toc-number">16.1.</span> <span class="toc-text">1. 从“写代码”变成“交付系统”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E4%BB%8E%E2%80%9C%E8%BF%90%E8%A1%8C%E6%88%90%E5%8A%9F%E2%80%9D%E5%8F%98%E6%88%90%E2%80%9C%E5%8F%AF%E9%87%8D%E5%A4%8D%E8%BF%90%E8%A1%8C%E2%80%9D"><span class="toc-number">16.2.</span> <span class="toc-text">2. 从“运行成功”变成“可重复运行”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E4%BB%8E%E2%80%9C%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E2%80%9D%E5%8F%98%E6%88%90%E2%80%9C%E7%8E%AF%E5%A2%83%E5%AE%9A%E4%B9%89%E2%80%9D"><span class="toc-number">16.3.</span> <span class="toc-text">3. 从“本地环境”变成“环境定义”</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E5%85%AD%E3%80%81%E6%80%BB%E7%BB%93"><span class="toc-number">17.</span> <span class="toc-text">十六、总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/19/life/two-failed-attempts-at-postgraduate-exam/" title="我的考研复习与调剂经历">我的考研复习与调剂经历</a><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/31/ai/Claude-Code-Agent-Architecture-Insights/" title="Claude Code 泄露源码带给我的 Agent 启发">Claude Code 泄露源码带给我的 Agent 启发</a><time datetime="2026-03-31T16:00:00.000Z" title="发表于 2026-04-01 00:00:00">2026-04-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/09/ops/Serverless-Practice/" title="记一次 Serverless 的认识与实践">记一次 Serverless 的认识与实践</a><time datetime="2026-03-09T16:00:00.000Z" title="发表于 2026-03-10 00:00:00">2026-03-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/11/19/ai/MCP-Tools-And-Prompt-Engineering-Trends/" title="MCP、Tools 与 Prompt Engineering 的工程化趋势">MCP、Tools 与 Prompt Engineering 的工程化趋势</a><time datetime="2025-11-19T16:00:00.000Z" title="发表于 2025-11-20 00:00:00">2025-11-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/15/ai/LangChain-LangGraph-Agent-Practice/" title="LangChain、LangGraph 与 AI Agent 工程实践">LangChain、LangGraph 与 AI Agent 工程实践</a><time datetime="2025-09-15T16:00:00.000Z" title="发表于 2025-09-16 00:00:00">2025-09-16</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By thchen</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'kesuoer-ui/kesuoer-ui.github.io',
+      'data-repo-id': 'R_kgDOSXiEqw',
+      'data-category-id': 'DIC_kwDOSXiEq84C8oeA',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>

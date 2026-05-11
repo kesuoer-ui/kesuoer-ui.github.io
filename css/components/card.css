@@ -1,0 +1,20 @@
+.card-widget,
+.recent-post-item,
+.post-block {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-sm);
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  transition: all var(--t-normal) var(--ease);
+}
+
+/* hover */
+.recent-post-item:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-md);
+}

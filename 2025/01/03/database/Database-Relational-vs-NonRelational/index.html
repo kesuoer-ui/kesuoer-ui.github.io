@@ -1,0 +1,855 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>关系型与非关系型数据库的理解整理 | thchen的闲言碎语堆积处</title><meta name="author" content="thchen"><meta name="copyright" content="thchen"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="从 MySQL、PostgreSQL 到 Redis、MongoDB，对关系型与非关系型数据库的核心概念、使用场景、事务机制、锁、索引、中间件生态与工程实践进行系统整理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关系型与非关系型数据库的理解整理">
+<meta property="og:url" content="https://kesuoer-ui.github.io/2025/01/03/database/Database-Relational-vs-NonRelational/index.html">
+<meta property="og:site_name" content="thchen的闲言碎语堆积处">
+<meta property="og:description" content="从 MySQL、PostgreSQL 到 Redis、MongoDB，对关系型与非关系型数据库的核心概念、使用场景、事务机制、锁、索引、中间件生态与工程实践进行系统整理。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kesuoer-ui.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-01-03T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-11T13:28:55.282Z">
+<meta property="article:author" content="thchen">
+<meta property="article:tag" content="Database">
+<meta property="article:tag" content="Middleware">
+<meta property="article:tag" content="MongoDB">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="Oracle">
+<meta property="article:tag" content="PostgreSQL">
+<meta property="article:tag" content="Redis">
+<meta property="article:tag" content="后端开发">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kesuoer-ui.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "关系型与非关系型数据库的理解整理",
+  "url": "https://kesuoer-ui.github.io/2025/01/03/database/Database-Relational-vs-NonRelational/",
+  "image": "https://kesuoer-ui.github.io/img/avatar.png",
+  "datePublished": "2025-01-03T16:00:00.000Z",
+  "dateModified": "2026-05-11T13:28:55.282Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "thchen",
+      "url": "https://kesuoer-ui.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://kesuoer-ui.github.io/2025/01/03/database/Database-Relational-vs-NonRelational/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '关系型与非关系型数据库的理解整理',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 8.1.2"><link rel="alternate" href="/atom.xml" title="thchen的闲言碎语堆积处" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">thchen的闲言碎语堆积处</span></a><a class="nav-page-title" href="/"><span class="site-name">关系型与非关系型数据库的理解整理</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">关系型与非关系型数据库的理解整理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-01-03T16:00:00.000Z" title="发表于 2025-01-04 00:00:00">2025-01-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-11T13:28:55.282Z" title="更新于 2026-05-11 21:28:55">2026-05-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E4%B8%AD%E9%97%B4%E4%BB%B6/">数据库与中间件</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="关系型与非关系型数据库的理解整理"><a href="#关系型与非关系型数据库的理解整理" class="headerlink" title="关系型与非关系型数据库的理解整理"></a>关系型与非关系型数据库的理解整理</h1><p>数据库这块，我一开始其实是没什么体系感的。</p>
+<p>最早写后端的时候，基本就是：</p>
+<ul>
+<li>CRUD</li>
+<li>查表</li>
+<li>写接口</li>
+<li>能跑就行</li>
+</ul>
+<p>直到系统稍微复杂一点之后，问题就开始变了：</p>
+<ul>
+<li>为什么这个 SQL 会慢</li>
+<li>为什么加了索引还是慢</li>
+<li>为什么线上偶尔卡死</li>
+<li>为什么数据不一致</li>
+<li>为什么一加并发就出问题</li>
+</ul>
+<p>那时候才慢慢意识到：</p>
+<p>数据库不是“存数据的地方”，更像是整个系统的底层调度器。</p>
+<hr>
+<h1 id="一、关系型数据库（RDBMS）"><a href="#一、关系型数据库（RDBMS）" class="headerlink" title="一、关系型数据库（RDBMS）"></a>一、关系型数据库（RDBMS）</h1><p>最早接触的一类就是关系型数据库。</p>
+<p>常见的基本就是：</p>
+<ul>
+<li>MySQL</li>
+<li>PostgreSQL</li>
+<li>Oracle</li>
+<li>SQL Server</li>
+<li>SQLite</li>
+</ul>
+<p>当时我的理解很简单：</p>
+<blockquote>
+<p>表 + SQL + 能查数据 &#x3D; 数据库</p>
+</blockquote>
+<p>后来做项目多了才发现，关系型数据库真正核心是“关系”。</p>
+<p>比如电商系统：</p>
+<ul>
+<li>用户</li>
+<li>商品</li>
+<li>订单</li>
+<li>支付</li>
+</ul>
+<p>这些东西单独看都简单，但一旦连起来，就全是关系。</p>
+<hr>
+<h2 id="MySQL（最常用的一类）"><a href="#MySQL（最常用的一类）" class="headerlink" title="MySQL（最常用的一类）"></a>MySQL（最常用的一类）</h2><p>我第一个正式用在项目里的数据库就是 MySQL。</p>
+<p>用下来最大的感受其实不是“强”，而是：</p>
+<blockquote>
+<p>足够稳，够通用，出了问题也好查。</p>
+</blockquote>
+<p>基本 Web 项目都绕不开它。</p>
+<hr>
+<h2 id="InnoDB-和-MyISAM"><a href="#InnoDB-和-MyISAM" class="headerlink" title="InnoDB 和 MyISAM"></a>InnoDB 和 MyISAM</h2><p>我当时踩坑比较深的一点是存储引擎。</p>
+<ul>
+<li>MyISAM：早期用过，后来基本放弃</li>
+<li>InnoDB：现在默认用</li>
+</ul>
+<p>区别当时我其实是踩出来的：</p>
+<p>MyISAM 写入稍微多一点就容易出问题，而且事务基本没法用。</p>
+<p>InnoDB 用起来就正常很多：</p>
+<ul>
+<li>能回滚</li>
+<li>支持事务</li>
+<li>崩了还能恢复</li>
+</ul>
+<hr>
+<h2 id="事务这块（ACID）"><a href="#事务这块（ACID）" class="headerlink" title="事务这块（ACID）"></a>事务这块（ACID）</h2><p>事务这块我第一次真正有感知，是在做转账逻辑的时候。</p>
+<p>大概就是这种逻辑：</p>
+<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">BEGIN</span><span class="token punctuation">;</span>
+
+<span class="token keyword">UPDATE</span> <span class="token keyword">user</span> <span class="token keyword">SET</span> money <span class="token operator">=</span> money <span class="token operator">-</span> <span class="token number">100</span> <span class="token keyword">WHERE</span> id <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token keyword">UPDATE</span> <span class="token keyword">user</span> <span class="token keyword">SET</span> money <span class="token operator">=</span> money <span class="token operator">+</span> <span class="token number">100</span> <span class="token keyword">WHERE</span> id <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
+
+<span class="token keyword">COMMIT</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>当时踩过一次问题是：</p>
+<p>中间服务挂了，钱扣了但没加上。</p>
+<p>后来才知道数据库会帮你回滚，这就是事务的意义。</p>
+<p>ACID 当时是背的，后来是靠事故理解的：</p>
+<ul>
+<li>原子性：要么都成功，要么都失败</li>
+<li>一致性：数据不能乱</li>
+<li>隔离性：互不影响</li>
+<li>持久性：提交了就不会丢</li>
+</ul>
+<hr>
+<h2 id="隔离级别"><a href="#隔离级别" class="headerlink" title="隔离级别"></a>隔离级别</h2><p>这个其实一开始我也只是背概念。</p>
+<p>真正有感觉是在高并发场景里。</p>
+<p>四个级别：</p>
+<ul>
+<li>读未提交</li>
+<li>读已提交</li>
+<li>可重复读（MySQL 默认）</li>
+<li>串行化</li>
+</ul>
+<p>后来才慢慢理解为什么默认是 RR：</p>
+<p>性能和一致性之间的一个折中。</p>
+<hr>
+<h2 id="MVCC（后来才真正理解）"><a href="#MVCC（后来才真正理解）" class="headerlink" title="MVCC（后来才真正理解）"></a>MVCC（后来才真正理解）</h2><p>MVCC 我最早是“知道这个词”，但没感觉。</p>
+<p>后来在并发读写冲突里才慢慢理解：</p>
+<p>数据库其实是靠“版本”在解决并发读的。</p>
+<p>简单说就是：</p>
+<blockquote>
+<p>读的不是当前数据，而是某个时间点的快照。</p>
+</blockquote>
+<p>这样才做到：</p>
+<ul>
+<li>读不阻塞写</li>
+<li>写不阻塞读</li>
+</ul>
+<hr>
+<h2 id="锁（真正踩坑的地方）"><a href="#锁（真正踩坑的地方）" class="headerlink" title="锁（真正踩坑的地方）"></a>锁（真正踩坑的地方）</h2><p>锁这个东西我是在线上问题里学的。</p>
+<p>典型问题就是死锁。</p>
+<p>比如两个事务：</p>
+<ul>
+<li>A 锁 user 再等 order</li>
+<li>B 锁 order 再等 user</li>
+</ul>
+<p>直接卡死。</p>
+<p>后来总结下来最有效的办法其实很朴素：</p>
+<ul>
+<li>加锁顺序统一</li>
+<li>事务尽量短</li>
+<li>少做大范围更新</li>
+</ul>
+<hr>
+<h2 id="索引（性能问题核心）"><a href="#索引（性能问题核心）" class="headerlink" title="索引（性能问题核心）"></a>索引（性能问题核心）</h2><p>性能问题 80% 其实都和索引有关。</p>
+<p>我当时最大的误区是：</p>
+<blockquote>
+<p>慢就加索引。</p>
+</blockquote>
+<p>后来踩坑才知道不是这么简单。</p>
+<p>几个典型坑：</p>
+<ul>
+<li>like ‘%xxx’ 直接失效</li>
+<li>对字段做函数会失效</li>
+<li>类型不一致会失效</li>
+</ul>
+<p>最核心的理解其实是：</p>
+<blockquote>
+<p>索引不是加了就用，而是查询方式必须匹配它的结构。</p>
+</blockquote>
+<hr>
+<h2 id="B-Tree"><a href="#B-Tree" class="headerlink" title="B+Tree"></a>B+Tree</h2><p>InnoDB 默认用 B+Tree。</p>
+<p>我当时理解比较简单：</p>
+<ul>
+<li>树越矮越快</li>
+<li>磁盘 IO 越少越好</li>
+<li>范围查询很适合</li>
+</ul>
+<p>后面看执行计划（EXPLAIN）才慢慢有感觉。</p>
+<hr>
+<h1 id="二、PostgreSQL"><a href="#二、PostgreSQL" class="headerlink" title="二、PostgreSQL"></a>二、PostgreSQL</h1><p>PostgreSQL 是后面接触的。</p>
+<p>当时换的原因很现实：</p>
+<blockquote>
+<p>MySQL 在一些复杂查询和结构化能力上开始不够用了。</p>
+</blockquote>
+<p>PG 给我最直观的感觉是：</p>
+<ul>
+<li>SQL 更规范</li>
+<li>JSON 支持更自然</li>
+<li>扩展能力强</li>
+<li>复杂查询更舒服</li>
+</ul>
+<p>尤其 JSONB，我后来在一些配置类数据里用得很多。</p>
+<hr>
+<h1 id="三、非关系型数据库（NoSQL）"><a href="#三、非关系型数据库（NoSQL）" class="headerlink" title="三、非关系型数据库（NoSQL）"></a>三、非关系型数据库（NoSQL）</h1><p>后面系统复杂起来之后，开始接触 NoSQL。</p>
+<p>最常见的几个：</p>
+<ul>
+<li>Redis</li>
+<li>MongoDB</li>
+</ul>
+<hr>
+<h2 id="Redis（我用得最多的-NoSQL）"><a href="#Redis（我用得最多的-NoSQL）" class="headerlink" title="Redis（我用得最多的 NoSQL）"></a>Redis（我用得最多的 NoSQL）</h2><p>Redis 一开始我理解就是缓存。</p>
+<p>后来用多了才发现它其实更像：</p>
+<blockquote>
+<p>内存数据结构服务。</p>
+</blockquote>
+<p>常见用法：</p>
+<ul>
+<li>缓存</li>
+<li>Token</li>
+<li>限流</li>
+<li>排行榜</li>
+<li>分布式锁</li>
+</ul>
+<hr>
+<h3 id="为什么快"><a href="#为什么快" class="headerlink" title="为什么快"></a>为什么快</h3><p>这个其实是踩坑之后慢慢理解的：</p>
+<ul>
+<li>内存操作</li>
+<li>单线程避免锁竞争</li>
+<li>IO 多路复用</li>
+</ul>
+<p>不是“数据库快”，而是压根不走传统数据库那套路径。</p>
+<hr>
+<h3 id="我踩过的几个坑"><a href="#我踩过的几个坑" class="headerlink" title="我踩过的几个坑"></a>我踩过的几个坑</h3><p>缓存相关问题基本都遇到过：</p>
+<ul>
+<li>缓存穿透（查不存在的数据）</li>
+<li>缓存击穿（热点失效瞬间打爆数据库）</li>
+<li>缓存雪崩（大量 key 同时过期）</li>
+</ul>
+<p>后来处理方式基本就几种：</p>
+<ul>
+<li>空值缓存</li>
+<li>随机过期时间</li>
+<li>热点保护</li>
+</ul>
+<hr>
+<h2 id="MongoDB"><a href="#MongoDB" class="headerlink" title="MongoDB"></a>MongoDB</h2><p>MongoDB 用得相对少一些。</p>
+<p>主要在一些结构不稳定的数据里用过：</p>
+<p>比如：</p>
+<ul>
+<li>配置</li>
+<li>日志</li>
+<li>用户扩展字段</li>
+<li>一些 JSON 结构数据</li>
+</ul>
+<p>它的特点很直接：</p>
+<blockquote>
+<p>不强约束结构，灵活，但一致性弱一些。</p>
+</blockquote>
+<hr>
+<h1 id="四、数据库之间的分工理解"><a href="#四、数据库之间的分工理解" class="headerlink" title="四、数据库之间的分工理解"></a>四、数据库之间的分工理解</h1><p>后来我对数据库的理解变成了比较工程化的一种拆分：</p>
+<hr>
+<h2 id="关系型数据库"><a href="#关系型数据库" class="headerlink" title="关系型数据库"></a>关系型数据库</h2><p>适合：</p>
+<ul>
+<li>强一致性</li>
+<li>核心业务数据</li>
+<li>结构稳定</li>
+</ul>
+<p>比如：</p>
+<ul>
+<li>订单</li>
+<li>用户</li>
+<li>资金</li>
+</ul>
+<hr>
+<h2 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h2><p>适合：</p>
+<ul>
+<li>快速访问</li>
+<li>缓存</li>
+<li>状态类数据</li>
+<li>临时数据</li>
+</ul>
+<hr>
+<h2 id="MongoDB-JSON-类数据库"><a href="#MongoDB-JSON-类数据库" class="headerlink" title="MongoDB &#x2F; JSON 类数据库"></a>MongoDB &#x2F; JSON 类数据库</h2><p>适合：</p>
+<ul>
+<li>结构不固定的数据</li>
+<li>配置类数据</li>
+<li>日志类数据</li>
+</ul>
+<hr>
+<h1 id="五、一些后期才理解的东西"><a href="#五、一些后期才理解的东西" class="headerlink" title="五、一些后期才理解的东西"></a>五、一些后期才理解的东西</h1><h2 id="1-数据库慢不一定是数据库的问题"><a href="#1-数据库慢不一定是数据库的问题" class="headerlink" title="1. 数据库慢不一定是数据库的问题"></a>1. 数据库慢不一定是数据库的问题</h2><p>很多时候是：</p>
+<ul>
+<li>索引设计问题</li>
+<li>SQL 写法问题</li>
+<li>数据量设计问题</li>
+</ul>
+<hr>
+<h2 id="2-ORM-不是银弹"><a href="#2-ORM-不是银弹" class="headerlink" title="2. ORM 不是银弹"></a>2. ORM 不是银弹</h2><p>我早期很依赖 ORM，后来踩坑后变成：</p>
+<ul>
+<li>简单查询用 ORM</li>
+<li>复杂查询直接 SQL</li>
+</ul>
+<hr>
+<h2 id="3-系统复杂之后，数据库只是其中一环"><a href="#3-系统复杂之后，数据库只是其中一环" class="headerlink" title="3. 系统复杂之后，数据库只是其中一环"></a>3. 系统复杂之后，数据库只是其中一环</h2><p>后面做系统会发现：</p>
+<p>真正复杂的不是 SQL，而是：</p>
+<ul>
+<li>缓存一致性</li>
+<li>并发控制</li>
+<li>数据流设计</li>
+<li>异步链路</li>
+</ul>
+<hr>
+<h1 id="六、最后的理解变化"><a href="#六、最后的理解变化" class="headerlink" title="六、最后的理解变化"></a>六、最后的理解变化</h1><p>回头看数据库这条线，其实变化挺明显的：</p>
+<p>一开始是：</p>
+<blockquote>
+<p>会写 SQL 就够了</p>
+</blockquote>
+<p>后来变成：</p>
+<blockquote>
+<p>能跑就行，但开始关注性能</p>
+</blockquote>
+<p>再后来变成：</p>
+<blockquote>
+<p>数据结构、并发、缓存、分布式一起看</p>
+</blockquote>
+<p>数据库本身没有变复杂，是系统把它放到了更复杂的位置上。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io">thchen</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io/2025/01/03/database/Database-Relational-vs-NonRelational/">https://kesuoer-ui.github.io/2025/01/03/database/Database-Relational-vs-NonRelational/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://kesuoer-ui.github.io" target="_blank">thchen的闲言碎语堆积处</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Redis/">Redis</a><a class="post-meta__tags" href="/tags/Middleware/">Middleware</a><a class="post-meta__tags" href="/tags/Database/">Database</a><a class="post-meta__tags" href="/tags/MySQL/">MySQL</a><a class="post-meta__tags" href="/tags/PostgreSQL/">PostgreSQL</a><a class="post-meta__tags" href="/tags/MongoDB/">MongoDB</a><a class="post-meta__tags" href="/tags/Oracle/">Oracle</a><a class="post-meta__tags" href="/tags/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/">后端开发</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/02/19/ops/Docker-To-Kubernetes/" title="从 Docker 到 K8S：我对容器化的理解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">从 Docker 到 K8S：我对容器化的理解</div></div><div class="info-2"><div class="info-item-1">修改说明（精简）这篇文章主要做了三类调整：  结构问题修正：原内容偏“概念堆叠”，调整为“问题 → 演进 → K8S 解决方式”的工程路径。 认知层强化：补齐 Docker → K8S 的核心断层（从运行到编排，从单机到声明式系统）。 表达一致性修正：统一为第一人称视角，避免第三方总结式口吻。   从 Docker 到 K8S：我对容器化的理解很多人第一次接触 Docker 时都会觉得： “终于不用配环境了”  但真正做项目之后很快会发现问题变了：  一个容器挂了怎么办？ 多机器如何部署？ 如何自动扩容？ 如何做负载均衡？ 如何滚动更新？ 如何服务发现？ 如何保证高可用？  问题从： “怎么运行”  变成： “怎么管理大量运行中的容器”  Kubernetes（K8S）就是为这个阶段设计的。  一、Docker 解决的问题Docker 本质解决的是： 环境一致性问题在 Docker 之前，环境问题是常态： 开发环境 / 测试环境 / 生产环境  经常出现：  依赖版本不一致 系统库不一致 Python &#x2F; Node 版本不一致 OpenSSL &#x2F; libc 差...</div></div></div></a><a class="pagination-related" href="/2024/10/02/backend/SpringBoot-Java-Web-Stack/" title="Spring Boot 与 Java Web 开发体系整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Spring Boot 与 Java Web 开发体系整理</div></div><div class="info-2"><div class="info-item-1">Spring Boot 与 Java Web 开发体系整理很多人第一次接触 Java Web 时都会懵。 因为会同时出现：  Spring SpringBoot SpringMVC MyBatis Maven Tomcat Lombok  甚至还有：  Redis RabbitMQ Nacos Gateway Dubbo  新人非常容易： 概念混乱  这篇文章尽量把： Java Web 整个体系的关系讲清楚。  Java Web 到底是什么本质上： 浏览器 ↓ HTTP请求 ↓ Java服务器 ↓ 数据库  Java Web 就是在处理：  路由 参数 登录 数据库 权限 JSON 文件上传 接口响应  这些东西。  Java Web 项目的典型结构现代项目通常： src ├── controller ├── service ├── mapper ├── entity ├── dto ├── config ├── utils └── common  对应：    层 作用    controller 接口入口   service 业务逻辑   mapper 数据库操作   ent...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/07/09/database/BigData-Middleware-Kafka-RabbitMQ-ES/" title="Kafka、RabbitMQ、ES 与大数据组件认知整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-07-10</div><div class="info-item-2">Kafka、RabbitMQ、ES 与大数据组件认知整理</div></div><div class="info-2"><div class="info-item-1">Kafka、RabbitMQ、ES 与大数据组件认知整理这篇基本是我在项目逐渐变复杂之后，开始被迫接触的一组东西。 前期开发其实很简单： 接口 + 数据库 = 完成需求  但一旦系统稍微大一点，就会开始出现一些很现实的问题：  接口变慢 数据库开始吃不消 同步调用互相阻塞 搜索越来越慢 数据越来越大之后开始扛不住  然后就会自然进入一个阶段：  开始被迫理解“系统不是一条直线，而是一堆数据在流动”。   一、为什么开始接触这些组件最开始的问题其实很具体，不是架构问题，而是“卡住了”。 比如我当时遇到的情况：  注册接口越来越慢 一次请求要做很多事（发短信、初始化数据、写日志） 某些接口互相依赖导致阻塞 搜索功能直接 LIKE 查询扛不住 数据量一大 MySQL 开始明显变慢  这时候才开始意识到：  同步调用这条链路是有上限的。   二、消息队列到底解决了什么问题一开始我对 MQ 的理解很粗糙，就是“异步”。 后来在项目里踩过一次比较典型的坑： 注册接口里做了太多事情：  写用户表 初始化配置 发邮件 发短信 写日志 风控检查  全部同步执行。 结果就是： 用户请求 -> 一直卡...</div></div></div></a><a class="pagination-related" href="/2022/01/07/backend/FastAPI-PostgreSQL-Practice/" title="我用 FastAPI 开发 Web 应用的实践整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-08</div><div class="info-item-2">我用 FastAPI 开发 Web 应用的实践整理</div></div><div class="info-2"><div class="info-item-1">我用 FastAPI 开发 Web 应用的实践整理这个项目本质上是一个： 图片社区类 Web 应用  功能方向类似：  Pinterest Pixiv 图片收藏站  核心功能包括：  用户注册登录 图片上传 点赞收藏 评论互动 标签系统 图片来源管理 用户行为记录  项目重点并不在前端。 而在于： id现代 Python 后端工程化  包括：  FastAPI 异步 ORM PostgreSQL JWT Redis Async 架构  这些完整技术链路。  技术栈项目后端技术栈大致如下： idFastAPI PostgreSQL GINO asyncpg Redis JWT Uvicorn Pydantic   为什么选择 FastAPI这个项目本质是： id前后端分离 API 服务  因此：  类型系统 自动文档 异步能力 数据校验  会非常重要。 FastAPI 在这些方面体验明显优于传统 Flask。  为什么选择 PostgreSQL数据库最开始考虑过 MySQL。 但最终还是选择 PostgreSQL。 原因主要有几个。  1. JSON 能力更强很多业务数据： 其实是...</div></div></div></a><a class="pagination-related" href="/2022/10/10/project/Course-Selection-System-Practice/" title="学生选课系统开发记录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2022-10-11</div><div class="info-item-2">学生选课系统开发记录</div></div><div class="info-2"><div class="info-item-1">学生选课系统开发记录这是第一次独立完成一个完整的前后端分离系统。 当时目标很明确： 复刻学校选课系统但原系统存在明显问题：  UI 老旧 操作卡顿 高峰期响应慢 功能体验不一致  因此决定自行实现一套替代方案。  项目目标核心需求非常直接：  学生登录 课程列表展示 学生选课 &#x2F; 退课 教师课程管理 基本数据统计  本质是一个典型： CRUD + 关系建模系统   ---  # 技术栈  ## 后端  | 技术        | 作用     | | ----------- | -------- | | SpringMVC   | Web接口  | | MyBatisPlus | ORM层    | | MySQL       | 数据库   | | Maven       | 依赖管理 | | Tomcat      | 运行容器 |  ---  ## 前端  | 技术         | 作用     | | ------------ | -------- | | Vue3         | 前端框架 | | TypeScript   | 类型约束 | | Vit...</div></div></div></a><a class="pagination-related" href="/2021/08/17/project/NoneBot2-Plugin-Architecture-Practice/" title="基于 NoneBot2 的 QQ 机器人开发实践"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-18</div><div class="info-item-2">基于 NoneBot2 的 QQ 机器人开发实践</div></div><div class="info-2"><div class="info-item-1">基于 NoneBot2 的 QQ 机器人开发实践这个项目从 2021 年开始搭建，并在后续一段时间持续迭代。 这是我第一次长期维护一个“持续在线”的 Python 服务型项目。 和一般脚本不同，Bot 项目本质上已经不是工具程序，而是一个事件驱动的常驻服务。  一、项目特点QQ Bot 相比普通程序，有几个非常明显的特征：  长期运行（7×24） 高频事件输入（消息流） 多群并发环境 功能持续增长 插件化需求强 状态与数据长期持久化  随着功能增加，项目逐渐从“脚本集合”演变为：  一个事件驱动的消息处理系统   二、技术栈选择核心技术组合如下： NoneBot2     + OneBot     + go-cqhttp     + PostgreSQL     + asyncio   三、为什么选择 NoneBot2当时在多个方案中做过对比：  Mirai Koishi NoneBot Yunzai  最终选择 NoneBot2 的原因主要是工程适配性：  1. Python 生态优势QQ Bot 的很多功能天然依赖：  HTTP 请求 数据处理 图像处理 AI 接口 文件操作...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">thchen</div><div class="author-info-description">全栈开发 / AI Agent / 系统设计</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/kesuoer-ui" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B3%E7%B3%BB%E5%9E%8B%E4%B8%8E%E9%9D%9E%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E7%90%86%E8%A7%A3%E6%95%B4%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">关系型与非关系型数据库的理解整理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%EF%BC%88RDBMS%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">一、关系型数据库（RDBMS）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL%EF%BC%88%E6%9C%80%E5%B8%B8%E7%94%A8%E7%9A%84%E4%B8%80%E7%B1%BB%EF%BC%89"><span class="toc-number">2.1.</span> <span class="toc-text">MySQL（最常用的一类）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#InnoDB-%E5%92%8C-MyISAM"><span class="toc-number">2.2.</span> <span class="toc-text">InnoDB 和 MyISAM</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E8%BF%99%E5%9D%97%EF%BC%88ACID%EF%BC%89"><span class="toc-number">2.3.</span> <span class="toc-text">事务这块（ACID）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="toc-number">2.4.</span> <span class="toc-text">隔离级别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MVCC%EF%BC%88%E5%90%8E%E6%9D%A5%E6%89%8D%E7%9C%9F%E6%AD%A3%E7%90%86%E8%A7%A3%EF%BC%89"><span class="toc-number">2.5.</span> <span class="toc-text">MVCC（后来才真正理解）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%94%81%EF%BC%88%E7%9C%9F%E6%AD%A3%E8%B8%A9%E5%9D%91%E7%9A%84%E5%9C%B0%E6%96%B9%EF%BC%89"><span class="toc-number">2.6.</span> <span class="toc-text">锁（真正踩坑的地方）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%EF%BC%88%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98%E6%A0%B8%E5%BF%83%EF%BC%89"><span class="toc-number">2.7.</span> <span class="toc-text">索引（性能问题核心）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#B-Tree"><span class="toc-number">2.8.</span> <span class="toc-text">B+Tree</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81PostgreSQL"><span class="toc-number">3.</span> <span class="toc-text">二、PostgreSQL</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E9%9D%9E%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%EF%BC%88NoSQL%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">三、非关系型数据库（NoSQL）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Redis%EF%BC%88%E6%88%91%E7%94%A8%E5%BE%97%E6%9C%80%E5%A4%9A%E7%9A%84-NoSQL%EF%BC%89"><span class="toc-number">4.1.</span> <span class="toc-text">Redis（我用得最多的 NoSQL）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BF%AB"><span class="toc-number">4.1.1.</span> <span class="toc-text">为什么快</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%88%91%E8%B8%A9%E8%BF%87%E7%9A%84%E5%87%A0%E4%B8%AA%E5%9D%91"><span class="toc-number">4.1.2.</span> <span class="toc-text">我踩过的几个坑</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MongoDB"><span class="toc-number">4.2.</span> <span class="toc-text">MongoDB</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B9%8B%E9%97%B4%E7%9A%84%E5%88%86%E5%B7%A5%E7%90%86%E8%A7%A3"><span class="toc-number">5.</span> <span class="toc-text">四、数据库之间的分工理解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">5.1.</span> <span class="toc-text">关系型数据库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Redis"><span class="toc-number">5.2.</span> <span class="toc-text">Redis</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MongoDB-JSON-%E7%B1%BB%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">5.3.</span> <span class="toc-text">MongoDB &#x2F; JSON 类数据库</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E4%B8%80%E4%BA%9B%E5%90%8E%E6%9C%9F%E6%89%8D%E7%90%86%E8%A7%A3%E7%9A%84%E4%B8%9C%E8%A5%BF"><span class="toc-number">6.</span> <span class="toc-text">五、一些后期才理解的东西</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%95%B0%E6%8D%AE%E5%BA%93%E6%85%A2%E4%B8%8D%E4%B8%80%E5%AE%9A%E6%98%AF%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">6.1.</span> <span class="toc-text">1. 数据库慢不一定是数据库的问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-ORM-%E4%B8%8D%E6%98%AF%E9%93%B6%E5%BC%B9"><span class="toc-number">6.2.</span> <span class="toc-text">2. ORM 不是银弹</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E7%B3%BB%E7%BB%9F%E5%A4%8D%E6%9D%82%E4%B9%8B%E5%90%8E%EF%BC%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8F%AA%E6%98%AF%E5%85%B6%E4%B8%AD%E4%B8%80%E7%8E%AF"><span class="toc-number">6.3.</span> <span class="toc-text">3. 系统复杂之后，数据库只是其中一环</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%9C%80%E5%90%8E%E7%9A%84%E7%90%86%E8%A7%A3%E5%8F%98%E5%8C%96"><span class="toc-number">7.</span> <span class="toc-text">六、最后的理解变化</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/19/life/two-failed-attempts-at-postgraduate-exam/" title="我的考研复习与调剂经历">我的考研复习与调剂经历</a><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/31/ai/Claude-Code-Agent-Architecture-Insights/" title="Claude Code 泄露源码带给我的 Agent 启发">Claude Code 泄露源码带给我的 Agent 启发</a><time datetime="2026-03-31T16:00:00.000Z" title="发表于 2026-04-01 00:00:00">2026-04-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/09/ops/Serverless-Practice/" title="记一次 Serverless 的认识与实践">记一次 Serverless 的认识与实践</a><time datetime="2026-03-09T16:00:00.000Z" title="发表于 2026-03-10 00:00:00">2026-03-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/11/19/ai/MCP-Tools-And-Prompt-Engineering-Trends/" title="MCP、Tools 与 Prompt Engineering 的工程化趋势">MCP、Tools 与 Prompt Engineering 的工程化趋势</a><time datetime="2025-11-19T16:00:00.000Z" title="发表于 2025-11-20 00:00:00">2025-11-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/15/ai/LangChain-LangGraph-Agent-Practice/" title="LangChain、LangGraph 与 AI Agent 工程实践">LangChain、LangGraph 与 AI Agent 工程实践</a><time datetime="2025-09-15T16:00:00.000Z" title="发表于 2025-09-16 00:00:00">2025-09-16</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By thchen</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'kesuoer-ui/kesuoer-ui.github.io',
+      'data-repo-id': 'R_kgDOSXiEqw',
+      'data-category-id': 'DIC_kwDOSXiEq84C8oeA',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>

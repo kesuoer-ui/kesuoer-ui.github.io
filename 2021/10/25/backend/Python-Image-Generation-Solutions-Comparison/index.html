@@ -1,0 +1,1135 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Python 生成图片的几种方案对比 | thchen的闲言碎语堆积处</title><meta name="author" content="thchen"><meta name="copyright" content="thchen"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Python 生成图片的几种方案对比Python 里。 “生成图片” 其实是一个非常大的需求。 例如：  Bot 生成信息图 数据报表 海报 OCR 预处理 AI 图片处理 自动截图 可视化 动态排行榜  后来做项目时。 会发现： 不同方案差异非常大。 甚至：  根本不是同一种思路。   Python 常见生成图片方案目前主流大概有几类：    方案 方向    PIL&#x2F;Pillow 传">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python 生成图片的几种方案对比">
+<meta property="og:url" content="https://kesuoer-ui.github.io/2021/10/25/backend/Python-Image-Generation-Solutions-Comparison/index.html">
+<meta property="og:site_name" content="thchen的闲言碎语堆积处">
+<meta property="og:description" content="Python 生成图片的几种方案对比Python 里。 “生成图片” 其实是一个非常大的需求。 例如：  Bot 生成信息图 数据报表 海报 OCR 预处理 AI 图片处理 自动截图 可视化 动态排行榜  后来做项目时。 会发现： 不同方案差异非常大。 甚至：  根本不是同一种思路。   Python 常见生成图片方案目前主流大概有几类：    方案 方向    PIL&#x2F;Pillow 传">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kesuoer-ui.github.io/img/avatar.png">
+<meta property="article:published_time" content="2021-10-25T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-11T13:28:55.281Z">
+<meta property="article:author" content="thchen">
+<meta property="article:tag" content="HTML Render">
+<meta property="article:tag" content="OpenCV">
+<meta property="article:tag" content="PIL">
+<meta property="article:tag" content="matplotlib">
+<meta property="article:tag" content="图像处理">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kesuoer-ui.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Python 生成图片的几种方案对比",
+  "url": "https://kesuoer-ui.github.io/2021/10/25/backend/Python-Image-Generation-Solutions-Comparison/",
+  "image": "https://kesuoer-ui.github.io/img/avatar.png",
+  "datePublished": "2021-10-25T16:00:00.000Z",
+  "dateModified": "2026-05-11T13:28:55.281Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "thchen",
+      "url": "https://kesuoer-ui.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://kesuoer-ui.github.io/2021/10/25/backend/Python-Image-Generation-Solutions-Comparison/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Python 生成图片的几种方案对比',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 8.1.2"><link rel="alternate" href="/atom.xml" title="thchen的闲言碎语堆积处" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">thchen的闲言碎语堆积处</span></a><a class="nav-page-title" href="/"><span class="site-name">Python 生成图片的几种方案对比</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Python 生成图片的几种方案对比</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-10-25T16:00:00.000Z" title="发表于 2021-10-26 00:00:00">2021-10-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-11T13:28:55.281Z" title="更新于 2026-05-11 21:28:55">2026-05-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/backend/">后端开发</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/backend/Python/">Python</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Python-生成图片的几种方案对比"><a href="#Python-生成图片的几种方案对比" class="headerlink" title="Python 生成图片的几种方案对比"></a>Python 生成图片的几种方案对比</h1><p>Python 里。</p>
+<p>“生成图片” 其实是一个非常大的需求。</p>
+<p>例如：</p>
+<ul>
+<li>Bot 生成信息图</li>
+<li>数据报表</li>
+<li>海报</li>
+<li>OCR 预处理</li>
+<li>AI 图片处理</li>
+<li>自动截图</li>
+<li>可视化</li>
+<li>动态排行榜</li>
+</ul>
+<p>后来做项目时。</p>
+<p>会发现：</p>
+<p>不同方案差异非常大。</p>
+<p>甚至：</p>
+<blockquote>
+<p>根本不是同一种思路。</p>
+</blockquote>
+<hr>
+<h1 id="Python-常见生成图片方案"><a href="#Python-常见生成图片方案" class="headerlink" title="Python 常见生成图片方案"></a>Python 常见生成图片方案</h1><p>目前主流大概有几类：</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>方向</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PIL&#x2F;Pillow</td>
+<td>传统绘图</td>
+</tr>
+<tr>
+<td>OpenCV</td>
+<td>图像处理</td>
+</tr>
+<tr>
+<td>matplotlib</td>
+<td>数据可视化</td>
+</tr>
+<tr>
+<td>HTML Render</td>
+<td>网页渲染截图</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="这些方案最大的区别"><a href="#这些方案最大的区别" class="headerlink" title="这些方案最大的区别"></a>这些方案最大的区别</h1><p>其实是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">谁负责布局<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="PIL"><a href="#PIL" class="headerlink" title="PIL"></a>PIL</h1><p>你自己计算坐标。</p>
+<hr>
+<h1 id="OpenCV"><a href="#OpenCV" class="headerlink" title="OpenCV"></a>OpenCV</h1><p>偏图像矩阵处理。</p>
+<hr>
+<h1 id="matplotlib"><a href="#matplotlib" class="headerlink" title="matplotlib"></a>matplotlib</h1><p>偏数据图表。</p>
+<hr>
+<h1 id="HTML-Render"><a href="#HTML-Render" class="headerlink" title="HTML Render"></a>HTML Render</h1><p>直接交给浏览器排版。</p>
+<hr>
+<h1 id="PIL-Pillow：最经典的方案"><a href="#PIL-Pillow：最经典的方案" class="headerlink" title="PIL &#x2F; Pillow：最经典的方案"></a>PIL &#x2F; Pillow：最经典的方案</h1><hr>
+<h1 id="Pillow-是什么"><a href="#Pillow-是什么" class="headerlink" title="Pillow 是什么"></a>Pillow 是什么</h1><p>Pillow：</p>
+<p>实际上是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">PIL 的现代维护版<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>现在基本：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">from</span> PIL <span class="token keyword">import</span> Image<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>都是 Pillow。</p>
+<hr>
+<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">pip <span class="token function">install</span> pillow<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="最简单生成图片"><a href="#最简单生成图片" class="headerlink" title="最简单生成图片"></a>最简单生成图片</h1><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">from</span> PIL <span class="token keyword">import</span> Image
+
+img <span class="token operator">=</span> Image<span class="token punctuation">.</span>new<span class="token punctuation">(</span><span class="token string">"RGB"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token number">500</span><span class="token punctuation">,</span> <span class="token number">300</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string">"white"</span><span class="token punctuation">)</span>
+img<span class="token punctuation">.</span>save<span class="token punctuation">(</span><span class="token string">"test.png"</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="Pillow-最核心的能力"><a href="#Pillow-最核心的能力" class="headerlink" title="Pillow 最核心的能力"></a>Pillow 最核心的能力</h1><p>包括：</p>
+<ul>
+<li>创建图片</li>
+<li>绘图</li>
+<li>写文字</li>
+<li>拼接图片</li>
+<li>加载字体</li>
+<li>裁剪缩放</li>
+<li>GIF处理</li>
+</ul>
+<hr>
+<h1 id="绘图"><a href="#绘图" class="headerlink" title="绘图"></a>绘图</h1><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">from</span> PIL <span class="token keyword">import</span> ImageDraw
+
+draw <span class="token operator">=</span> ImageDraw<span class="token punctuation">.</span>Draw<span class="token punctuation">(</span>img<span class="token punctuation">)</span>
+
+draw<span class="token punctuation">.</span>rectangle<span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">,</span> fill<span class="token operator">=</span><span class="token string">"red"</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="写文字"><a href="#写文字" class="headerlink" title="写文字"></a>写文字</h1><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">from</span> PIL <span class="token keyword">import</span> ImageFont
+
+font <span class="token operator">=</span> ImageFont<span class="token punctuation">.</span>truetype<span class="token punctuation">(</span><span class="token string">"msyh.ttc"</span><span class="token punctuation">,</span> <span class="token number">32</span><span class="token punctuation">)</span>
+
+draw<span class="token punctuation">.</span>text<span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">50</span><span class="token punctuation">,</span> <span class="token number">50</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string">"Hello"</span><span class="token punctuation">,</span> font<span class="token operator">=</span>font<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="Pillow-最大用途"><a href="#Pillow-最大用途" class="headerlink" title="Pillow 最大用途"></a>Pillow 最大用途</h1><p>我后来项目里最常见用途：</p>
+<p>其实是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">信息图生成<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>例如：</p>
+<ul>
+<li>Bot 菜单</li>
+<li>排行榜</li>
+<li>状态卡片</li>
+<li>用户信息图</li>
+</ul>
+<hr>
+<h1 id="Pillow-最大优点"><a href="#Pillow-最大优点" class="headerlink" title="Pillow 最大优点"></a>Pillow 最大优点</h1><hr>
+<h1 id="1-非常轻量"><a href="#1-非常轻量" class="headerlink" title="1. 非常轻量"></a>1. 非常轻量</h1><p>依赖少。</p>
+<p>启动快。</p>
+<hr>
+<h1 id="2-纯-Python-生态兼容好"><a href="#2-纯-Python-生态兼容好" class="headerlink" title="2. 纯 Python 生态兼容好"></a>2. 纯 Python 生态兼容好</h1><p>几乎所有 Python 项目都能直接接。</p>
+<hr>
+<h1 id="3-对-Bot-非常友好"><a href="#3-对-Bot-非常友好" class="headerlink" title="3. 对 Bot 非常友好"></a>3. 对 Bot 非常友好</h1><p>尤其：</p>
+<ul>
+<li>QQ Bot</li>
+<li>Telegram Bot</li>
+<li>Discord Bot</li>
+</ul>
+<hr>
+<h1 id="Pillow-最大缺点"><a href="#Pillow-最大缺点" class="headerlink" title="Pillow 最大缺点"></a>Pillow 最大缺点</h1><p>就是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">布局全靠手算<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="最痛苦的问题"><a href="#最痛苦的问题" class="headerlink" title="最痛苦的问题"></a>最痛苦的问题</h1><p>例如：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">文字居中
+自动换行
+动态高度
+自适应布局<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>全部要自己算。</p>
+<hr>
+<h1 id="后来项目复杂后会发现"><a href="#后来项目复杂后会发现" class="headerlink" title="后来项目复杂后会发现"></a>后来项目复杂后会发现</h1><p>Pillow 很容易变成：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">坐标地狱<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="中文字体是经典坑"><a href="#中文字体是经典坑" class="headerlink" title="中文字体是经典坑"></a>中文字体是经典坑</h1><p>很多新人第一次都会遇到：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">中文乱码<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>原因：</p>
+<p>默认字体不支持中文。</p>
+<hr>
+<h1 id="常见解决方案"><a href="#常见解决方案" class="headerlink" title="常见解决方案"></a>常见解决方案</h1><p>Windows：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">msyh<span class="token punctuation">.</span>ttc<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>Linux：</p>
+<p>需要安装：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Noto Sans CJK<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="Linux-字体坑非常多"><a href="#Linux-字体坑非常多" class="headerlink" title="Linux 字体坑非常多"></a>Linux 字体坑非常多</h1><p>尤其 Docker。</p>
+<p>经常：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">本地正常
+服务器乱码<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>原因通常是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">服务器没字体<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="Pillow-性能问题"><a href="#Pillow-性能问题" class="headerlink" title="Pillow 性能问题"></a>Pillow 性能问题</h1><p>Pillow 本身不算慢。</p>
+<p>但：</p>
+<p>大量：</p>
+<ul>
+<li>抗锯齿</li>
+<li>超大图</li>
+<li>复杂阴影</li>
+</ul>
+<p>后。</p>
+<p>CPU 开销明显。</p>
+<hr>
+<h1 id="OpenCV：完全不同的世界"><a href="#OpenCV：完全不同的世界" class="headerlink" title="OpenCV：完全不同的世界"></a>OpenCV：完全不同的世界</h1><hr>
+<h1 id="OpenCV-是什么"><a href="#OpenCV-是什么" class="headerlink" title="OpenCV 是什么"></a>OpenCV 是什么</h1><p>OpenCV：</p>
+<p>本质：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">计算机视觉库<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>不是专门做 UI 绘图的。</p>
+<hr>
+<h1 id="安装-1"><a href="#安装-1" class="headerlink" title="安装"></a>安装</h1><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">pip <span class="token function">install</span> opencv-python<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="OpenCV-最大特点"><a href="#OpenCV-最大特点" class="headerlink" title="OpenCV 最大特点"></a>OpenCV 最大特点</h1><p>它处理的不是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">图片对象<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>而是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">矩阵<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="读取图片"><a href="#读取图片" class="headerlink" title="读取图片"></a>读取图片</h1><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> cv2
+
+img <span class="token operator">=</span> cv2<span class="token punctuation">.</span>imread<span class="token punctuation">(</span><span class="token string">"test.png"</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="OpenCV-本质"><a href="#OpenCV-本质" class="headerlink" title="OpenCV 本质"></a>OpenCV 本质</h1><p>其实：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">numpy数组<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="例如："><a href="#例如：" class="headerlink" title="例如："></a>例如：</h1><pre class="line-numbers language-python" data-language="python"><code class="language-python">img<span class="token punctuation">.</span>shape<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>输出：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">(height, width, channel)<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="OpenCV-擅长什么"><a href="#OpenCV-擅长什么" class="headerlink" title="OpenCV 擅长什么"></a>OpenCV 擅长什么</h1><p>特别适合：</p>
+<ul>
+<li>图像识别</li>
+<li>OCR预处理</li>
+<li>边缘检测</li>
+<li>视频处理</li>
+<li>摄像头</li>
+<li>AI视觉</li>
+</ul>
+<hr>
+<h1 id="OpenCV-常见操作"><a href="#OpenCV-常见操作" class="headerlink" title="OpenCV 常见操作"></a>OpenCV 常见操作</h1><hr>
+<h1 id="缩放"><a href="#缩放" class="headerlink" title="缩放"></a>缩放</h1><pre class="line-numbers language-python" data-language="python"><code class="language-python">cv2<span class="token punctuation">.</span>resize<span class="token punctuation">(</span>img<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token number">500</span><span class="token punctuation">,</span> <span class="token number">300</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="高斯模糊"><a href="#高斯模糊" class="headerlink" title="高斯模糊"></a>高斯模糊</h1><pre class="line-numbers language-python" data-language="python"><code class="language-python">cv2<span class="token punctuation">.</span>GaussianBlur<span class="token punctuation">(</span>img<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">,</span><span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="灰度化"><a href="#灰度化" class="headerlink" title="灰度化"></a>灰度化</h1><pre class="line-numbers language-python" data-language="python"><code class="language-python">cv2<span class="token punctuation">.</span>cvtColor<span class="token punctuation">(</span>img<span class="token punctuation">,</span> cv2<span class="token punctuation">.</span>COLOR_BGR2GRAY<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="OpenCV-最大问题"><a href="#OpenCV-最大问题" class="headerlink" title="OpenCV 最大问题"></a>OpenCV 最大问题</h1><p>它：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">不适合做复杂UI<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="为什么"><a href="#为什么" class="headerlink" title="为什么"></a>为什么</h1><p>因为：</p>
+<p>所有东西：</p>
+<p>还是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">手工坐标<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>而且：</p>
+<p>文字系统非常弱。</p>
+<hr>
+<h1 id="中文更是经典大坑"><a href="#中文更是经典大坑" class="headerlink" title="中文更是经典大坑"></a>中文更是经典大坑</h1><p>OpenCV 默认：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">几乎不支持中文绘制<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>很多人最后：</p>
+<p>还是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Pillow + OpenCV混合<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="一个经典组合"><a href="#一个经典组合" class="headerlink" title="一个经典组合"></a>一个经典组合</h1><p>例如：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">OpenCV处理图像
+Pillow负责中文文字<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="OpenCV-与-Pillow-的颜色坑"><a href="#OpenCV-与-Pillow-的颜色坑" class="headerlink" title="OpenCV 与 Pillow 的颜色坑"></a>OpenCV 与 Pillow 的颜色坑</h1><p>这是非常经典的问题。</p>
+<hr>
+<h1 id="Pillow"><a href="#Pillow" class="headerlink" title="Pillow"></a>Pillow</h1><p>默认：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">RGB<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="OpenCV-1"><a href="#OpenCV-1" class="headerlink" title="OpenCV"></a>OpenCV</h1><p>默认：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">BGR<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="所以很多人第一次转换时"><a href="#所以很多人第一次转换时" class="headerlink" title="所以很多人第一次转换时"></a>所以很多人第一次转换时</h1><p>图片会：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">颜色错乱<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="转换方式"><a href="#转换方式" class="headerlink" title="转换方式"></a>转换方式</h1><pre class="line-numbers language-python" data-language="python"><code class="language-python">cv2<span class="token punctuation">.</span>cvtColor<span class="token punctuation">(</span>img<span class="token punctuation">,</span> cv2<span class="token punctuation">.</span>COLOR_BGR2RGB<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="matplotlib：数据可视化路线"><a href="#matplotlib：数据可视化路线" class="headerlink" title="matplotlib：数据可视化路线"></a>matplotlib：数据可视化路线</h1><hr>
+<h1 id="matplotlib-是什么"><a href="#matplotlib-是什么" class="headerlink" title="matplotlib 是什么"></a>matplotlib 是什么</h1><p>本质：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">科学计算绘图库<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="安装-2"><a href="#安装-2" class="headerlink" title="安装"></a>安装</h1><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">pip <span class="token function">install</span> matplotlib<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="最经典用途"><a href="#最经典用途" class="headerlink" title="最经典用途"></a>最经典用途</h1><p>例如：</p>
+<ul>
+<li>折线图</li>
+<li>柱状图</li>
+<li>饼图</li>
+<li>热力图</li>
+<li>数据分析</li>
+</ul>
+<hr>
+<h1 id="最简单例子"><a href="#最简单例子" class="headerlink" title="最简单例子"></a>最简单例子</h1><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> matplotlib<span class="token punctuation">.</span>pyplot <span class="token keyword">as</span> plt
+
+plt<span class="token punctuation">.</span>plot<span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token number">4</span><span class="token punctuation">,</span><span class="token number">5</span><span class="token punctuation">,</span><span class="token number">6</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+plt<span class="token punctuation">.</span>savefig<span class="token punctuation">(</span><span class="token string">"chart.png"</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="matplotlib-最大特点"><a href="#matplotlib-最大特点" class="headerlink" title="matplotlib 最大特点"></a>matplotlib 最大特点</h1><p>是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">图表生态极强<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>尤其：</p>
+<ul>
+<li>numpy</li>
+<li>pandas</li>
+<li>jupyter</li>
+</ul>
+<p>配套非常成熟。</p>
+<hr>
+<h1 id="很多数据分析项目"><a href="#很多数据分析项目" class="headerlink" title="很多数据分析项目"></a>很多数据分析项目</h1><p>本质：</p>
+<p>就是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">pandas + matplotlib<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="matplotlib-最大缺点"><a href="#matplotlib-最大缺点" class="headerlink" title="matplotlib 最大缺点"></a>matplotlib 最大缺点</h1><p>其实也明显。</p>
+<hr>
+<h1 id="1-不适合复杂UI"><a href="#1-不适合复杂UI" class="headerlink" title="1. 不适合复杂UI"></a>1. 不适合复杂UI</h1><p>它本质：</p>
+<p>不是 UI 引擎。</p>
+<hr>
+<h1 id="2-中文字体坑很多"><a href="#2-中文字体坑很多" class="headerlink" title="2. 中文字体坑很多"></a>2. 中文字体坑很多</h1><p>尤其 Linux。</p>
+<p>经常：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">方块字
+乱码<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="解决方式"><a href="#解决方式" class="headerlink" title="解决方式"></a>解决方式</h1><p>指定字体：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">plt<span class="token punctuation">.</span>rcParams<span class="token punctuation">[</span><span class="token string">'font.sans-serif'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'SimHei'</span><span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="3-样式不现代"><a href="#3-样式不现代" class="headerlink" title="3. 样式不现代"></a>3. 样式不现代</h1><p>默认图表：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">一眼学术风<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>很多人后期：</p>
+<p>会转：</p>
+<ul>
+<li>plotly</li>
+<li>echarts</li>
+<li>seaborn</li>
+</ul>
+<hr>
+<h1 id="HTML-Render：后期越来越主流"><a href="#HTML-Render：后期越来越主流" class="headerlink" title="HTML Render：后期越来越主流"></a>HTML Render：后期越来越主流</h1><p>这是我后来：</p>
+<p>越来越喜欢的方案。</p>
+<hr>
+<h1 id="为什么-1"><a href="#为什么-1" class="headerlink" title="为什么"></a>为什么</h1><p>因为：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">浏览器本身就是最强布局引擎<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="核心思路"><a href="#核心思路" class="headerlink" title="核心思路"></a>核心思路</h1><pre class="line-numbers language-text" data-language="text"><code class="language-text">HTML + CSS
+-> 浏览器渲染
+-> 截图<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="常见方案"><a href="#常见方案" class="headerlink" title="常见方案"></a>常见方案</h1><p>例如：</p>
+<ul>
+<li>Playwright</li>
+<li>Selenium</li>
+<li>Puppeteer</li>
+<li>pyppeteer</li>
+</ul>
+<hr>
+<h1 id="Playwright-安装"><a href="#Playwright-安装" class="headerlink" title="Playwright 安装"></a>Playwright 安装</h1><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">pip <span class="token function">install</span> playwright
+playwright <span class="token function">install</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="最简单截图"><a href="#最简单截图" class="headerlink" title="最简单截图"></a>最简单截图</h1><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">from</span> playwright<span class="token punctuation">.</span>sync_api <span class="token keyword">import</span> sync_playwright
+
+<span class="token keyword">with</span> sync_playwright<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">as</span> p<span class="token punctuation">:</span>
+    browser <span class="token operator">=</span> p<span class="token punctuation">.</span>chromium<span class="token punctuation">.</span>launch<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+    page <span class="token operator">=</span> browser<span class="token punctuation">.</span>new_page<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+    page<span class="token punctuation">.</span>set_content<span class="token punctuation">(</span><span class="token triple-quoted-string string">"""
+    &lt;h1>Hello&lt;/h1>
+    """</span><span class="token punctuation">)</span>
+
+    page<span class="token punctuation">.</span>screenshot<span class="token punctuation">(</span>path<span class="token operator">=</span><span class="token string">"test.png"</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="HTML-Render-最大优势"><a href="#HTML-Render-最大优势" class="headerlink" title="HTML Render 最大优势"></a>HTML Render 最大优势</h1><hr>
+<h1 id="1-天然现代-UI"><a href="#1-天然现代-UI" class="headerlink" title="1. 天然现代 UI"></a>1. 天然现代 UI</h1><p>因为：</p>
+<p>直接：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">CSS布局<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="2-不需要手算坐标"><a href="#2-不需要手算坐标" class="headerlink" title="2. 不需要手算坐标"></a>2. 不需要手算坐标</h1><p>终于不用：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">x + 20
+y + 50<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>了。</p>
+<hr>
+<h1 id="3-支持复杂布局"><a href="#3-支持复杂布局" class="headerlink" title="3. 支持复杂布局"></a>3. 支持复杂布局</h1><p>例如：</p>
+<ul>
+<li>flex</li>
+<li>grid</li>
+<li>阴影</li>
+<li>渐变</li>
+<li>动画</li>
+</ul>
+<hr>
+<h1 id="4-前端生态直接复用"><a href="#4-前端生态直接复用" class="headerlink" title="4. 前端生态直接复用"></a>4. 前端生态直接复用</h1><p>甚至：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Vue页面
+React页面<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>都能直接截图。</p>
+<hr>
+<h1 id="这对现代-Bot-非常重要"><a href="#这对现代-Bot-非常重要" class="headerlink" title="这对现代 Bot 非常重要"></a>这对现代 Bot 非常重要</h1><p>因为很多：</p>
+<p>高质量 Bot 图片。</p>
+<p>本质：</p>
+<p>已经是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">网页截图<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="HTML-Render-最大问题"><a href="#HTML-Render-最大问题" class="headerlink" title="HTML Render 最大问题"></a>HTML Render 最大问题</h1><hr>
+<h1 id="1-重"><a href="#1-重" class="headerlink" title="1. 重"></a>1. 重</h1><p>浏览器非常重。</p>
+<hr>
+<h1 id="2-部署复杂"><a href="#2-部署复杂" class="headerlink" title="2. 部署复杂"></a>2. 部署复杂</h1><p>尤其 Linux。</p>
+<p>经常：</p>
+<ul>
+<li>缺依赖</li>
+<li>缺字体</li>
+<li>Chromium启动失败</li>
+</ul>
+<hr>
+<h1 id="3-Docker-坑很多"><a href="#3-Docker-坑很多" class="headerlink" title="3. Docker 坑很多"></a>3. Docker 坑很多</h1><p>例如：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">no sandbox<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="常见启动参数"><a href="#常见启动参数" class="headerlink" title="常见启动参数"></a>常见启动参数</h1><pre class="line-numbers language-python" data-language="python"><code class="language-python">browser <span class="token operator">=</span> p<span class="token punctuation">.</span>chromium<span class="token punctuation">.</span>launch<span class="token punctuation">(</span>
+    args<span class="token operator">=</span><span class="token punctuation">[</span><span class="token string">"--no-sandbox"</span><span class="token punctuation">]</span>
+<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="4-字体问题依然存在"><a href="#4-字体问题依然存在" class="headerlink" title="4. 字体问题依然存在"></a>4. 字体问题依然存在</h1><p>服务器：</p>
+<p>还是可能：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">没中文字体<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="5-并发压力大"><a href="#5-并发压力大" class="headerlink" title="5. 并发压力大"></a>5. 并发压力大</h1><p>浏览器实例：</p>
+<p>内存占用非常高。</p>
+<hr>
+<h1 id="后来很多项目的做法"><a href="#后来很多项目的做法" class="headerlink" title="后来很多项目的做法"></a>后来很多项目的做法</h1><p>是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">浏览器池<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>而不是：</p>
+<p>每次启动 Chromium。</p>
+<hr>
+<h1 id="HTML-Render-最适合什么"><a href="#HTML-Render-最适合什么" class="headerlink" title="HTML Render 最适合什么"></a>HTML Render 最适合什么</h1><p>特别适合：</p>
+<ul>
+<li>动态卡片</li>
+<li>排行榜</li>
+<li>信息页</li>
+<li>海报</li>
+<li>AI结果展示</li>
+<li>复杂UI生成</li>
+</ul>
+<hr>
+<h1 id="各方案本质区别"><a href="#各方案本质区别" class="headerlink" title="各方案本质区别"></a>各方案本质区别</h1><table>
+<thead>
+<tr>
+<th>方案</th>
+<th>本质</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Pillow</td>
+<td>手工绘图</td>
+</tr>
+<tr>
+<td>OpenCV</td>
+<td>图像矩阵处理</td>
+</tr>
+<tr>
+<td>matplotlib</td>
+<td>数据图表</td>
+</tr>
+<tr>
+<td>HTML Render</td>
+<td>浏览器渲染</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="我后来的实际选择"><a href="#我后来的实际选择" class="headerlink" title="我后来的实际选择"></a>我后来的实际选择</h1><hr>
+<h1 id="简单图片生成"><a href="#简单图片生成" class="headerlink" title="简单图片生成"></a>简单图片生成</h1><p>用：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Pillow<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="OCR-视觉处理"><a href="#OCR-视觉处理" class="headerlink" title="OCR&#x2F;视觉处理"></a>OCR&#x2F;视觉处理</h1><p>用：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">OpenCV<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="数据分析图"><a href="#数据分析图" class="headerlink" title="数据分析图"></a>数据分析图</h1><p>用：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">matplotlib<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="高质量动态UI"><a href="#高质量动态UI" class="headerlink" title="高质量动态UI"></a>高质量动态UI</h1><p>用：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">HTML Render<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="现在很多现代项目"><a href="#现在很多现代项目" class="headerlink" title="现在很多现代项目"></a>现在很多现代项目</h1><p>其实已经逐渐：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">前端化<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="即："><a href="#即：" class="headerlink" title="即："></a>即：</h1><pre class="line-numbers language-text" data-language="text"><code class="language-text">前端负责页面
+Python负责渲染截图<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="所以很多后期复杂-Bot"><a href="#所以很多后期复杂-Bot" class="headerlink" title="所以很多后期复杂 Bot"></a>所以很多后期复杂 Bot</h1><p>架构会变成：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Vue/React
+-> Playwright截图
+-> Bot发送图片<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="这其实已经不是“画图”"><a href="#这其实已经不是“画图”" class="headerlink" title="这其实已经不是“画图”"></a>这其实已经不是“画图”</h1><p>而是：</p>
+<blockquote>
+<p>用浏览器作为图片生成引擎。</p>
+</blockquote>
+<hr>
+<h1 id="最后一个重要问题"><a href="#最后一个重要问题" class="headerlink" title="最后一个重要问题"></a>最后一个重要问题</h1><p>很多人会问：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">为什么不用纯前端Canvas<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="实际上"><a href="#实际上" class="headerlink" title="实际上"></a>实际上</h1><p>很多项目：</p>
+<p>就是这么做的。</p>
+<p>但：</p>
+<p>Python 服务端：</p>
+<p>更适合：</p>
+<ul>
+<li>自动化</li>
+<li>批量生成</li>
+<li>Bot</li>
+<li>后台任务</li>
+</ul>
+<hr>
+<h1 id="最后总结"><a href="#最后总结" class="headerlink" title="最后总结"></a>最后总结</h1><hr>
+<h1 id="Pillow-1"><a href="#Pillow-1" class="headerlink" title="Pillow"></a>Pillow</h1><p>适合：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">轻量绘图
+信息图
+Bot图片<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="OpenCV-2"><a href="#OpenCV-2" class="headerlink" title="OpenCV"></a>OpenCV</h1><p>适合：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">视觉处理
+OCR
+图像算法<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="matplotlib-1"><a href="#matplotlib-1" class="headerlink" title="matplotlib"></a>matplotlib</h1><p>适合：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">统计图
+数据分析
+科研图表<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="HTML-Render-1"><a href="#HTML-Render-1" class="headerlink" title="HTML Render"></a>HTML Render</h1><p>适合：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">现代UI
+复杂布局
+高质量动态页面<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="Python-图片生成生态"><a href="#Python-图片生成生态" class="headerlink" title="Python 图片生成生态"></a>Python 图片生成生态</h1><p>本质上其实已经分成：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">传统绘图流派
+浏览器渲染流派<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>而现在越来越多复杂项目。</p>
+<p>其实都在逐渐：</p>
+<blockquote>
+<p>“前端化”。</p>
+</blockquote>
+<p>因为：</p>
+<p>浏览器本身。</p>
+<p>已经是现代世界最成熟的渲染引擎之一。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io">thchen</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io/2021/10/25/backend/Python-Image-Generation-Solutions-Comparison/">https://kesuoer-ui.github.io/2021/10/25/backend/Python-Image-Generation-Solutions-Comparison/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://kesuoer-ui.github.io" target="_blank">thchen的闲言碎语堆积处</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/PIL/">PIL</a><a class="post-meta__tags" href="/tags/OpenCV/">OpenCV</a><a class="post-meta__tags" href="/tags/matplotlib/">matplotlib</a><a class="post-meta__tags" href="/tags/HTML-Render/">HTML Render</a><a class="post-meta__tags" href="/tags/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/">图像处理</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2021/11/02/other/VPN-Knowleage-2/" title="我踩过的代理、转发与远程访问坑"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">我踩过的代理、转发与远程访问坑</div></div><div class="info-2"><div class="info-item-1">背景学会基础代理之后，折腾的方向很自然地变成了另一件事：  让不同设备之间可以互相访问。  从“能上网”，变成“能互相连”。 于是开始接触一堆工具和概念：  frp gost SOCKS5 Tailscale Proxifier 内网穿透 远程访问  问题也随之变得更复杂。  公网 IP 的真实问题一开始有一个很朴素的误解：  只要能上网，就能被访问  后来才发现这是错的。 现实情况通常是：  没有公网 IP NAT 嵌套 NAT 运营商级 NAT（CGNAT）  结构变成： id外部 -> 运营商 NAT -> 家庭路由 -> 设备   结果是：  - 你可以访问外网 - 外网无法直接访问你  ---  ## frp：第一次接触内网穿透  frp 是第一次真正让“远程访问本地服务”变得可行的工具。  基本结构：  &#96;&#96;&#96;text id&#x3D;&quot;frp1&quot; 内网机器 -&gt; frpc -&gt; 公网服务器 -&gt; frps -&gt; 外部访问 &#96;&#96;&#96;  核心思想是：  &gt; 主动向公网建立连接...</div></div></div></a><a class="pagination-related" href="/2021/09/18/network/http-token-jwt-authentication-mechanisms/" title="HTTP、Token、JWT 与网页鉴权机制整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">HTTP、Token、JWT 与网页鉴权机制整理</div></div><div class="info-2"><div class="info-item-1">HTTP、Token、JWT 与网页鉴权机制整理很多人第一次做前后端分离时都会疑惑： 用户到底是怎么“登录状态持久化”的？  浏览器关了。 APP 重启了。 为什么服务端还知道我是谁？ 这背后其实就是： 鉴权（Authentication）   HTTP 为什么天然无状态HTTP 本质： 请求 -> 响应  服务端默认： 不记得我是谁  即： 每一次请求都是独立事件  所以：  登录状态 用户身份 权限信息  都必须额外设计机制来承载。  Cookie：最早的状态方案最传统的方式： Cookie + Session  流程是： 登录成功     ↓ 服务端生成 Session     ↓ SessionID 写入 Cookie     ↓ 浏览器后续自动携带 Cookie   Session 本质服务端通常存： &#123;   "session_id": &#123;     "user_id": 123   &#125; &#125;  位置可能是：  内存 Redis 数据库   Cookie 的核心特点浏览器会： 自动携带 Cookie  因此早期 Web 系统基本依赖它...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">thchen</div><div class="author-info-description">全栈开发 / AI Agent / 系统设计</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/kesuoer-ui" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Python-%E7%94%9F%E6%88%90%E5%9B%BE%E7%89%87%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94"><span class="toc-number">1.</span> <span class="toc-text">Python 生成图片的几种方案对比</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Python-%E5%B8%B8%E8%A7%81%E7%94%9F%E6%88%90%E5%9B%BE%E7%89%87%E6%96%B9%E6%A1%88"><span class="toc-number">2.</span> <span class="toc-text">Python 常见生成图片方案</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BF%99%E4%BA%9B%E6%96%B9%E6%A1%88%E6%9C%80%E5%A4%A7%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">3.</span> <span class="toc-text">这些方案最大的区别</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#PIL"><span class="toc-number">4.</span> <span class="toc-text">PIL</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#OpenCV"><span class="toc-number">5.</span> <span class="toc-text">OpenCV</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#matplotlib"><span class="toc-number">6.</span> <span class="toc-text">matplotlib</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#HTML-Render"><span class="toc-number">7.</span> <span class="toc-text">HTML Render</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#PIL-Pillow%EF%BC%9A%E6%9C%80%E7%BB%8F%E5%85%B8%E7%9A%84%E6%96%B9%E6%A1%88"><span class="toc-number">8.</span> <span class="toc-text">PIL &#x2F; Pillow：最经典的方案</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pillow-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">9.</span> <span class="toc-text">Pillow 是什么</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%89%E8%A3%85"><span class="toc-number">10.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%80%E7%AE%80%E5%8D%95%E7%94%9F%E6%88%90%E5%9B%BE%E7%89%87"><span class="toc-number">11.</span> <span class="toc-text">最简单生成图片</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pillow-%E6%9C%80%E6%A0%B8%E5%BF%83%E7%9A%84%E8%83%BD%E5%8A%9B"><span class="toc-number">12.</span> <span class="toc-text">Pillow 最核心的能力</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%98%E5%9B%BE"><span class="toc-number">13.</span> <span class="toc-text">绘图</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%86%99%E6%96%87%E5%AD%97"><span class="toc-number">14.</span> <span class="toc-text">写文字</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pillow-%E6%9C%80%E5%A4%A7%E7%94%A8%E9%80%94"><span class="toc-number">15.</span> <span class="toc-text">Pillow 最大用途</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pillow-%E6%9C%80%E5%A4%A7%E4%BC%98%E7%82%B9"><span class="toc-number">16.</span> <span class="toc-text">Pillow 最大优点</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E9%9D%9E%E5%B8%B8%E8%BD%BB%E9%87%8F"><span class="toc-number">17.</span> <span class="toc-text">1. 非常轻量</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E7%BA%AF-Python-%E7%94%9F%E6%80%81%E5%85%BC%E5%AE%B9%E5%A5%BD"><span class="toc-number">18.</span> <span class="toc-text">2. 纯 Python 生态兼容好</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E5%AF%B9-Bot-%E9%9D%9E%E5%B8%B8%E5%8F%8B%E5%A5%BD"><span class="toc-number">19.</span> <span class="toc-text">3. 对 Bot 非常友好</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pillow-%E6%9C%80%E5%A4%A7%E7%BC%BA%E7%82%B9"><span class="toc-number">20.</span> <span class="toc-text">Pillow 最大缺点</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%80%E7%97%9B%E8%8B%A6%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">21.</span> <span class="toc-text">最痛苦的问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%8E%E6%9D%A5%E9%A1%B9%E7%9B%AE%E5%A4%8D%E6%9D%82%E5%90%8E%E4%BC%9A%E5%8F%91%E7%8E%B0"><span class="toc-number">22.</span> <span class="toc-text">后来项目复杂后会发现</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%AD%E6%96%87%E5%AD%97%E4%BD%93%E6%98%AF%E7%BB%8F%E5%85%B8%E5%9D%91"><span class="toc-number">23.</span> <span class="toc-text">中文字体是经典坑</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">24.</span> <span class="toc-text">常见解决方案</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Linux-%E5%AD%97%E4%BD%93%E5%9D%91%E9%9D%9E%E5%B8%B8%E5%A4%9A"><span class="toc-number">25.</span> <span class="toc-text">Linux 字体坑非常多</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pillow-%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98"><span class="toc-number">26.</span> <span class="toc-text">Pillow 性能问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#OpenCV%EF%BC%9A%E5%AE%8C%E5%85%A8%E4%B8%8D%E5%90%8C%E7%9A%84%E4%B8%96%E7%95%8C"><span class="toc-number">27.</span> <span class="toc-text">OpenCV：完全不同的世界</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#OpenCV-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">28.</span> <span class="toc-text">OpenCV 是什么</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-1"><span class="toc-number">29.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#OpenCV-%E6%9C%80%E5%A4%A7%E7%89%B9%E7%82%B9"><span class="toc-number">30.</span> <span class="toc-text">OpenCV 最大特点</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96%E5%9B%BE%E7%89%87"><span class="toc-number">31.</span> <span class="toc-text">读取图片</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#OpenCV-%E6%9C%AC%E8%B4%A8"><span class="toc-number">32.</span> <span class="toc-text">OpenCV 本质</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BE%8B%E5%A6%82%EF%BC%9A"><span class="toc-number">33.</span> <span class="toc-text">例如：</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#OpenCV-%E6%93%85%E9%95%BF%E4%BB%80%E4%B9%88"><span class="toc-number">34.</span> <span class="toc-text">OpenCV 擅长什么</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#OpenCV-%E5%B8%B8%E8%A7%81%E6%93%8D%E4%BD%9C"><span class="toc-number">35.</span> <span class="toc-text">OpenCV 常见操作</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BC%A9%E6%94%BE"><span class="toc-number">36.</span> <span class="toc-text">缩放</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%AB%98%E6%96%AF%E6%A8%A1%E7%B3%8A"><span class="toc-number">37.</span> <span class="toc-text">高斯模糊</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%81%B0%E5%BA%A6%E5%8C%96"><span class="toc-number">38.</span> <span class="toc-text">灰度化</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#OpenCV-%E6%9C%80%E5%A4%A7%E9%97%AE%E9%A2%98"><span class="toc-number">39.</span> <span class="toc-text">OpenCV 最大问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88"><span class="toc-number">40.</span> <span class="toc-text">为什么</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%AD%E6%96%87%E6%9B%B4%E6%98%AF%E7%BB%8F%E5%85%B8%E5%A4%A7%E5%9D%91"><span class="toc-number">41.</span> <span class="toc-text">中文更是经典大坑</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E7%BB%8F%E5%85%B8%E7%BB%84%E5%90%88"><span class="toc-number">42.</span> <span class="toc-text">一个经典组合</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#OpenCV-%E4%B8%8E-Pillow-%E7%9A%84%E9%A2%9C%E8%89%B2%E5%9D%91"><span class="toc-number">43.</span> <span class="toc-text">OpenCV 与 Pillow 的颜色坑</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pillow"><span class="toc-number">44.</span> <span class="toc-text">Pillow</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#OpenCV-1"><span class="toc-number">45.</span> <span class="toc-text">OpenCV</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%89%80%E4%BB%A5%E5%BE%88%E5%A4%9A%E4%BA%BA%E7%AC%AC%E4%B8%80%E6%AC%A1%E8%BD%AC%E6%8D%A2%E6%97%B6"><span class="toc-number">46.</span> <span class="toc-text">所以很多人第一次转换时</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BD%AC%E6%8D%A2%E6%96%B9%E5%BC%8F"><span class="toc-number">47.</span> <span class="toc-text">转换方式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#matplotlib%EF%BC%9A%E6%95%B0%E6%8D%AE%E5%8F%AF%E8%A7%86%E5%8C%96%E8%B7%AF%E7%BA%BF"><span class="toc-number">48.</span> <span class="toc-text">matplotlib：数据可视化路线</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#matplotlib-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">49.</span> <span class="toc-text">matplotlib 是什么</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-2"><span class="toc-number">50.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%80%E7%BB%8F%E5%85%B8%E7%94%A8%E9%80%94"><span class="toc-number">51.</span> <span class="toc-text">最经典用途</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%80%E7%AE%80%E5%8D%95%E4%BE%8B%E5%AD%90"><span class="toc-number">52.</span> <span class="toc-text">最简单例子</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#matplotlib-%E6%9C%80%E5%A4%A7%E7%89%B9%E7%82%B9"><span class="toc-number">53.</span> <span class="toc-text">matplotlib 最大特点</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BE%88%E5%A4%9A%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90%E9%A1%B9%E7%9B%AE"><span class="toc-number">54.</span> <span class="toc-text">很多数据分析项目</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#matplotlib-%E6%9C%80%E5%A4%A7%E7%BC%BA%E7%82%B9"><span class="toc-number">55.</span> <span class="toc-text">matplotlib 最大缺点</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E4%B8%8D%E9%80%82%E5%90%88%E5%A4%8D%E6%9D%82UI"><span class="toc-number">56.</span> <span class="toc-text">1. 不适合复杂UI</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E4%B8%AD%E6%96%87%E5%AD%97%E4%BD%93%E5%9D%91%E5%BE%88%E5%A4%9A"><span class="toc-number">57.</span> <span class="toc-text">2. 中文字体坑很多</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E5%BC%8F"><span class="toc-number">58.</span> <span class="toc-text">解决方式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%A0%B7%E5%BC%8F%E4%B8%8D%E7%8E%B0%E4%BB%A3"><span class="toc-number">59.</span> <span class="toc-text">3. 样式不现代</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#HTML-Render%EF%BC%9A%E5%90%8E%E6%9C%9F%E8%B6%8A%E6%9D%A5%E8%B6%8A%E4%B8%BB%E6%B5%81"><span class="toc-number">60.</span> <span class="toc-text">HTML Render：后期越来越主流</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-1"><span class="toc-number">61.</span> <span class="toc-text">为什么</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%80%9D%E8%B7%AF"><span class="toc-number">62.</span> <span class="toc-text">核心思路</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E6%96%B9%E6%A1%88"><span class="toc-number">63.</span> <span class="toc-text">常见方案</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Playwright-%E5%AE%89%E8%A3%85"><span class="toc-number">64.</span> <span class="toc-text">Playwright 安装</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%80%E7%AE%80%E5%8D%95%E6%88%AA%E5%9B%BE"><span class="toc-number">65.</span> <span class="toc-text">最简单截图</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#HTML-Render-%E6%9C%80%E5%A4%A7%E4%BC%98%E5%8A%BF"><span class="toc-number">66.</span> <span class="toc-text">HTML Render 最大优势</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%A4%A9%E7%84%B6%E7%8E%B0%E4%BB%A3-UI"><span class="toc-number">67.</span> <span class="toc-text">1. 天然现代 UI</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E4%B8%8D%E9%9C%80%E8%A6%81%E6%89%8B%E7%AE%97%E5%9D%90%E6%A0%87"><span class="toc-number">68.</span> <span class="toc-text">2. 不需要手算坐标</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%94%AF%E6%8C%81%E5%A4%8D%E6%9D%82%E5%B8%83%E5%B1%80"><span class="toc-number">69.</span> <span class="toc-text">3. 支持复杂布局</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E5%89%8D%E7%AB%AF%E7%94%9F%E6%80%81%E7%9B%B4%E6%8E%A5%E5%A4%8D%E7%94%A8"><span class="toc-number">70.</span> <span class="toc-text">4. 前端生态直接复用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BF%99%E5%AF%B9%E7%8E%B0%E4%BB%A3-Bot-%E9%9D%9E%E5%B8%B8%E9%87%8D%E8%A6%81"><span class="toc-number">71.</span> <span class="toc-text">这对现代 Bot 非常重要</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#HTML-Render-%E6%9C%80%E5%A4%A7%E9%97%AE%E9%A2%98"><span class="toc-number">72.</span> <span class="toc-text">HTML Render 最大问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E9%87%8D"><span class="toc-number">73.</span> <span class="toc-text">1. 重</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E9%83%A8%E7%BD%B2%E5%A4%8D%E6%9D%82"><span class="toc-number">74.</span> <span class="toc-text">2. 部署复杂</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-Docker-%E5%9D%91%E5%BE%88%E5%A4%9A"><span class="toc-number">75.</span> <span class="toc-text">3. Docker 坑很多</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0"><span class="toc-number">76.</span> <span class="toc-text">常见启动参数</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E5%AD%97%E4%BD%93%E9%97%AE%E9%A2%98%E4%BE%9D%E7%84%B6%E5%AD%98%E5%9C%A8"><span class="toc-number">77.</span> <span class="toc-text">4. 字体问题依然存在</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E5%B9%B6%E5%8F%91%E5%8E%8B%E5%8A%9B%E5%A4%A7"><span class="toc-number">78.</span> <span class="toc-text">5. 并发压力大</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%8E%E6%9D%A5%E5%BE%88%E5%A4%9A%E9%A1%B9%E7%9B%AE%E7%9A%84%E5%81%9A%E6%B3%95"><span class="toc-number">79.</span> <span class="toc-text">后来很多项目的做法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#HTML-Render-%E6%9C%80%E9%80%82%E5%90%88%E4%BB%80%E4%B9%88"><span class="toc-number">80.</span> <span class="toc-text">HTML Render 最适合什么</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%84%E6%96%B9%E6%A1%88%E6%9C%AC%E8%B4%A8%E5%8C%BA%E5%88%AB"><span class="toc-number">81.</span> <span class="toc-text">各方案本质区别</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%88%91%E5%90%8E%E6%9D%A5%E7%9A%84%E5%AE%9E%E9%99%85%E9%80%89%E6%8B%A9"><span class="toc-number">82.</span> <span class="toc-text">我后来的实际选择</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E5%9B%BE%E7%89%87%E7%94%9F%E6%88%90"><span class="toc-number">83.</span> <span class="toc-text">简单图片生成</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#OCR-%E8%A7%86%E8%A7%89%E5%A4%84%E7%90%86"><span class="toc-number">84.</span> <span class="toc-text">OCR&#x2F;视觉处理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90%E5%9B%BE"><span class="toc-number">85.</span> <span class="toc-text">数据分析图</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%AB%98%E8%B4%A8%E9%87%8F%E5%8A%A8%E6%80%81UI"><span class="toc-number">86.</span> <span class="toc-text">高质量动态UI</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%8E%B0%E5%9C%A8%E5%BE%88%E5%A4%9A%E7%8E%B0%E4%BB%A3%E9%A1%B9%E7%9B%AE"><span class="toc-number">87.</span> <span class="toc-text">现在很多现代项目</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%B3%EF%BC%9A"><span class="toc-number">88.</span> <span class="toc-text">即：</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%89%80%E4%BB%A5%E5%BE%88%E5%A4%9A%E5%90%8E%E6%9C%9F%E5%A4%8D%E6%9D%82-Bot"><span class="toc-number">89.</span> <span class="toc-text">所以很多后期复杂 Bot</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BF%99%E5%85%B6%E5%AE%9E%E5%B7%B2%E7%BB%8F%E4%B8%8D%E6%98%AF%E2%80%9C%E7%94%BB%E5%9B%BE%E2%80%9D"><span class="toc-number">90.</span> <span class="toc-text">这其实已经不是“画图”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%80%E5%90%8E%E4%B8%80%E4%B8%AA%E9%87%8D%E8%A6%81%E9%97%AE%E9%A2%98"><span class="toc-number">91.</span> <span class="toc-text">最后一个重要问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E4%B8%8A"><span class="toc-number">92.</span> <span class="toc-text">实际上</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%80%E5%90%8E%E6%80%BB%E7%BB%93"><span class="toc-number">93.</span> <span class="toc-text">最后总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Pillow-1"><span class="toc-number">94.</span> <span class="toc-text">Pillow</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#OpenCV-2"><span class="toc-number">95.</span> <span class="toc-text">OpenCV</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#matplotlib-1"><span class="toc-number">96.</span> <span class="toc-text">matplotlib</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#HTML-Render-1"><span class="toc-number">97.</span> <span class="toc-text">HTML Render</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Python-%E5%9B%BE%E7%89%87%E7%94%9F%E6%88%90%E7%94%9F%E6%80%81"><span class="toc-number">98.</span> <span class="toc-text">Python 图片生成生态</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/19/life/two-failed-attempts-at-postgraduate-exam/" title="我的考研复习与调剂经历">我的考研复习与调剂经历</a><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/31/ai/Claude-Code-Agent-Architecture-Insights/" title="Claude Code 泄露源码带给我的 Agent 启发">Claude Code 泄露源码带给我的 Agent 启发</a><time datetime="2026-03-31T16:00:00.000Z" title="发表于 2026-04-01 00:00:00">2026-04-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/09/ops/Serverless-Practice/" title="记一次 Serverless 的认识与实践">记一次 Serverless 的认识与实践</a><time datetime="2026-03-09T16:00:00.000Z" title="发表于 2026-03-10 00:00:00">2026-03-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/11/19/ai/MCP-Tools-And-Prompt-Engineering-Trends/" title="MCP、Tools 与 Prompt Engineering 的工程化趋势">MCP、Tools 与 Prompt Engineering 的工程化趋势</a><time datetime="2025-11-19T16:00:00.000Z" title="发表于 2025-11-20 00:00:00">2025-11-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/15/ai/LangChain-LangGraph-Agent-Practice/" title="LangChain、LangGraph 与 AI Agent 工程实践">LangChain、LangGraph 与 AI Agent 工程实践</a><time datetime="2025-09-15T16:00:00.000Z" title="发表于 2025-09-16 00:00:00">2025-09-16</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By thchen</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'kesuoer-ui/kesuoer-ui.github.io',
+      'data-repo-id': 'R_kgDOSXiEqw',
+      'data-category-id': 'DIC_kwDOSXiEq84C8oeA',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>

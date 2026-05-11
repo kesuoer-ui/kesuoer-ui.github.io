@@ -1,0 +1,913 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>LangChain、LangGraph 与 AI Agent 工程实践 | thchen的闲言碎语堆积处</title><meta name="author" content="thchen"><meta name="copyright" content="thchen"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="LangChain、LangGraph 与 AI Agent 工程实践这篇不是“框架介绍”，更偏向一次工程实现过程的整理。 核心问题其实很简单：  当 LLM 从“聊天工具”变成“执行单元”之后，系统怎么设计才能不崩？   1. Agent 真正开始变复杂的临界点最早的模型使用方式非常直接： idLLM → 输出   后来变成：  &#96;&#96;&#96;text id&#x3D;&amp;quot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LangChain、LangGraph 与 AI Agent 工程实践">
+<meta property="og:url" content="https://kesuoer-ui.github.io/2025/09/15/ai/LangChain-LangGraph-Agent-Practice/index.html">
+<meta property="og:site_name" content="thchen的闲言碎语堆积处">
+<meta property="og:description" content="LangChain、LangGraph 与 AI Agent 工程实践这篇不是“框架介绍”，更偏向一次工程实现过程的整理。 核心问题其实很简单：  当 LLM 从“聊天工具”变成“执行单元”之后，系统怎么设计才能不崩？   1. Agent 真正开始变复杂的临界点最早的模型使用方式非常直接： idLLM → 输出   后来变成：  &#96;&#96;&#96;text id&#x3D;&amp;quot">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kesuoer-ui.github.io/img/avatar.png">
+<meta property="article:published_time" content="2025-09-15T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-11T13:28:55.280Z">
+<meta property="article:author" content="thchen">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Harness">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="LangChain">
+<meta property="article:tag" content="LangGraph">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kesuoer-ui.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "LangChain、LangGraph 与 AI Agent 工程实践",
+  "url": "https://kesuoer-ui.github.io/2025/09/15/ai/LangChain-LangGraph-Agent-Practice/",
+  "image": "https://kesuoer-ui.github.io/img/avatar.png",
+  "datePublished": "2025-09-15T16:00:00.000Z",
+  "dateModified": "2026-05-11T13:28:55.280Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "thchen",
+      "url": "https://kesuoer-ui.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://kesuoer-ui.github.io/2025/09/15/ai/LangChain-LangGraph-Agent-Practice/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'LangChain、LangGraph 与 AI Agent 工程实践',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 8.1.2"><link rel="alternate" href="/atom.xml" title="thchen的闲言碎语堆积处" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">thchen的闲言碎语堆积处</span></a><a class="nav-page-title" href="/"><span class="site-name">LangChain、LangGraph 与 AI Agent 工程实践</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">LangChain、LangGraph 与 AI Agent 工程实践</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-09-15T16:00:00.000Z" title="发表于 2025-09-16 00:00:00">2025-09-16</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-11T13:28:55.280Z" title="更新于 2026-05-11 21:28:55">2026-05-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/ai/">AI</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="LangChain、LangGraph-与-AI-Agent-工程实践"><a href="#LangChain、LangGraph-与-AI-Agent-工程实践" class="headerlink" title="LangChain、LangGraph 与 AI Agent 工程实践"></a>LangChain、LangGraph 与 AI Agent 工程实践</h1><p>这篇不是“框架介绍”，更偏向一次工程实现过程的整理。</p>
+<p>核心问题其实很简单：</p>
+<blockquote>
+<p>当 LLM 从“聊天工具”变成“执行单元”之后，系统怎么设计才能不崩？</p>
+</blockquote>
+<hr>
+<h1 id="1-Agent-真正开始变复杂的临界点"><a href="#1-Agent-真正开始变复杂的临界点" class="headerlink" title="1. Agent 真正开始变复杂的临界点"></a>1. Agent 真正开始变复杂的临界点</h1><p>最早的模型使用方式非常直接：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">LLM → 输出<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<pre class="line-numbers language-none"><code class="language-none">
+后来变成：
+
+&#96;&#96;&#96;text id&#x3D;&quot;h0q1a2&quot;
+LLM → Tool → 输出
+&#96;&#96;&#96;
+
+再往后：
+
+&#96;&#96;&#96;text id&#x3D;&quot;h0q1a3&quot;
+LLM → Tool → 多轮 → 状态 → 再执行
+&#96;&#96;&#96;
+
+问题开始出现：
+
+- 多轮后状态不可控
+- Tool 调用顺序漂移
+- 上下文污染
+- 输出不可复现
+- 错误无法恢复
+
+本质问题不是模型，而是：
+
+&gt; 没有执行控制系统（Execution Control Plane）。
+
+---
+
+# 2. 为什么 LangChain 最早能火起来
+
+LangChain 本质做了一件事：
+
+&gt; 把“LLM调用链”变成工程结构。
+
+它提供的不是能力，而是：
+
+- Prompt 组织方式
+- Tool 抽象
+- Memory 模块
+- Chain 执行结构
+- RAG 流程封装
+
+但早期问题也很明显：
+
+- 抽象过多
+- API 变化频繁
+- 状态不可控
+- 调试困难
+
+工程上有一个典型问题：
+
+&gt; 你很难知道 Agent “为什么做错了”。
+
+---
+
+# 3. Agent 系统真正的分界线：有没有 Harness
+
+后来逐渐意识到一个关键概念：
+
+&gt; Agent 是否工程化，本质看有没有 Harness（执行框架）。
+
+这里的 Harness 可以理解为：
+
+&#96;&#96;&#96;text id&#x3D;&quot;h0q1a4&quot;
+LLM不是系统核心
+而是被控制执行的“计算单元”
+&#96;&#96;&#96;
+
+一个完整 Harness 通常包含：
+
+- Execution Loop（执行循环）
+- State Manager（状态管理）
+- Tool Router（工具调度）
+- Policy Layer（执行约束）
+- Memory Layer（状态持久化）
+- Observability（可观测性）
+
+没有 Harness 的 Agent：
+
+&gt; 本质就是“随机调用 LLM 的脚本”。
+
+---
+
+# 4. 从 Chat Agent 到 Workflow Agent
+
+早期模式：
+
+&#96;&#96;&#96;text id&#x3D;&quot;h0q1a5&quot;
+User → LLM → Answer
+&#96;&#96;&#96;
+
+Agent 模式：
+
+&#96;&#96;&#96;text id&#x3D;&quot;h0q1a6&quot;
+User
+→ Planner
+→ Tool Execution
+→ Memory Update
+→ Response
+&#96;&#96;&#96;
+
+Workflow 引入之后，系统变化是：
+
+- 不再追求自由生成
+- 转向流程约束执行
+- 每一步都有状态输入输出
+
+---
+
+# 5. LangGraph 的本质：从链式执行到状态机
+
+LangChain 的核心问题：
+
+&gt; Chain 是线性的，复杂任务无法表达分支状态。
+
+LangGraph 引入的是：
+
+&gt; 有状态的执行图（Stateful Graph）
+
+本质结构：
+
+&#96;&#96;&#96;text id&#x3D;&quot;h0q1a7&quot;
+Node → Node → Node
+  ↘       ↙
+     State
+&#96;&#96;&#96;
+
+关键变化：
+
+- 支持分支
+- 支持回环
+- 支持条件跳转
+- 支持状态共享
+
+---
+
+# 6. 为什么 Graph 比 Chain 更接近工程系统
+
+现实 Agent 任务通常不是线性的：
+
+例如：
+
+- 识别意图
+- 判断是否需要工具
+- 调用多个工具
+- 汇总结果
+- 失败重试
+- fallback路径
+
+Chain 的问题：
+
+&#96;&#96;&#96;text id&#x3D;&quot;h0q1a8&quot;
+一条路走到底
+&#96;&#96;&#96;
+
+Graph 的优势：
+
+&#96;&#96;&#96;text id&#x3D;&quot;h0q1a9&quot;
+允许系统“走错路再修正”
+&#96;&#96;&#96;
+
+---
+
+# 7. Tool Calling 的工程问题本质
+
+Tool Calling 表面是：
+
+&#96;&#96;&#96;text id&#x3D;&quot;h0q1b1&quot;
+LLM调用函数
+&#96;&#96;&#96;
+
+但工程问题是：
+
+- 参数合法性
+- schema一致性
+- tool失败恢复
+- 并发调用冲突
+- tool结果可信度
+
+典型失败场景：
+
+- JSON格式错误
+- 参数幻觉
+- 无限循环调用
+- tool结果污染上下文
+
+---
+
+# 8. 为什么 Tool 需要 Policy Layer（控制层）
+
+如果没有 policy：
+
+&#96;&#96;&#96;text id&#x3D;&quot;h0q1b2&quot;
+LLM → 随便调工具
+&#96;&#96;&#96;
+
+有 policy：
+
+&#96;&#96;&#96;text id&#x3D;&quot;h0q1b3&quot;
+LLM → Tool Router → 权限判断 → 执行
+&#96;&#96;&#96;
+
+Policy 做的事情：
+
+- 限制工具使用范围
+- 控制调用频率
+- 校验参数合法性
+- 防止危险操作
+- 控制成本（token &#x2F; api）
+
+---
+
+# 9. Memory 的本质：不是“记忆”，而是状态压缩
+
+常见误区：
+
+&#96;&#96;&#96;text id&#x3D;&quot;h0q1b4&quot;
+Memory &#x3D; 聊天记录
+&#96;&#96;&#96;
+
+实际工程中：
+
+Memory 是：
+
+&gt; 状态压缩 + 检索系统
+
+通常包括：
+
+- Summary Memory（摘要）
+- Vector Memory（语义检索）
+- Structured State（结构化状态）
+
+核心目标：
+
+&gt; 控制 token 增长，而不是无限堆历史。
+
+---
+
+# 10. Context Engineering（比 Prompt 更重要）
+
+系统运行久之后真正的问题是：
+
+- context越来越大
+- 噪声越来越多
+- 决策越来越不稳定
+
+因此核心变成：
+
+&gt; 如何组织上下文，而不是如何写 prompt
+
+包括：
+
+- 信息裁剪
+- 状态摘要
+- 任务相关性过滤
+- 历史分层
+
+---
+
+# 11. MCP 的意义：Tool 标准化协议
+
+当 Tool 数量上升之后，会遇到问题：
+
+- tool接口不统一
+- 调用方式混乱
+- 权限体系缺失
+
+MCP 的作用本质是：
+
+&gt; 统一 Agent 与工具系统的通信协议
+
+类似：
+
+- HTTP 解决 Web 通信
+- MCP 解决 AI Tool 通信
+
+---
+
+# 12. FastAPI + Agent 的工程结构演化
+
+早期结构：
+
+&#96;&#96;&#96;text id&#x3D;&quot;h0q1b5&quot;
+FastAPI → LLM
+&#96;&#96;&#96;
+
+后期结构：
+
+&#96;&#96;&#96;text id&#x3D;&quot;h0q1b6&quot;
+FastAPI
+→ Agent Harness
+   → Workflow Engine
+      → Tool Layer
+      → Memory Layer
+      → LLM Layer
+&#96;&#96;&#96;
+
+---
+
+# 13. 最大的工程认知变化：Agent不是模型问题
+
+总结下来变化是：
+
+| 阶段 | 认知         |
+| ---- | ------------ |
+| 早期 | LLM能力问题  |
+| 中期 | Prompt问题   |
+| 后期 | 系统工程问题 |
+
+最终结论：
+
+&gt; Agent 的上限不是模型，而是系统设计。
+
+---
+
+# 14. 一个更现实的理解
+
+当前 Agent 系统更像：
+
+- 一个执行引擎
+- 一个状态机
+- 一个带工具权限的运行时
+
+而不是：
+
+- 一个聊天机器人
+
+---
+
+# 总结
+
+LangChain &#x2F; LangGraph &#x2F; MCP &#x2F; Tool Calling 这些组件单独看是框架。
+
+但组合起来后本质是：
+
+&gt; 一个“自然语言驱动的执行系统雏形”。
+
+而 Harness（执行控制层）才是决定系统能否进入工程阶段的关键。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io">thchen</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io/2025/09/15/ai/LangChain-LangGraph-Agent-Practice/">https://kesuoer-ui.github.io/2025/09/15/ai/LangChain-LangGraph-Agent-Practice/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://kesuoer-ui.github.io" target="_blank">thchen的闲言碎语堆积处</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Harness/">Harness</a><a class="post-meta__tags" href="/tags/AI-Agent/">AI Agent</a><a class="post-meta__tags" href="/tags/LLM/">LLM</a><a class="post-meta__tags" href="/tags/LangChain/">LangChain</a><a class="post-meta__tags" href="/tags/LangGraph/">LangGraph</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/11/19/ai/MCP-Tools-And-Prompt-Engineering-Trends/" title="MCP、Tools 与 Prompt Engineering 的工程化趋势"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">MCP、Tools 与 Prompt Engineering 的工程化趋势</div></div><div class="info-2"><div class="info-item-1">MCP、Tools 与 Prompt Engineering 的工程化趋势AI 发展到后面。 我越来越感觉： 很多人其实低估了：  “工程化” 这件事的重要性。  因为早期 AI 圈子。 太容易沉迷于： id模型又变强了 参数又变大了 Benchmark又提升了  但真正开始做 Agent 后。 会越来越意识到：  模型能力只是下限。  真正决定系统能不能落地的。 是：  Workflow Tool Context Memory 状态管理 Prompt Engineering 系统稳定性  这些工程问题。  为什么 AI Agent 后期越来越像“软件工程”因为： 大模型本质上已经开始：  “接管软件交互层”。   以前的软件模式传统软件： id按钮 菜单 输入框 接口  用户必须：  学会软件规则。   现在开始反过来了AI 模式： id自然语言 -> AI理解 -> Tool执行  变成：  软件开始理解人。   这其实是巨大的范式变化因为： 过去几十年。 人类一直在： id适应机器  而 AI 时代开始： id机器适应人   为什么 Prompt Engineering 会...</div></div></div></a><a class="pagination-related" href="/2025/05/20/ai/From-ChatGPT-To-AI-Agent/" title="从 ChatGPT 到 AI Agent：我的大模型认知变化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">从 ChatGPT 到 AI Agent：我的大模型认知变化</div></div><div class="info-2"><div class="info-item-1">从 ChatGPT 到 AI Agent：我的大模型认知变化前言如果把互联网的发展理解为“信息获取效率”的不断提升，那么大模型（LLM）带来的变化，本质上是在把“人类自然语言”直接变成新的操作系统。 搜索引擎时代，人需要适应机器。 AI 大模型时代，机器开始适应人。 而我对这件事的认知变化，大概横跨了这几年整个 AI 行业的发展过程。  一、最开始：把 ChatGPT 当“会聊天的搜索引擎”大概在 2020～2021 年前后，OpenAI 的 GPT 系列开始逐渐出圈。 那时候国内其实已经有不少技术圈的人在讨论 GPT-3 了，但普通人真正开始接触，还是在 ChatGPT 爆火之后。 最初体验其实很魔幻。 因为第一次发现：  机器真的能理解长串自然语言 不需要关键词搜索 不需要研究搜索语法 可以像真人一样对话 还能理解上下文  这和传统搜索引擎完全不是一个时代的东西。 以前搜索： python aiohttp websocket reconnect  后来变成： 我有一个 websocket 长连接，aiohttp 下断线后怎么自动重连？  体验差距是跨时代的。  当时最大的几个...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/03/31/ai/Claude-Code-Agent-Architecture-Insights/" title="Claude Code 泄露源码带给我的 Agent 启发"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-04-01</div><div class="info-item-2">Claude Code 泄露源码带给我的 Agent 启发</div></div><div class="info-2"><div class="info-item-1">Claude Code 泄露源码带来的真实启发这件事最有价值的地方，其实不是“AI 又进步了”。 而是第一次能从工业级实现里看到：  Agent 不是一个模型封装，而是一个完整的软件系统。  在这之前，大部分 Agent 项目都停留在“组合 Demo”的阶段：  LLM + Prompt LLM + Tool LLM + Memory  能跑，但不稳定，也谈不上工程体系。 Claude Code 的源码让我第一次看到另一种东西：  它不是在做 Agent，而是在做一个“受控执行系统”。   1. 早期 Agent 的问题其实很一致我之前做过不少 Agent demo，本质结构都类似： 用户输入 → LLM → Tool → 输出  或者稍微复杂一点： LLM → 判断是否调用工具 → Tool → LLM总结  问题很快就会暴露： （1）没有任务结构模型直接开始做事，没有拆解过程。 结果就是：  一步错全盘错 多步骤任务极不稳定   （2）上下文越来越脏所有历史都往 prompt 里堆：  token 爆炸 早期信息污染后续决策 模型越来越“迷”   （3）工具调用不可控典型问题...</div></div></div></a><a class="pagination-related" href="/2025/05/20/ai/From-ChatGPT-To-AI-Agent/" title="从 ChatGPT 到 AI Agent：我的大模型认知变化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-21</div><div class="info-item-2">从 ChatGPT 到 AI Agent：我的大模型认知变化</div></div><div class="info-2"><div class="info-item-1">从 ChatGPT 到 AI Agent：我的大模型认知变化前言如果把互联网的发展理解为“信息获取效率”的不断提升，那么大模型（LLM）带来的变化，本质上是在把“人类自然语言”直接变成新的操作系统。 搜索引擎时代，人需要适应机器。 AI 大模型时代，机器开始适应人。 而我对这件事的认知变化，大概横跨了这几年整个 AI 行业的发展过程。  一、最开始：把 ChatGPT 当“会聊天的搜索引擎”大概在 2020～2021 年前后，OpenAI 的 GPT 系列开始逐渐出圈。 那时候国内其实已经有不少技术圈的人在讨论 GPT-3 了，但普通人真正开始接触，还是在 ChatGPT 爆火之后。 最初体验其实很魔幻。 因为第一次发现：  机器真的能理解长串自然语言 不需要关键词搜索 不需要研究搜索语法 可以像真人一样对话 还能理解上下文  这和传统搜索引擎完全不是一个时代的东西。 以前搜索： python aiohttp websocket reconnect  后来变成： 我有一个 websocket 长连接，aiohttp 下断线后怎么自动重连？  体验差距是跨时代的。  当时最大的几个...</div></div></div></a><a class="pagination-related" href="/2025/11/19/ai/MCP-Tools-And-Prompt-Engineering-Trends/" title="MCP、Tools 与 Prompt Engineering 的工程化趋势"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-20</div><div class="info-item-2">MCP、Tools 与 Prompt Engineering 的工程化趋势</div></div><div class="info-2"><div class="info-item-1">MCP、Tools 与 Prompt Engineering 的工程化趋势AI 发展到后面。 我越来越感觉： 很多人其实低估了：  “工程化” 这件事的重要性。  因为早期 AI 圈子。 太容易沉迷于： id模型又变强了 参数又变大了 Benchmark又提升了  但真正开始做 Agent 后。 会越来越意识到：  模型能力只是下限。  真正决定系统能不能落地的。 是：  Workflow Tool Context Memory 状态管理 Prompt Engineering 系统稳定性  这些工程问题。  为什么 AI Agent 后期越来越像“软件工程”因为： 大模型本质上已经开始：  “接管软件交互层”。   以前的软件模式传统软件： id按钮 菜单 输入框 接口  用户必须：  学会软件规则。   现在开始反过来了AI 模式： id自然语言 -> AI理解 -> Tool执行  变成：  软件开始理解人。   这其实是巨大的范式变化因为： 过去几十年。 人类一直在： id适应机器  而 AI 时代开始： id机器适应人   为什么 Prompt Engineering 会...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">thchen</div><div class="author-info-description">全栈开发 / AI Agent / 系统设计</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/kesuoer-ui" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#LangChain%E3%80%81LangGraph-%E4%B8%8E-AI-Agent-%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5"><span class="toc-number">1.</span> <span class="toc-text">LangChain、LangGraph 与 AI Agent 工程实践</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-Agent-%E7%9C%9F%E6%AD%A3%E5%BC%80%E5%A7%8B%E5%8F%98%E5%A4%8D%E6%9D%82%E7%9A%84%E4%B8%B4%E7%95%8C%E7%82%B9"><span class="toc-number">2.</span> <span class="toc-text">1. Agent 真正开始变复杂的临界点</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/19/life/two-failed-attempts-at-postgraduate-exam/" title="我的考研复习与调剂经历">我的考研复习与调剂经历</a><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/31/ai/Claude-Code-Agent-Architecture-Insights/" title="Claude Code 泄露源码带给我的 Agent 启发">Claude Code 泄露源码带给我的 Agent 启发</a><time datetime="2026-03-31T16:00:00.000Z" title="发表于 2026-04-01 00:00:00">2026-04-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/09/ops/Serverless-Practice/" title="记一次 Serverless 的认识与实践">记一次 Serverless 的认识与实践</a><time datetime="2026-03-09T16:00:00.000Z" title="发表于 2026-03-10 00:00:00">2026-03-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/11/19/ai/MCP-Tools-And-Prompt-Engineering-Trends/" title="MCP、Tools 与 Prompt Engineering 的工程化趋势">MCP、Tools 与 Prompt Engineering 的工程化趋势</a><time datetime="2025-11-19T16:00:00.000Z" title="发表于 2025-11-20 00:00:00">2025-11-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/15/ai/LangChain-LangGraph-Agent-Practice/" title="LangChain、LangGraph 与 AI Agent 工程实践">LangChain、LangGraph 与 AI Agent 工程实践</a><time datetime="2025-09-15T16:00:00.000Z" title="发表于 2025-09-16 00:00:00">2025-09-16</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By thchen</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'kesuoer-ui/kesuoer-ui.github.io',
+      'data-repo-id': 'R_kgDOSXiEqw',
+      'data-category-id': 'DIC_kwDOSXiEq84C8oeA',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>

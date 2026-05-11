@@ -1,0 +1,833 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Twitter 爬虫系统的第二次进化：从 Selenium 到 Playwright + API 并发架构 | thchen的闲言碎语堆积处</title><meta name="author" content="thchen"><meta name="copyright" content="thchen"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Twitter 爬虫系统的第二次进化距离上一次写 Twitter &#x2F; Pixiv 爬虫实践，大概过去了 7 个月。 这段时间里，我对“爬虫”这件事的理解发生了一个比较明显的变化： 爬虫 ≠ 模拟浏览器 爬虫 &#x3D; 数据入口工程化调度系统   这次目标其实更“现实”上一版还停留在：  Selenium 翻页 XPath 抓 HTML 人工 scroll + sleep  而这一版的目标变成：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Twitter 爬虫系统的第二次进化：从 Selenium 到 Playwright + API 并发架构">
+<meta property="og:url" content="https://kesuoer-ui.github.io/2021/07/09/project/Twitter-And-Pixiv-Crawler-Practice-2/index.html">
+<meta property="og:site_name" content="thchen的闲言碎语堆积处">
+<meta property="og:description" content="Twitter 爬虫系统的第二次进化距离上一次写 Twitter &#x2F; Pixiv 爬虫实践，大概过去了 7 个月。 这段时间里，我对“爬虫”这件事的理解发生了一个比较明显的变化： 爬虫 ≠ 模拟浏览器 爬虫 &#x3D; 数据入口工程化调度系统   这次目标其实更“现实”上一版还停留在：  Selenium 翻页 XPath 抓 HTML 人工 scroll + sleep  而这一版的目标变成：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kesuoer-ui.github.io/img/avatar.png">
+<meta property="article:published_time" content="2021-07-09T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-11T13:28:55.284Z">
+<meta property="article:author" content="thchen">
+<meta property="article:tag" content="AsyncIO">
+<meta property="article:tag" content="Playwright">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Twitter API">
+<meta property="article:tag" content="工程化">
+<meta property="article:tag" content="爬虫">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kesuoer-ui.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Twitter 爬虫系统的第二次进化：从 Selenium 到 Playwright + API 并发架构",
+  "url": "https://kesuoer-ui.github.io/2021/07/09/project/Twitter-And-Pixiv-Crawler-Practice-2/",
+  "image": "https://kesuoer-ui.github.io/img/avatar.png",
+  "datePublished": "2021-07-09T16:00:00.000Z",
+  "dateModified": "2026-05-11T13:28:55.284Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "thchen",
+      "url": "https://kesuoer-ui.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://kesuoer-ui.github.io/2021/07/09/project/Twitter-And-Pixiv-Crawler-Practice-2/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Twitter 爬虫系统的第二次进化：从 Selenium 到 Playwright + API 并发架构',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 8.1.2"><link rel="alternate" href="/atom.xml" title="thchen的闲言碎语堆积处" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">thchen的闲言碎语堆积处</span></a><a class="nav-page-title" href="/"><span class="site-name">Twitter 爬虫系统的第二次进化：从 Selenium 到 Playwright + API 并发架构</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Twitter 爬虫系统的第二次进化：从 Selenium 到 Playwright + API 并发架构</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-07-09T16:00:00.000Z" title="发表于 2021-07-10 00:00:00">2021-07-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-11T13:28:55.284Z" title="更新于 2026-05-11 21:28:55">2026-05-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E9%A1%B9%E7%9B%AE%E5%AE%9E%E8%B7%B5/">项目实践</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Twitter-爬虫系统的第二次进化"><a href="#Twitter-爬虫系统的第二次进化" class="headerlink" title="Twitter 爬虫系统的第二次进化"></a>Twitter 爬虫系统的第二次进化</h1><p>距离上一次写 Twitter &#x2F; Pixiv 爬虫实践，大概过去了 7 个月。</p>
+<p>这段时间里，我对“爬虫”这件事的理解发生了一个比较明显的变化：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">爬虫 ≠ 模拟浏览器
+爬虫 = 数据入口工程化调度系统<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="这次目标其实更“现实”"><a href="#这次目标其实更“现实”" class="headerlink" title="这次目标其实更“现实”"></a>这次目标其实更“现实”</h1><p>上一版还停留在：</p>
+<ul>
+<li>Selenium 翻页</li>
+<li>XPath 抓 HTML</li>
+<li>人工 scroll + sleep</li>
+</ul>
+<p>而这一版的目标变成：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">尽可能稳定地批量处理 Twitter 推文数据<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>核心需求只有三个：</p>
+<ul>
+<li>稳定拿到 tweet 结构化数据</li>
+<li>高并发处理 URL 队列</li>
+<li>避免浏览器阻塞成为瓶颈</li>
+</ul>
+<hr>
+<h1 id="技术栈的变化"><a href="#技术栈的变化" class="headerlink" title="技术栈的变化"></a>技术栈的变化</h1><p>这一版明显分裂成两个层：</p>
+<h2 id="1-数据层（API-优先）"><a href="#1-数据层（API-优先）" class="headerlink" title="1. 数据层（API 优先）"></a>1. 数据层（API 优先）</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">Twitter GraphQL API / v2 API<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>直接绕开 HTML。</p>
+<hr>
+<h2 id="2-展示层（Playwright）"><a href="#2-展示层（Playwright）" class="headerlink" title="2. 展示层（Playwright）"></a>2. 展示层（Playwright）</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">Playwright（替代 Selenium）<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>只在必要场景下使用浏览器：</p>
+<ul>
+<li>登录态继承</li>
+<li>cookie 获取</li>
+<li>页面验证辅助</li>
+</ul>
+<hr>
+<h1 id="一个关键转折：不再“解析网页”"><a href="#一个关键转折：不再“解析网页”" class="headerlink" title="一个关键转折：不再“解析网页”"></a>一个关键转折：不再“解析网页”</h1><p>上一版核心是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">XPath + DOM结构<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>这一版核心变成：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">GraphQL <span class="token operator">+</span> JSON<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>例如：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">https<span class="token punctuation">:</span><span class="token operator">//</span>twitter<span class="token punctuation">.</span>com<span class="token operator">/</span>i<span class="token operator">/</span>api<span class="token operator">/</span>graphql<span class="token operator">/</span>D_jNhjWZeRZT5NURzfJZSQ<span class="token operator">/</span>TweetResultByRestId<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="认知变化1：Twitter-本质是-GraphQL-API-系统"><a href="#认知变化1：Twitter-本质是-GraphQL-API-系统" class="headerlink" title="认知变化1：Twitter 本质是 GraphQL API 系统"></a>认知变化1：Twitter 本质是 GraphQL API 系统</h1><p>HTML 只是壳。</p>
+<p>真正数据来源：</p>
+<ul>
+<li>tweetResult</li>
+<li>legacy object</li>
+<li>user_results</li>
+</ul>
+<hr>
+<h1 id="认知变化2：数据结构比页面结构稳定得多"><a href="#认知变化2：数据结构比页面结构稳定得多" class="headerlink" title="认知变化2：数据结构比页面结构稳定得多"></a>认知变化2：数据结构比页面结构稳定得多</h1><p>之前的问题是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">DOM 改一下 -> 爬虫崩<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>现在变成：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">API字段变化 -> 才会影响逻辑<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>稳定性直接提升一个数量级。</p>
+<hr>
+<h1 id="系统结构开始“工程化”"><a href="#系统结构开始“工程化”" class="headerlink" title="系统结构开始“工程化”"></a>系统结构开始“工程化”</h1><p>这一版开始有明显系统拆分：</p>
+<h2 id="1-爬取层"><a href="#1-爬取层" class="headerlink" title="1. 爬取层"></a>1. 爬取层</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python">get_tweet_info<span class="token punctuation">(</span><span class="token punctuation">)</span>
+get_tweets_info<span class="token punctuation">(</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>支持：</p>
+<ul>
+<li>单条</li>
+<li>批量 asyncio 并发</li>
+</ul>
+<hr>
+<h2 id="2-解析层"><a href="#2-解析层" class="headerlink" title="2. 解析层"></a>2. 解析层</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python">legacy <span class="token operator">-</span><span class="token operator">></span> user <span class="token operator">-</span><span class="token operator">></span> media <span class="token operator">-</span><span class="token operator">></span> entities<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>统一结构化输出：</p>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token punctuation">&#123;</span>
+  <span class="token property">"tweet_id"</span><span class="token operator">:</span> <span class="token string">""</span><span class="token punctuation">,</span>
+  <span class="token property">"user_id"</span><span class="token operator">:</span> <span class="token string">""</span><span class="token punctuation">,</span>
+  <span class="token property">"media"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"favorite_count"</span><span class="token operator">:</span> <span class="token number">0</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h2 id="3-存储层"><a href="#3-存储层" class="headerlink" title="3. 存储层"></a>3. 存储层</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python">twitter<span class="token operator">-</span>log<span class="token operator">-</span>YYYY_MM_DD<span class="token punctuation">.</span>json<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>实现：</p>
+<ul>
+<li>增量写入</li>
+<li>去重 tweet_id</li>
+<li>历史恢复</li>
+</ul>
+<hr>
+<h1 id="并发体系：第一次真正引入-AsyncIO"><a href="#并发体系：第一次真正引入-AsyncIO" class="headerlink" title="并发体系：第一次真正引入 AsyncIO"></a>并发体系：第一次真正引入 AsyncIO</h1><p>这一版最重要变化其实不是 Playwright，而是：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">asyncio <span class="token operator">+</span> httpx<span class="token punctuation">.</span>AsyncClient<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h2 id="API-批处理："><a href="#API-批处理：" class="headerlink" title="API 批处理："></a>API 批处理：</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python">asyncio<span class="token punctuation">.</span>gather<span class="token punctuation">(</span><span class="token operator">*</span>queries<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>核心意义：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">从“一个一个抓”
+变成“批量调度”<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="GraphQL-请求构造"><a href="#GraphQL-请求构造" class="headerlink" title="GraphQL 请求构造"></a>GraphQL 请求构造</h1><p>这一部分已经比较“底层工程化”了：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">params <span class="token operator">=</span> <span class="token punctuation">&#123;</span>
+    <span class="token string">"variables"</span><span class="token punctuation">:</span> orjson<span class="token punctuation">.</span>dumps<span class="token punctuation">(</span><span class="token punctuation">&#123;</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">.</span>decode<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token string">"features"</span><span class="token punctuation">:</span> self<span class="token punctuation">.</span>default_features
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>特点：</p>
+<ul>
+<li>手动拼 variables</li>
+<li>feature flags 控制行为</li>
+<li>请求结构完全固定化</li>
+</ul>
+<hr>
+<h1 id="一个关键优化：减少-Playwright-依赖"><a href="#一个关键优化：减少-Playwright-依赖" class="headerlink" title="一个关键优化：减少 Playwright 依赖"></a>一个关键优化：减少 Playwright 依赖</h1><p>这一版 Playwright 已经不再做“爬虫核心”，而是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">登录态容器 + cookie继承器<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<p>启动方式：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">launch_persistent_context<span class="token punctuation">(</span>
+    user_data_dir<span class="token operator">=</span>ChromeProfile<span class="token punctuation">,</span>
+    headless<span class="token operator">=</span><span class="token boolean">True</span>
+<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="认知变化3：浏览器只是“身份工具”"><a href="#认知变化3：浏览器只是“身份工具”" class="headerlink" title="认知变化3：浏览器只是“身份工具”"></a>认知变化3：浏览器只是“身份工具”</h1><p>上一版：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">浏览器 = 爬虫核心<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>这一版：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">浏览器 = 登录态来源<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="媒体处理逻辑变得更工程化"><a href="#媒体处理逻辑变得更工程化" class="headerlink" title="媒体处理逻辑变得更工程化"></a>媒体处理逻辑变得更工程化</h1><p>这一版对 media 做了分类：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">photo <span class="token operator">/</span> video <span class="token operator">/</span> animated_gif<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>并且做了：</p>
+<ul>
+<li>bitrate 选最高视频源</li>
+<li>url 补全逻辑</li>
+<li>去重 id_str</li>
+</ul>
+<hr>
+<h1 id="一个关键点：Twitter-图片“原图恢复”"><a href="#一个关键点：Twitter-图片“原图恢复”" class="headerlink" title="一个关键点：Twitter 图片“原图恢复”"></a>一个关键点：Twitter 图片“原图恢复”</h1><p>仍然保留了经典逻辑：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">media_url <span class="token operator">+</span> <span class="token string">"?format=xxx&amp;name=4096x4096"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>本质是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">利用 URL 规则恢复原图<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="文件系统策略开始分层"><a href="#文件系统策略开始分层" class="headerlink" title="文件系统策略开始分层"></a>文件系统策略开始分层</h1><p>下载路径结构：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">save_path/
+    ln/
+    mmj/
+    vbs/
+    ws/
+    other/<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<p>来源：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">authors_sorted_dict<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="认知变化4：数据分类前置比后处理更重要"><a href="#认知变化4：数据分类前置比后处理更重要" class="headerlink" title="认知变化4：数据分类前置比后处理更重要"></a>认知变化4：数据分类前置比后处理更重要</h1><p>上一版是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">下载完再整理<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>这一版是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">下载前就决定归类路径<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="点赞系统（GraphQL-mutation）"><a href="#点赞系统（GraphQL-mutation）" class="headerlink" title="点赞系统（GraphQL mutation）"></a>点赞系统（GraphQL mutation）</h1><p>这一版甚至开始做“行为模拟”：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">FavoriteTweet mutation<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>本质：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">写接口调用，而不是模拟点击<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="失败处理机制更像“任务系统”"><a href="#失败处理机制更像“任务系统”" class="headerlink" title="失败处理机制更像“任务系统”"></a>失败处理机制更像“任务系统”</h1><p>新增：</p>
+<ul>
+<li>重试机制（try_time &lt; 3）</li>
+<li>Rate limit sleep 5 min</li>
+<li>httpx 异常分类</li>
+<li>failed_tweets 记录</li>
+</ul>
+<hr>
+<h1 id="一个很关键的升级：系统自愈能力"><a href="#一个很关键的升级：系统自愈能力" class="headerlink" title="一个很关键的升级：系统自愈能力"></a>一个很关键的升级：系统自愈能力</h1><p>这一版已经具备：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">失败 -> 记录 -> 延迟 -> 重试<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>而不是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">失败 -> 直接崩<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="并发下载第二模块（async-Playwright）"><a href="#并发下载第二模块（async-Playwright）" class="headerlink" title="并发下载第二模块（async Playwright）"></a>并发下载第二模块（async Playwright）</h1><p>后半段代码明显是另一个实验：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">多页面并发读取 tweet likes<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>结构：</p>
+<ul>
+<li>start_process</li>
+<li>get_likes</li>
+<li>download(page)</li>
+</ul>
+<hr>
+<p>核心能力：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">批量打开页面 -> 提取点赞数 -> 重命名文件<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="一个很重要的设计：global-lock"><a href="#一个很重要的设计：global-lock" class="headerlink" title="一个很重要的设计：global_lock"></a>一个很重要的设计：global_lock</h1><p>说明当时已经在解决：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">并发冲突 + 状态同步问题<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="这一阶段的核心问题其实是："><a href="#这一阶段的核心问题其实是：" class="headerlink" title="这一阶段的核心问题其实是："></a>这一阶段的核心问题其实是：</h1><h2 id="1-并发资源管理"><a href="#1-并发资源管理" class="headerlink" title="1. 并发资源管理"></a>1. 并发资源管理</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">多个 page / context / browser 生命周期<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h2 id="2-任务同步"><a href="#2-任务同步" class="headerlink" title="2. 任务同步"></a>2. 任务同步</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">global_id + global_lock<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h2 id="3-文件系统竞争"><a href="#3-文件系统竞争" class="headerlink" title="3. 文件系统竞争"></a>3. 文件系统竞争</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">rename + exists check<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="认知变化5：爬虫开始接近“分布式任务模型”"><a href="#认知变化5：爬虫开始接近“分布式任务模型”" class="headerlink" title="认知变化5：爬虫开始接近“分布式任务模型”"></a>认知变化5：爬虫开始接近“分布式任务模型”</h1><p>虽然还是单机，但已经具备：</p>
+<ul>
+<li>worker 思想</li>
+<li>queue 思想</li>
+<li>batch slicing</li>
+</ul>
+<hr>
+<h1 id="一个很明显的趋势"><a href="#一个很明显的趋势" class="headerlink" title="一个很明显的趋势"></a>一个很明显的趋势</h1><p>对比上一版：</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>技术</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>v1</td>
+<td>Selenium + XPath</td>
+</tr>
+<tr>
+<td>v2</td>
+<td>API + AsyncIO + Playwright</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="本质变化总结"><a href="#本质变化总结" class="headerlink" title="本质变化总结"></a>本质变化总结</h1><p>这一版最大的变化不是代码，而是思维：</p>
+<h2 id="从："><a href="#从：" class="headerlink" title="从："></a>从：</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">“我要模拟网页行为”<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<h2 id="到："><a href="#到：" class="headerlink" title="到："></a>到：</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">“我要消费接口数据流”<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="最后一个现实结论"><a href="#最后一个现实结论" class="headerlink" title="最后一个现实结论"></a>最后一个现实结论</h1><p>这一阶段其实已经可以看出来：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">浏览器爬虫只是过渡形态<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>真正稳定系统依赖：</p>
+<ul>
+<li>API 逆向</li>
+<li>请求结构分析</li>
+<li>并发调度</li>
+<li>数据结构设计</li>
+</ul>
+<hr>
+<h1 id="后记（当时的状态）"><a href="#后记（当时的状态）" class="headerlink" title="后记（当时的状态）"></a>后记（当时的状态）</h1><p>这一版写完之后，有一个很明显的感觉：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">爬虫不再是“写脚本”
+而是在搭一个小型数据系统<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io">thchen</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io/2021/07/09/project/Twitter-And-Pixiv-Crawler-Practice-2/">https://kesuoer-ui.github.io/2021/07/09/project/Twitter-And-Pixiv-Crawler-Practice-2/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://kesuoer-ui.github.io" target="_blank">thchen的闲言碎语堆积处</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%88%AC%E8%99%AB/">爬虫</a><a class="post-meta__tags" href="/tags/Python/">Python</a><a class="post-meta__tags" href="/tags/Playwright/">Playwright</a><a class="post-meta__tags" href="/tags/AsyncIO/">AsyncIO</a><a class="post-meta__tags" href="/tags/Twitter-API/">Twitter API</a><a class="post-meta__tags" href="/tags/%E5%B7%A5%E7%A8%8B%E5%8C%96/">工程化</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2021/08/16/backend/Python-Environment-Management-Guide/" title="Python 环境管理终于不再混乱"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Python 环境管理终于不再混乱</div></div><div class="info-2"><div class="info-item-1">Python 环境管理终于不再混乱Python 生态有一个很典型的问题：  开发效率极高，但环境极容易混乱。  尤其：  新手 AI 项目 多 Python 版本 多项目并行开发  几乎都会踩环境坑。 最经典的问题包括： 明明已经 pip install 了却 import 不到  项目昨天还能跑今天突然炸了  不同项目依赖版本冲突  CUDA、Torch、Pydantic 版本地狱  而 Python 环境管理，本质上就是解决：  Python 解释器管理 包管理 依赖隔离 版本锁定 系统依赖管理  这些问题。  Python 环境体系到底是什么关系很多新人最容易混乱的地方就是： pip venv poetry conda  到底谁管谁。 实际上：  pip负责： 安装 Python 包  例如： pip install requests   venv负责： 创建独立 Python 虚拟环境  避免不同项目依赖互相污染。  poetry负责： 现代化 Python 项目与依赖管理  包括：  依赖管理 虚拟环境 锁版本 项目配置   conda负责： 更底层的环境管理  不仅管...</div></div></div></a><a class="pagination-related" href="/2021/06/20/tools/Efficiency-Tools-And-Tampermonkey/" title="浏览器插件与油猴脚本：我的效率工具流"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">浏览器插件与油猴脚本：我的效率工具流</div></div><div class="info-2"><div class="info-item-1">浏览器插件与油猴脚本：我的效率工具流后来逐渐有一个比较明确的体感：  人与人之间的效率差距，不只是“能力”，很大一部分来自工具链。  尤其是长期高频使用电脑的人，最后都会形成一套稳定的“数字工作流”：  浏览器使用习惯 快捷键体系 脚本自动化 信息获取路径 常用工具组合  这些东西不会写在简历里，但实际影响非常大。  我最开始对效率工具的理解早期对插件的印象比较简单： 插件 = 花里胡哨的功能  但实际使用一段时间后会变成另一种认知：  很多“重复操作”，本质上都是可以被消除的。  比如：  少点几十次鼠标 少复制粘贴几次文本 少切换几次页面 少做重复筛选  单次看起来不明显，但长期累积差异会被放大。  浏览器在现代环境中的角色变化随着使用场景变化，浏览器逐渐变成核心入口：  信息检索 视频与内容消费 文档编辑 代码托管 AI 工具 各类 Web 应用  于是一个很自然的结论是：  浏览器本身更像“第二个操作系统”。  插件体系的意义，也随之变成：  对整个工作环境的扩展。   插件的本质：改变网页行为早期误解是插件只是“增加功能”。 后来逐渐明确一点：  插件真正的能力，是修改...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2020/12/13/project/Twitter-And-Pixiv-Crawler-Practice/" title="Twitter 与 Pixiv 爬虫实践踩坑记录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-14</div><div class="info-item-2">Twitter 与 Pixiv 爬虫实践踩坑记录</div></div><div class="info-2"><div class="info-item-1">Twitter 与 Pixiv 爬虫实践踩坑记录这是我真正开始深入理解： 现代网站不是“网页” 而是“前端应用”  的一次项目实践。 当时主要目的其实很简单： 自动收集同人图  尤其：  Twitter Pixiv  这种二次元内容站。  最开始的想法其实很幼稚一开始我以为： requests.get()  就结束了。 后来才发现：  根本不是这么回事。   当时 Twitter 还叫 Twitter那时候： 还没改名 X。 而且： API 也没现在这么离谱。 但： 反爬已经很严重了。  第一次真正理解“动态网页”最开始。 我写的： 其实是： Selenium + XPath  传统浏览器爬虫。  当时的核心思路 1. 浏览器打开页面self.bro.get(self.link)   2. 下滑页面window.scrollTo()   3. 获取 HTMLcontent = self.bro.page_source   4. XPath 提取图片tree.xpath('//img/@src')   5. 下载图片urllib.request.urlretrieve()   现在...</div></div></div></a><a class="pagination-related" href="/2022/09/17/backend/Modern-Python-Web-Scraping-And-Automation/" title="从 Scrapy 到 Playwright：现代 Python 爬虫技术整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2022-09-18</div><div class="info-item-2">从 Scrapy 到 Playwright：现代 Python 爬虫技术整理</div></div><div class="info-2"><div class="info-item-1">从 Scrapy 到 Playwright：现代 Python 爬虫技术整理很多人第一次接触 Python。 几乎都会接触： 爬虫  因为： Python 在这个领域生态太强了。 而我自己对爬虫技术的认知变化。 其实也是：  从“请求脚本小子” 到真正理解现代 Web 自动化。   最开始：requests + BeautifulSoup很多人入门爬虫。 基本都从： requests BeautifulSoup  开始。  requests：最经典 HTTP 库安装： pip install requests   最简单请求import requests  resp = requests.get("https://example.com")  print(resp.text)   BeautifulSoup：HTML 解析安装： pip install beautifulsoup4   最简单解析from bs4 import BeautifulSoup  soup = BeautifulSoup(resp.text, "html.parser")  title = soup.t...</div></div></div></a><a class="pagination-related" href="/2021/02/10/network/Web-Anti-Scraping-Mechanisms-Analysis/" title="我研究过的网站反爬机制与破解思路整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2021-02-11</div><div class="info-item-2">我研究过的网站反爬机制与破解思路整理</div></div><div class="info-2"><div class="info-item-1">我研究过的网站反爬机制与破解思路整理很多人刚学 Python 爬虫时。 都会经历一个阶段： requests.get(url)  然后： response.text  就觉得： “原来爬虫这么简单”  但真正开始做：  Twitter Pixiv 电商平台 社交网站 AI平台 视频网站  之后才会意识到：  现代网站对抗的已经不是“脚本”，而是“自动化系统”。  后来逐渐发现： 现代爬虫真正难的地方不是： 怎么发请求  而是： 怎么伪装成“正常人”   现代反爬的核心思路反爬从来不是单点策略，而是分层体系： 请求层 ↓ 账号层 ↓ 行为层 ↓ 浏览器层 ↓ 设备层 ↓ 网络层  任意一层异常都会触发：  403 限流 风控 验证码 登录失效   第一阶段：Header 检测这是最早遇到的一层门槛。 最初写法： import requests  requests.get(url)  结果直接： 403 Forbidden   User-Agent 只是最低门槛补上： headers = &#123;     "User-Agent": "Mozilla/5.0" &#125;  部...</div></div></div></a><a class="pagination-related" href="/2021/08/17/project/NoneBot2-Plugin-Architecture-Practice/" title="基于 NoneBot2 的 QQ 机器人开发实践"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-18</div><div class="info-item-2">基于 NoneBot2 的 QQ 机器人开发实践</div></div><div class="info-2"><div class="info-item-1">基于 NoneBot2 的 QQ 机器人开发实践这个项目从 2021 年开始搭建，并在后续一段时间持续迭代。 这是我第一次长期维护一个“持续在线”的 Python 服务型项目。 和一般脚本不同，Bot 项目本质上已经不是工具程序，而是一个事件驱动的常驻服务。  一、项目特点QQ Bot 相比普通程序，有几个非常明显的特征：  长期运行（7×24） 高频事件输入（消息流） 多群并发环境 功能持续增长 插件化需求强 状态与数据长期持久化  随着功能增加，项目逐渐从“脚本集合”演变为：  一个事件驱动的消息处理系统   二、技术栈选择核心技术组合如下： NoneBot2     + OneBot     + go-cqhttp     + PostgreSQL     + asyncio   三、为什么选择 NoneBot2当时在多个方案中做过对比：  Mirai Koishi NoneBot Yunzai  最终选择 NoneBot2 的原因主要是工程适配性：  1. Python 生态优势QQ Bot 的很多功能天然依赖：  HTTP 请求 数据处理 图像处理 AI 接口 文件操作...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">thchen</div><div class="author-info-description">全栈开发 / AI Agent / 系统设计</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/kesuoer-ui" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Twitter-%E7%88%AC%E8%99%AB%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%AC%AC%E4%BA%8C%E6%AC%A1%E8%BF%9B%E5%8C%96"><span class="toc-number">1.</span> <span class="toc-text">Twitter 爬虫系统的第二次进化</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BF%99%E6%AC%A1%E7%9B%AE%E6%A0%87%E5%85%B6%E5%AE%9E%E6%9B%B4%E2%80%9C%E7%8E%B0%E5%AE%9E%E2%80%9D"><span class="toc-number">2.</span> <span class="toc-text">这次目标其实更“现实”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8A%80%E6%9C%AF%E6%A0%88%E7%9A%84%E5%8F%98%E5%8C%96"><span class="toc-number">3.</span> <span class="toc-text">技术栈的变化</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%95%B0%E6%8D%AE%E5%B1%82%EF%BC%88API-%E4%BC%98%E5%85%88%EF%BC%89"><span class="toc-number">3.1.</span> <span class="toc-text">1. 数据层（API 优先）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%B1%95%E7%A4%BA%E5%B1%82%EF%BC%88Playwright%EF%BC%89"><span class="toc-number">3.2.</span> <span class="toc-text">2. 展示层（Playwright）</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E5%85%B3%E9%94%AE%E8%BD%AC%E6%8A%98%EF%BC%9A%E4%B8%8D%E5%86%8D%E2%80%9C%E8%A7%A3%E6%9E%90%E7%BD%91%E9%A1%B5%E2%80%9D"><span class="toc-number">4.</span> <span class="toc-text">一个关键转折：不再“解析网页”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AE%A4%E7%9F%A5%E5%8F%98%E5%8C%961%EF%BC%9ATwitter-%E6%9C%AC%E8%B4%A8%E6%98%AF-GraphQL-API-%E7%B3%BB%E7%BB%9F"><span class="toc-number">5.</span> <span class="toc-text">认知变化1：Twitter 本质是 GraphQL API 系统</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AE%A4%E7%9F%A5%E5%8F%98%E5%8C%962%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%AF%94%E9%A1%B5%E9%9D%A2%E7%BB%93%E6%9E%84%E7%A8%B3%E5%AE%9A%E5%BE%97%E5%A4%9A"><span class="toc-number">6.</span> <span class="toc-text">认知变化2：数据结构比页面结构稳定得多</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84%E5%BC%80%E5%A7%8B%E2%80%9C%E5%B7%A5%E7%A8%8B%E5%8C%96%E2%80%9D"><span class="toc-number">7.</span> <span class="toc-text">系统结构开始“工程化”</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%88%AC%E5%8F%96%E5%B1%82"><span class="toc-number">7.1.</span> <span class="toc-text">1. 爬取层</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E8%A7%A3%E6%9E%90%E5%B1%82"><span class="toc-number">7.2.</span> <span class="toc-text">2. 解析层</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%AD%98%E5%82%A8%E5%B1%82"><span class="toc-number">7.3.</span> <span class="toc-text">3. 存储层</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E4%BD%93%E7%B3%BB%EF%BC%9A%E7%AC%AC%E4%B8%80%E6%AC%A1%E7%9C%9F%E6%AD%A3%E5%BC%95%E5%85%A5-AsyncIO"><span class="toc-number">8.</span> <span class="toc-text">并发体系：第一次真正引入 AsyncIO</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#API-%E6%89%B9%E5%A4%84%E7%90%86%EF%BC%9A"><span class="toc-number">8.1.</span> <span class="toc-text">API 批处理：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#GraphQL-%E8%AF%B7%E6%B1%82%E6%9E%84%E9%80%A0"><span class="toc-number">9.</span> <span class="toc-text">GraphQL 请求构造</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E5%85%B3%E9%94%AE%E4%BC%98%E5%8C%96%EF%BC%9A%E5%87%8F%E5%B0%91-Playwright-%E4%BE%9D%E8%B5%96"><span class="toc-number">10.</span> <span class="toc-text">一个关键优化：减少 Playwright 依赖</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AE%A4%E7%9F%A5%E5%8F%98%E5%8C%963%EF%BC%9A%E6%B5%8F%E8%A7%88%E5%99%A8%E5%8F%AA%E6%98%AF%E2%80%9C%E8%BA%AB%E4%BB%BD%E5%B7%A5%E5%85%B7%E2%80%9D"><span class="toc-number">11.</span> <span class="toc-text">认知变化3：浏览器只是“身份工具”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AA%92%E4%BD%93%E5%A4%84%E7%90%86%E9%80%BB%E8%BE%91%E5%8F%98%E5%BE%97%E6%9B%B4%E5%B7%A5%E7%A8%8B%E5%8C%96"><span class="toc-number">12.</span> <span class="toc-text">媒体处理逻辑变得更工程化</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E5%85%B3%E9%94%AE%E7%82%B9%EF%BC%9ATwitter-%E5%9B%BE%E7%89%87%E2%80%9C%E5%8E%9F%E5%9B%BE%E6%81%A2%E5%A4%8D%E2%80%9D"><span class="toc-number">13.</span> <span class="toc-text">一个关键点：Twitter 图片“原图恢复”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AD%96%E7%95%A5%E5%BC%80%E5%A7%8B%E5%88%86%E5%B1%82"><span class="toc-number">14.</span> <span class="toc-text">文件系统策略开始分层</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AE%A4%E7%9F%A5%E5%8F%98%E5%8C%964%EF%BC%9A%E6%95%B0%E6%8D%AE%E5%88%86%E7%B1%BB%E5%89%8D%E7%BD%AE%E6%AF%94%E5%90%8E%E5%A4%84%E7%90%86%E6%9B%B4%E9%87%8D%E8%A6%81"><span class="toc-number">15.</span> <span class="toc-text">认知变化4：数据分类前置比后处理更重要</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%82%B9%E8%B5%9E%E7%B3%BB%E7%BB%9F%EF%BC%88GraphQL-mutation%EF%BC%89"><span class="toc-number">16.</span> <span class="toc-text">点赞系统（GraphQL mutation）</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%B1%E8%B4%A5%E5%A4%84%E7%90%86%E6%9C%BA%E5%88%B6%E6%9B%B4%E5%83%8F%E2%80%9C%E4%BB%BB%E5%8A%A1%E7%B3%BB%E7%BB%9F%E2%80%9D"><span class="toc-number">17.</span> <span class="toc-text">失败处理机制更像“任务系统”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E5%BE%88%E5%85%B3%E9%94%AE%E7%9A%84%E5%8D%87%E7%BA%A7%EF%BC%9A%E7%B3%BB%E7%BB%9F%E8%87%AA%E6%84%88%E8%83%BD%E5%8A%9B"><span class="toc-number">18.</span> <span class="toc-text">一个很关键的升级：系统自愈能力</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E4%B8%8B%E8%BD%BD%E7%AC%AC%E4%BA%8C%E6%A8%A1%E5%9D%97%EF%BC%88async-Playwright%EF%BC%89"><span class="toc-number">19.</span> <span class="toc-text">并发下载第二模块（async Playwright）</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E5%BE%88%E9%87%8D%E8%A6%81%E7%9A%84%E8%AE%BE%E8%AE%A1%EF%BC%9Aglobal-lock"><span class="toc-number">20.</span> <span class="toc-text">一个很重要的设计：global_lock</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BF%99%E4%B8%80%E9%98%B6%E6%AE%B5%E7%9A%84%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98%E5%85%B6%E5%AE%9E%E6%98%AF%EF%BC%9A"><span class="toc-number">21.</span> <span class="toc-text">这一阶段的核心问题其实是：</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%B9%B6%E5%8F%91%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86"><span class="toc-number">21.1.</span> <span class="toc-text">1. 并发资源管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E4%BB%BB%E5%8A%A1%E5%90%8C%E6%AD%A5"><span class="toc-number">21.2.</span> <span class="toc-text">2. 任务同步</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AB%9E%E4%BA%89"><span class="toc-number">21.3.</span> <span class="toc-text">3. 文件系统竞争</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AE%A4%E7%9F%A5%E5%8F%98%E5%8C%965%EF%BC%9A%E7%88%AC%E8%99%AB%E5%BC%80%E5%A7%8B%E6%8E%A5%E8%BF%91%E2%80%9C%E5%88%86%E5%B8%83%E5%BC%8F%E4%BB%BB%E5%8A%A1%E6%A8%A1%E5%9E%8B%E2%80%9D"><span class="toc-number">22.</span> <span class="toc-text">认知变化5：爬虫开始接近“分布式任务模型”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E5%BE%88%E6%98%8E%E6%98%BE%E7%9A%84%E8%B6%8B%E5%8A%BF"><span class="toc-number">23.</span> <span class="toc-text">一个很明显的趋势</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%AC%E8%B4%A8%E5%8F%98%E5%8C%96%E6%80%BB%E7%BB%93"><span class="toc-number">24.</span> <span class="toc-text">本质变化总结</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E%EF%BC%9A"><span class="toc-number">24.1.</span> <span class="toc-text">从：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%B0%EF%BC%9A"><span class="toc-number">24.2.</span> <span class="toc-text">到：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%80%E5%90%8E%E4%B8%80%E4%B8%AA%E7%8E%B0%E5%AE%9E%E7%BB%93%E8%AE%BA"><span class="toc-number">25.</span> <span class="toc-text">最后一个现实结论</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%8E%E8%AE%B0%EF%BC%88%E5%BD%93%E6%97%B6%E7%9A%84%E7%8A%B6%E6%80%81%EF%BC%89"><span class="toc-number">26.</span> <span class="toc-text">后记（当时的状态）</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/19/life/two-failed-attempts-at-postgraduate-exam/" title="我的考研复习与调剂经历">我的考研复习与调剂经历</a><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/31/ai/Claude-Code-Agent-Architecture-Insights/" title="Claude Code 泄露源码带给我的 Agent 启发">Claude Code 泄露源码带给我的 Agent 启发</a><time datetime="2026-03-31T16:00:00.000Z" title="发表于 2026-04-01 00:00:00">2026-04-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/09/ops/Serverless-Practice/" title="记一次 Serverless 的认识与实践">记一次 Serverless 的认识与实践</a><time datetime="2026-03-09T16:00:00.000Z" title="发表于 2026-03-10 00:00:00">2026-03-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/11/19/ai/MCP-Tools-And-Prompt-Engineering-Trends/" title="MCP、Tools 与 Prompt Engineering 的工程化趋势">MCP、Tools 与 Prompt Engineering 的工程化趋势</a><time datetime="2025-11-19T16:00:00.000Z" title="发表于 2025-11-20 00:00:00">2025-11-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/15/ai/LangChain-LangGraph-Agent-Practice/" title="LangChain、LangGraph 与 AI Agent 工程实践">LangChain、LangGraph 与 AI Agent 工程实践</a><time datetime="2025-09-15T16:00:00.000Z" title="发表于 2025-09-16 00:00:00">2025-09-16</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By thchen</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'kesuoer-ui/kesuoer-ui.github.io',
+      'data-repo-id': 'R_kgDOSXiEqw',
+      'data-category-id': 'DIC_kwDOSXiEq84C8oeA',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>

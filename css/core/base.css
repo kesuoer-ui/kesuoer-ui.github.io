@@ -1,0 +1,31 @@
+body {
+  background: var(--bg);
+  color: var(--text);
+  transition: background var(--t-normal) var(--ease);
+}
+
+/* 链接 */
+a {
+  color: var(--primary);
+  transition: color var(--t-fast) var(--ease);
+}
+
+a:hover {
+  color: var(--primary-light);
+}
+
+/* 页面容器 */
+#content-inner {
+  max-width: var(--container);
+  margin: 0 auto;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 999px;
+}

@@ -1,0 +1,1223 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>AI 语音、AI 翻唱与音色转换技术整理 | thchen的闲言碎语堆积处</title><meta name="author" content="thchen"><meta name="copyright" content="thchen"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="AI 语音、AI 翻唱与音色转换技术整理AI绘画火起来之前，其实 AI 语音这边我就已经玩挺久了。 而且这玩意相比 AI 绘画，更容易让人产生一种“技术已经突破次元壁”的感觉。 尤其第一次：  输入一句文本 生成角色语音 再到把自己的歌翻唱成别人的声音  那个冲击感其实非常强。 这几年 AI 语音方向也迭代得非常快： TTS（文本转语音） ↓ VITS ↓ SVC ↓ DDSP-SVC ↓ Dif">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI 语音、AI 翻唱与音色转换技术整理">
+<meta property="og:url" content="https://kesuoer-ui.github.io/2023/10/04/ai/AI-Voice-SVC-VITS-Workflow/index.html">
+<meta property="og:site_name" content="thchen的闲言碎语堆积处">
+<meta property="og:description" content="AI 语音、AI 翻唱与音色转换技术整理AI绘画火起来之前，其实 AI 语音这边我就已经玩挺久了。 而且这玩意相比 AI 绘画，更容易让人产生一种“技术已经突破次元壁”的感觉。 尤其第一次：  输入一句文本 生成角色语音 再到把自己的歌翻唱成别人的声音  那个冲击感其实非常强。 这几年 AI 语音方向也迭代得非常快： TTS（文本转语音） ↓ VITS ↓ SVC ↓ DDSP-SVC ↓ Dif">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kesuoer-ui.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-10-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-11T13:28:55.280Z">
+<meta property="article:author" content="thchen">
+<meta property="article:tag" content="AIGC">
+<meta property="article:tag" content="UVR">
+<meta property="article:tag" content="VITS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kesuoer-ui.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "AI 语音、AI 翻唱与音色转换技术整理",
+  "url": "https://kesuoer-ui.github.io/2023/10/04/ai/AI-Voice-SVC-VITS-Workflow/",
+  "image": "https://kesuoer-ui.github.io/img/avatar.png",
+  "datePublished": "2023-10-04T16:00:00.000Z",
+  "dateModified": "2026-05-11T13:28:55.280Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "thchen",
+      "url": "https://kesuoer-ui.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://kesuoer-ui.github.io/2023/10/04/ai/AI-Voice-SVC-VITS-Workflow/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'AI 语音、AI 翻唱与音色转换技术整理',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 8.1.2"><link rel="alternate" href="/atom.xml" title="thchen的闲言碎语堆积处" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">thchen的闲言碎语堆积处</span></a><a class="nav-page-title" href="/"><span class="site-name">AI 语音、AI 翻唱与音色转换技术整理</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">AI 语音、AI 翻唱与音色转换技术整理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-10-04T16:00:00.000Z" title="发表于 2023-10-05 00:00:00">2023-10-05</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-11T13:28:55.280Z" title="更新于 2026-05-11 21:28:55">2026-05-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/ai/">AI</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/ai/AIGC/">AIGC</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="AI-语音、AI-翻唱与音色转换技术整理"><a href="#AI-语音、AI-翻唱与音色转换技术整理" class="headerlink" title="AI 语音、AI 翻唱与音色转换技术整理"></a>AI 语音、AI 翻唱与音色转换技术整理</h1><p>AI绘画火起来之前，其实 AI 语音这边我就已经玩挺久了。</p>
+<p>而且这玩意相比 AI 绘画，更容易让人产生一种“技术已经突破次元壁”的感觉。</p>
+<p>尤其第一次：</p>
+<ul>
+<li>输入一句文本</li>
+<li>生成角色语音</li>
+<li>再到把自己的歌翻唱成别人的声音</li>
+</ul>
+<p>那个冲击感其实非常强。</p>
+<p>这几年 AI 语音方向也迭代得非常快：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">TTS（文本转语音）
+↓
+VITS
+↓
+SVC
+↓
+DDSP-SVC
+↓
+Diffusion-SVC
+↓
+RVC / GPT-SoVITS / OpenVoice<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>整个领域已经从：</p>
+<blockquote>
+<p>“能发声”</p>
+</blockquote>
+<p>变成了：</p>
+<blockquote>
+<p>“越来越像真人”</p>
+</blockquote>
+<hr>
+<h1 id="一、我接触-AI-语音的整个过程"><a href="#一、我接触-AI-语音的整个过程" class="headerlink" title="一、我接触 AI 语音的整个过程"></a>一、我接触 AI 语音的整个过程</h1><p>我最早接触的是：</p>
+<ul>
+<li>文本转语音（TTS）</li>
+<li>VTuber 语音</li>
+<li>日语角色语音合成</li>
+</ul>
+<p>后来开始接触：</p>
+<ul>
+<li>AI翻唱</li>
+<li>歌声音色转换</li>
+<li>干声提取</li>
+<li>模型训练</li>
+<li>推理部署</li>
+</ul>
+<p>再后来：</p>
+<ul>
+<li>开始自己收集训练集</li>
+<li>自己训练模型</li>
+<li>自己做整套 workflow</li>
+</ul>
+<p>然后才意识到：</p>
+<p><strong>AI语音最难的不是训练。</strong></p>
+<p>而是：</p>
+<h1 id="“数据处理。”"><a href="#“数据处理。”" class="headerlink" title="“数据处理。”"></a>“数据处理。”</h1><p>尤其是：</p>
+<ul>
+<li>干净的人声</li>
+<li>无背景音</li>
+<li>无混响</li>
+<li>无BGM</li>
+<li>无电流麦</li>
+<li>无环境噪声</li>
+</ul>
+<p>这个真的比训练模型难太多了。</p>
+<hr>
+<h1 id="二、AI语音领域到底在做什么？"><a href="#二、AI语音领域到底在做什么？" class="headerlink" title="二、AI语音领域到底在做什么？"></a>二、AI语音领域到底在做什么？</h1><p>其实核心就两件事：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TTS</td>
+<td>文本生成语音</td>
+</tr>
+<tr>
+<td>SVC</td>
+<td>保留旋律，只替换音色</td>
+</tr>
+</tbody></table>
+<p>比如：</p>
+<h2 id="TTS（Text-To-Speech）"><a href="#TTS（Text-To-Speech）" class="headerlink" title="TTS（Text To Speech）"></a>TTS（Text To Speech）</h2><p>输入：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">你好，今天过得怎么样？<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>输出：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">某角色的语音<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h2 id="SVC（Singing-Voice-Conversion）"><a href="#SVC（Singing-Voice-Conversion）" class="headerlink" title="SVC（Singing Voice Conversion）"></a>SVC（Singing Voice Conversion）</h2><p>输入：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">你自己唱的一首歌<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>输出：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">变成目标角色的声音<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>旋律还是你的。</p>
+<p>但音色已经换人了。</p>
+<p>这就是 AI 翻唱。</p>
+<hr>
+<h1 id="三、VITS：当年真正意义上的“革命”"><a href="#三、VITS：当年真正意义上的“革命”" class="headerlink" title="三、VITS：当年真正意义上的“革命”"></a>三、VITS：当年真正意义上的“革命”</h1><p>以前传统 TTS 最大的问题：</p>
+<ul>
+<li>机械感强</li>
+<li>情绪差</li>
+<li>停顿奇怪</li>
+<li>不自然</li>
+</ul>
+<p>后来 VITS 出现后。</p>
+<p>整个圈子直接炸了。</p>
+<hr>
+<h1 id="四、VITS-到底是什么？"><a href="#四、VITS-到底是什么？" class="headerlink" title="四、VITS 到底是什么？"></a>四、VITS 到底是什么？</h1><p>VITS 本质上：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Variational Inference + GAN + TTS<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>它是：</p>
+<ul>
+<li>VAE</li>
+<li>Flow</li>
+<li>GAN</li>
+<li>End-to-End TTS</li>
+</ul>
+<p>融合出来的一套东西。</p>
+<hr>
+<h1 id="五、VITS-为什么强？"><a href="#五、VITS-为什么强？" class="headerlink" title="五、VITS 为什么强？"></a>五、VITS 为什么强？</h1><p>因为它：</p>
+<h2 id="1-不再拼接音素"><a href="#1-不再拼接音素" class="headerlink" title="1. 不再拼接音素"></a>1. 不再拼接音素</h2><p>以前很多 TTS：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">你好 = 你 + 好<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>像机器人念词典。</p>
+<hr>
+<p>VITS 开始：</p>
+<h2 id="“直接学习人类发声规律”"><a href="#“直接学习人类发声规律”" class="headerlink" title="“直接学习人类发声规律”"></a>“直接学习人类发声规律”</h2><p>于是：</p>
+<ul>
+<li>韵律更自然</li>
+<li>停顿更像真人</li>
+<li>情绪更连续</li>
+<li>呼吸感更真实</li>
+</ul>
+<hr>
+<h1 id="六、VITS-的工作流程"><a href="#六、VITS-的工作流程" class="headerlink" title="六、VITS 的工作流程"></a>六、VITS 的工作流程</h1><p>整体流程大概：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">文本
+↓
+文本编码
+↓
+音素序列
+↓
+隐变量建模
+↓
+声学特征
+↓
+Vocoder
+↓
+音频<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>核心：</p>
+<h2 id="“让模型学会怎么发声”"><a href="#“让模型学会怎么发声”" class="headerlink" title="“让模型学会怎么发声”"></a>“让模型学会怎么发声”</h2><p>而不是：</p>
+<h2 id="“让程序拼声音”"><a href="#“让程序拼声音”" class="headerlink" title="“让程序拼声音”"></a>“让程序拼声音”</h2><hr>
+<h1 id="七、VITS-训练最难的是什么？"><a href="#七、VITS-训练最难的是什么？" class="headerlink" title="七、VITS 训练最难的是什么？"></a>七、VITS 训练最难的是什么？</h1><p>答案是：</p>
+<h1 id="数据集。"><a href="#数据集。" class="headerlink" title="数据集。"></a>数据集。</h1><hr>
+<h2 id="一个好模型需要："><a href="#一个好模型需要：" class="headerlink" title="一个好模型需要："></a>一个好模型需要：</h2><ul>
+<li>高质量录音</li>
+<li>足够长时长</li>
+<li>情绪稳定</li>
+<li>音量稳定</li>
+<li>无噪音</li>
+<li>无BGM</li>
+<li>无混响</li>
+</ul>
+<p>尤其：</p>
+<h1 id="干声。"><a href="#干声。" class="headerlink" title="干声。"></a>干声。</h1><hr>
+<h1 id="八、什么叫干声？"><a href="#八、什么叫干声？" class="headerlink" title="八、什么叫干声？"></a>八、什么叫干声？</h1><p>就是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">只有人声
+没有任何背景<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>包括：</p>
+<ul>
+<li>没有BGM</li>
+<li>没有环境音</li>
+<li>没有混响</li>
+<li>没有电流声</li>
+</ul>
+<hr>
+<h2 id="为什么干声这么重要？"><a href="#为什么干声这么重要？" class="headerlink" title="为什么干声这么重要？"></a>为什么干声这么重要？</h2><p>因为模型会：</p>
+<h1 id="“把训练集里的所有东西一起学进去。”"><a href="#“把训练集里的所有东西一起学进去。”" class="headerlink" title="“把训练集里的所有东西一起学进去。”"></a>“把训练集里的所有东西一起学进去。”</h1><p>包括：</p>
+<ul>
+<li>空调声</li>
+<li>回声</li>
+<li>风扇声</li>
+<li>键盘声</li>
+<li>背景音乐</li>
+</ul>
+<p>最后：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">你训练角色语音
+结果模型顺便学会了空调<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>很真实。</p>
+<hr>
+<h1 id="九、我当时怎么收集训练集"><a href="#九、我当时怎么收集训练集" class="headerlink" title="九、我当时怎么收集训练集"></a>九、我当时怎么收集训练集</h1><p>这是最折磨人的部分。</p>
+<hr>
+<h2 id="常见来源："><a href="#常见来源：" class="headerlink" title="常见来源："></a>常见来源：</h2><table>
+<thead>
+<tr>
+<th>来源</th>
+<th>质量</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>官方语音包</td>
+<td>极高</td>
+</tr>
+<tr>
+<td>游戏语音</td>
+<td>高</td>
+</tr>
+<tr>
+<td>ASMR</td>
+<td>中</td>
+</tr>
+<tr>
+<td>直播录播</td>
+<td>差</td>
+</tr>
+<tr>
+<td>歌曲分轨</td>
+<td>看运气</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="最大问题："><a href="#最大问题：" class="headerlink" title="最大问题："></a>最大问题：</h2><h3 id="“没有干净音频。”"><a href="#“没有干净音频。”" class="headerlink" title="“没有干净音频。”"></a>“没有干净音频。”</h3><p>尤其二次元角色。</p>
+<p>很多：</p>
+<ul>
+<li>只有直播</li>
+<li>只有带BGM视频</li>
+<li>只有手游录屏</li>
+</ul>
+<p>于是只能：</p>
+<h1 id="自己拆。"><a href="#自己拆。" class="headerlink" title="自己拆。"></a>自己拆。</h1><hr>
+<h1 id="十、UVR：整个-AI-翻唱圈的核心工具之一"><a href="#十、UVR：整个-AI-翻唱圈的核心工具之一" class="headerlink" title="十、UVR：整个 AI 翻唱圈的核心工具之一"></a>十、UVR：整个 AI 翻唱圈的核心工具之一</h1><p>当时最常用的：</p>
+<h1 id="Ultimate-Vocal-Remover（UVR）"><a href="#Ultimate-Vocal-Remover（UVR）" class="headerlink" title="Ultimate Vocal Remover（UVR）"></a>Ultimate Vocal Remover（UVR）</h1><p>它基本成了：</p>
+<h2 id="AI翻唱前置工具。"><a href="#AI翻唱前置工具。" class="headerlink" title="AI翻唱前置工具。"></a>AI翻唱前置工具。</h2><hr>
+<h1 id="十一、UVR-能做什么？"><a href="#十一、UVR-能做什么？" class="headerlink" title="十一、UVR 能做什么？"></a>十一、UVR 能做什么？</h1><p>它能：</p>
+<ul>
+<li>人声分离</li>
+<li>去BGM</li>
+<li>去鼓点</li>
+<li>去和声</li>
+<li>提取伴奏</li>
+</ul>
+<p>输入：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">完整歌曲<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>输出：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">干声 + 伴奏<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="十二、AI翻唱为什么离不开-UVR"><a href="#十二、AI翻唱为什么离不开-UVR" class="headerlink" title="十二、AI翻唱为什么离不开 UVR"></a>十二、AI翻唱为什么离不开 UVR</h1><p>因为：</p>
+<h1 id="SVC-训练要求“纯人声”。"><a href="#SVC-训练要求“纯人声”。" class="headerlink" title="SVC 训练要求“纯人声”。"></a>SVC 训练要求“纯人声”。</h1><p>你如果直接拿完整歌曲训练：</p>
+<p>模型会：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">连鼓点一起学进去<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>于是推理结果：</p>
+<ul>
+<li>爆炸</li>
+<li>电音感</li>
+<li>杂音</li>
+<li>破音</li>
+<li>共振异常</li>
+</ul>
+<hr>
+<h1 id="十三、我踩过最多的坑：训练集质量"><a href="#十三、我踩过最多的坑：训练集质量" class="headerlink" title="十三、我踩过最多的坑：训练集质量"></a>十三、我踩过最多的坑：训练集质量</h1><p>真的。</p>
+<p>这个领域：</p>
+<h1 id="70-问题来自数据集。"><a href="#70-问题来自数据集。" class="headerlink" title="70%问题来自数据集。"></a>70%问题来自数据集。</h1><hr>
+<h2 id="常见翻车："><a href="#常见翻车：" class="headerlink" title="常见翻车："></a>常见翻车：</h2><h3 id="1-音量不统一"><a href="#1-音量不统一" class="headerlink" title="1. 音量不统一"></a>1. 音量不统一</h3><p>结果：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">模型时大时小<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h3 id="2-采样率混乱"><a href="#2-采样率混乱" class="headerlink" title="2. 采样率混乱"></a>2. 采样率混乱</h3><p>比如：</p>
+<ul>
+<li>44100</li>
+<li>48000</li>
+<li>22050</li>
+</ul>
+<p>混一起。</p>
+<p>直接炸。</p>
+<hr>
+<h3 id="3-情绪差异太大"><a href="#3-情绪差异太大" class="headerlink" title="3. 情绪差异太大"></a>3. 情绪差异太大</h3><p>一会喊叫。</p>
+<p>一会耳语。</p>
+<p>模型学不会。</p>
+<hr>
+<h3 id="4-混响太重"><a href="#4-混响太重" class="headerlink" title="4. 混响太重"></a>4. 混响太重</h3><p>最后：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">AI 自带浴室音效<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="十四、SVC-到底是什么？"><a href="#十四、SVC-到底是什么？" class="headerlink" title="十四、SVC 到底是什么？"></a>十四、SVC 到底是什么？</h1><p>SVC：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Singing Voice Conversion<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>核心：</p>
+<h1 id="保留旋律，只替换音色。"><a href="#保留旋律，只替换音色。" class="headerlink" title="保留旋律，只替换音色。"></a>保留旋律，只替换音色。</h1><hr>
+<h2 id="输入："><a href="#输入：" class="headerlink" title="输入："></a>输入：</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">你的歌声<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h2 id="输出："><a href="#输出：" class="headerlink" title="输出："></a>输出：</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">目标角色音色<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>旋律还是你的。</p>
+<p>但声音已经换人。</p>
+<hr>
+<h1 id="十五、SVC-的核心流程"><a href="#十五、SVC-的核心流程" class="headerlink" title="十五、SVC 的核心流程"></a>十五、SVC 的核心流程</h1><p>大概：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">原始歌声
+↓
+提取 Pitch
+↓
+提取特征
+↓
+模型推理
+↓
+生成目标音色<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>其中：</p>
+<h2 id="Pitch（音高）"><a href="#Pitch（音高）" class="headerlink" title="Pitch（音高）"></a>Pitch（音高）</h2><p>特别重要。</p>
+<p>因为：</p>
+<h1 id="“旋律本身不能丢。”"><a href="#“旋律本身不能丢。”" class="headerlink" title="“旋律本身不能丢。”"></a>“旋律本身不能丢。”</h1><hr>
+<h1 id="十六、DDSP-SVC-为什么当年很火"><a href="#十六、DDSP-SVC-为什么当年很火" class="headerlink" title="十六、DDSP-SVC 为什么当年很火"></a>十六、DDSP-SVC 为什么当年很火</h1><p>因为它：</p>
+<h1 id="非常轻。"><a href="#非常轻。" class="headerlink" title="非常轻。"></a>非常轻。</h1><hr>
+<h2 id="DDSP-是什么？"><a href="#DDSP-是什么？" class="headerlink" title="DDSP 是什么？"></a>DDSP 是什么？</h2><p>全称：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Differentiable Digital Signal Processing<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>本质：</p>
+<h2 id="“神经网络-数字信号处理”"><a href="#“神经网络-数字信号处理”" class="headerlink" title="“神经网络 + 数字信号处理”"></a>“神经网络 + 数字信号处理”</h2><hr>
+<h2 id="它的特点："><a href="#它的特点：" class="headerlink" title="它的特点："></a>它的特点：</h2><table>
+<thead>
+<tr>
+<th>特点</th>
+<th>情况</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>训练快</td>
+<td>✔</td>
+</tr>
+<tr>
+<td>显存低</td>
+<td>✔</td>
+</tr>
+<tr>
+<td>推理快</td>
+<td>✔</td>
+</tr>
+<tr>
+<td>音质一般</td>
+<td>✔</td>
+</tr>
+</tbody></table>
+<hr>
+<p>所以：</p>
+<h1 id="很适合低配置玩家。"><a href="#很适合低配置玩家。" class="headerlink" title="很适合低配置玩家。"></a>很适合低配置玩家。</h1><hr>
+<h1 id="十七、Diffusion-SVC-为什么效果更强"><a href="#十七、Diffusion-SVC-为什么效果更强" class="headerlink" title="十七、Diffusion-SVC 为什么效果更强"></a>十七、Diffusion-SVC 为什么效果更强</h1><p>后来：</p>
+<p>Diffusion 系列开始接管。</p>
+<hr>
+<h2 id="核心思路："><a href="#核心思路：" class="headerlink" title="核心思路："></a>核心思路：</h2><p>不是一次生成。</p>
+<p>而是：</p>
+<h1 id="“不断降噪生成音频”"><a href="#“不断降噪生成音频”" class="headerlink" title="“不断降噪生成音频”"></a>“不断降噪生成音频”</h1><p>类似：</p>
+<ul>
+<li>Stable Diffusion</li>
+<li>AI绘画</li>
+</ul>
+<hr>
+<h2 id="效果："><a href="#效果：" class="headerlink" title="效果："></a>效果：</h2><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>Diffusion</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>音质</td>
+<td>高</td>
+</tr>
+<tr>
+<td>细节</td>
+<td>强</td>
+</tr>
+<tr>
+<td>情感</td>
+<td>更自然</td>
+</tr>
+<tr>
+<td>推理速度</td>
+<td>慢</td>
+</tr>
+<tr>
+<td>显存占用</td>
+<td>高</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="十八、为什么-Diffusion-更像真人"><a href="#十八、为什么-Diffusion-更像真人" class="headerlink" title="十八、为什么 Diffusion 更像真人"></a>十八、为什么 Diffusion 更像真人</h1><p>因为它：</p>
+<h1 id="更擅长补细节。"><a href="#更擅长补细节。" class="headerlink" title="更擅长补细节。"></a>更擅长补细节。</h1><p>比如：</p>
+<ul>
+<li>呼吸</li>
+<li>尾音</li>
+<li>共鸣</li>
+<li>颤音</li>
+<li>空气感</li>
+</ul>
+<p>这些传统 SVC 很难做。</p>
+<hr>
+<h1 id="十九、为什么很多人后来转向-RVC"><a href="#十九、为什么很多人后来转向-RVC" class="headerlink" title="十九、为什么很多人后来转向 RVC"></a>十九、为什么很多人后来转向 RVC</h1><p>因为：</p>
+<h1 id="太方便了。"><a href="#太方便了。" class="headerlink" title="太方便了。"></a>太方便了。</h1><hr>
+<h2 id="RVC-的优势："><a href="#RVC-的优势：" class="headerlink" title="RVC 的优势："></a>RVC 的优势：</h2><ul>
+<li>部署简单</li>
+<li>推理快</li>
+<li>社区资源多</li>
+<li>小白友好</li>
+<li>显存需求低</li>
+</ul>
+<p>很多人第一次真正跑通 AI翻唱。</p>
+<p>其实都是 RVC。</p>
+<hr>
+<h1 id="二十、显卡真的是门槛"><a href="#二十、显卡真的是门槛" class="headerlink" title="二十、显卡真的是门槛"></a>二十、显卡真的是门槛</h1><p>这个领域：</p>
+<h1 id="GPU-决定体验。"><a href="#GPU-决定体验。" class="headerlink" title="GPU 决定体验。"></a>GPU 决定体验。</h1><hr>
+<h2 id="当年最痛苦的问题："><a href="#当年最痛苦的问题：" class="headerlink" title="当年最痛苦的问题："></a>当年最痛苦的问题：</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">显存不够<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h2 id="常见问题："><a href="#常见问题：" class="headerlink" title="常见问题："></a>常见问题：</h2><table>
+<thead>
+<tr>
+<th>显存</th>
+<th>体验</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>4G</td>
+<td>非常痛苦</td>
+</tr>
+<tr>
+<td>6G</td>
+<td>勉强</td>
+</tr>
+<tr>
+<td>8G</td>
+<td>基本能玩</td>
+</tr>
+<tr>
+<td>12G+</td>
+<td>舒服很多</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="二十一、AMD-当年真的很难受"><a href="#二十一、AMD-当年真的很难受" class="headerlink" title="二十一、AMD 当年真的很难受"></a>二十一、AMD 当年真的很难受</h1><p>以前很多项目：</p>
+<h1 id="默认-CUDA。"><a href="#默认-CUDA。" class="headerlink" title="默认 CUDA。"></a>默认 CUDA。</h1><p>于是：</p>
+<ul>
+<li>NVIDIA 正常</li>
+<li>AMD 原地爆炸</li>
+</ul>
+<p>尤其：</p>
+<ul>
+<li>pytorch</li>
+<li>cuda</li>
+<li>xformers</li>
+<li>half precision</li>
+</ul>
+<p>各种兼容问题。</p>
+<hr>
+<h1 id="二十二、Google-Colab-当年真的是救星"><a href="#二十二、Google-Colab-当年真的是救星" class="headerlink" title="二十二、Google Colab 当年真的是救星"></a>二十二、Google Colab 当年真的是救星</h1><p>因为：</p>
+<h1 id="白嫖-GPU。"><a href="#白嫖-GPU。" class="headerlink" title="白嫖 GPU。"></a>白嫖 GPU。</h1><hr>
+<p>很多人 workflow：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">本地处理数据
+↓
+上传 Colab
+↓
+云端训练
+↓
+下载模型
+↓
+本地推理<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h2 id="当年最经典："><a href="#当年最经典：" class="headerlink" title="当年最经典："></a>当年最经典：</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">Colab 额度没了<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>然后开始：</p>
+<ul>
+<li>切号</li>
+<li>换号</li>
+<li>重开 runtime</li>
+</ul>
+<p>属于时代记忆了。</p>
+<hr>
+<h1 id="二十三、AI翻唱真正难的部分其实是工程"><a href="#二十三、AI翻唱真正难的部分其实是工程" class="headerlink" title="二十三、AI翻唱真正难的部分其实是工程"></a>二十三、AI翻唱真正难的部分其实是工程</h1><p>很多人以为：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">训练 = AI翻唱<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>实际上：</p>
+<h1 id="前后处理占了大量时间。"><a href="#前后处理占了大量时间。" class="headerlink" title="前后处理占了大量时间。"></a>前后处理占了大量时间。</h1><hr>
+<h1 id="二十四、一个完整-AI翻唱流程"><a href="#二十四、一个完整-AI翻唱流程" class="headerlink" title="二十四、一个完整 AI翻唱流程"></a>二十四、一个完整 AI翻唱流程</h1><pre class="line-numbers language-text" data-language="text"><code class="language-text">歌曲
+↓
+UVR 分离人声
+↓
+降噪
+↓
+切片
+↓
+统一采样率
+↓
+训练模型
+↓
+推理转换
+↓
+后期混音
+↓
+导出<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>真正训练可能就几个小时。</p>
+<p>但前处理能折腾你一整天。</p>
+<hr>
+<h1 id="二十五、后期混音也很重要"><a href="#二十五、后期混音也很重要" class="headerlink" title="二十五、后期混音也很重要"></a>二十五、后期混音也很重要</h1><p>很多人：</p>
+<p>模型不错。</p>
+<p>但成品难听。</p>
+<p>原因：</p>
+<h1 id="没混音。"><a href="#没混音。" class="headerlink" title="没混音。"></a>没混音。</h1><hr>
+<h2 id="常见处理："><a href="#常见处理：" class="headerlink" title="常见处理："></a>常见处理：</h2><ul>
+<li>EQ</li>
+<li>压缩</li>
+<li>混响</li>
+<li>音量均衡</li>
+<li>人声增强</li>
+</ul>
+<p>否则：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">AI声音会“飘”<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="二十六、AI语音领域最大的变化"><a href="#二十六、AI语音领域最大的变化" class="headerlink" title="二十六、AI语音领域最大的变化"></a>二十六、AI语音领域最大的变化</h1><p>以前：</p>
+<h1 id="“能用”"><a href="#“能用”" class="headerlink" title="“能用”"></a>“能用”</h1><p>就已经很震撼。</p>
+<p>现在：</p>
+<p>大家已经开始追求：</p>
+<ul>
+<li>情绪</li>
+<li>呼吸</li>
+<li>演技</li>
+<li>语气</li>
+<li>长文本稳定性</li>
+<li>多语言</li>
+<li>实时推理</li>
+</ul>
+<p>整个行业已经从：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">玩具<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>开始变成：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">生产工具<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="二十七、现在的趋势"><a href="#二十七、现在的趋势" class="headerlink" title="二十七、现在的趋势"></a>二十七、现在的趋势</h1><p>目前已经开始：</p>
+<ul>
+<li>GPT + TTS</li>
+<li>情绪控制</li>
+<li>音色克隆</li>
+<li>实时变声</li>
+<li>端侧推理</li>
+<li>长上下文语音</li>
+<li>多说话人</li>
+</ul>
+<p>甚至：</p>
+<h1 id="“一句话克隆声音”"><a href="#“一句话克隆声音”" class="headerlink" title="“一句话克隆声音”"></a>“一句话克隆声音”</h1><p>都已经快成熟了。</p>
+<hr>
+<h1 id="二十八、我对-AI语音最大的感受"><a href="#二十八、我对-AI语音最大的感受" class="headerlink" title="二十八、我对 AI语音最大的感受"></a>二十八、我对 AI语音最大的感受</h1><p>这个领域特别容易让人：</p>
+<h1 id="“沉迷调参。”"><a href="#“沉迷调参。”" class="headerlink" title="“沉迷调参。”"></a>“沉迷调参。”</h1><p>因为：</p>
+<p>你永远觉得：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">再调一下会不会更像<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>然后：</p>
+<ul>
+<li>重训</li>
+<li>重切</li>
+<li>重采样</li>
+<li>重推理</li>
+</ul>
+<p>无限循环。</p>
+<hr>
+<h1 id="二十九、现在回头看"><a href="#二十九、现在回头看" class="headerlink" title="二十九、现在回头看"></a>二十九、现在回头看</h1><p>AI语音其实特别像：</p>
+<h1 id="“AI绘画的另一条平行线。”"><a href="#“AI绘画的另一条平行线。”" class="headerlink" title="“AI绘画的另一条平行线。”"></a>“AI绘画的另一条平行线。”</h1><p>两边都经历了：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">模型爆炸
+↓
+社区爆炸
+↓
+整合包爆炸
+↓
+工作流复杂化
+↓
+插件生态化<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>最后：</p>
+<p>真正重要的已经不是：</p>
+<h1 id="“你会不会运行模型”"><a href="#“你会不会运行模型”" class="headerlink" title="“你会不会运行模型”"></a>“你会不会运行模型”</h1><p>而是：</p>
+<h1 id="“你有没有完整-workflow-的理解”"><a href="#“你有没有完整-workflow-的理解”" class="headerlink" title="“你有没有完整 workflow 的理解”"></a>“你有没有完整 workflow 的理解”</h1><p>包括：</p>
+<ul>
+<li>数据</li>
+<li>工程</li>
+<li>推理</li>
+<li>部署</li>
+<li>调参</li>
+<li>后处理</li>
+</ul>
+<p>这些东西。</p>
+<hr>
+<h1 id="三十、最后补几个现在常见的新方向"><a href="#三十、最后补几个现在常见的新方向" class="headerlink" title="三十、最后补几个现在常见的新方向"></a>三十、最后补几个现在常见的新方向</h1><h2 id="GPT-SoVITS"><a href="#GPT-SoVITS" class="headerlink" title="GPT-SoVITS"></a>GPT-SoVITS</h2><p>现在非常火。</p>
+<p>因为：</p>
+<ul>
+<li>少量数据即可训练</li>
+<li>中文效果强</li>
+<li>情绪自然</li>
+<li>推理速度快</li>
+</ul>
+<hr>
+<h2 id="OpenVoice"><a href="#OpenVoice" class="headerlink" title="OpenVoice"></a>OpenVoice</h2><p>偏向：</p>
+<h1 id="声音克隆。"><a href="#声音克隆。" class="headerlink" title="声音克隆。"></a>声音克隆。</h1><hr>
+<h2 id="Bert-VITS2"><a href="#Bert-VITS2" class="headerlink" title="Bert-VITS2"></a>Bert-VITS2</h2><p>很多中文圈项目会用。</p>
+<p>因为：</p>
+<ul>
+<li>中文表现更强</li>
+<li>情绪更稳定</li>
+</ul>
+<hr>
+<h1 id="三十一、一些经典踩坑记录"><a href="#三十一、一些经典踩坑记录" class="headerlink" title="三十一、一些经典踩坑记录"></a>三十一、一些经典踩坑记录</h1><h2 id="1-ffmpeg-环境变量没配"><a href="#1-ffmpeg-环境变量没配" class="headerlink" title="1. ffmpeg 环境变量没配"></a>1. ffmpeg 环境变量没配</h2><p>直接：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ffmpeg not found<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h2 id="2-CUDA-版本不匹配"><a href="#2-CUDA-版本不匹配" class="headerlink" title="2. CUDA 版本不匹配"></a>2. CUDA 版本不匹配</h2><p>经典：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Torch CUDA unavailable<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h2 id="3-half-precision-爆-NaN"><a href="#3-half-precision-爆-NaN" class="headerlink" title="3. half precision 爆 NaN"></a>3. half precision 爆 NaN</h2><p>推理直接炸。</p>
+<hr>
+<h2 id="4-windows-路径中文"><a href="#4-windows-路径中文" class="headerlink" title="4. windows 路径中文"></a>4. windows 路径中文</h2><p>部分项目直接寄。</p>
+<hr>
+<h2 id="5-pytorch-版本冲突"><a href="#5-pytorch-版本冲突" class="headerlink" title="5. pytorch 版本冲突"></a>5. pytorch 版本冲突</h2><p>尤其：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">torch
+torchaudio
+cuda<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>版本必须对应。</p>
+<hr>
+<h1 id="三十二、现在再看这些项目"><a href="#三十二、现在再看这些项目" class="headerlink" title="三十二、现在再看这些项目"></a>三十二、现在再看这些项目</h1><p>其实已经不只是：</p>
+<h1 id="“AI整活”"><a href="#“AI整活”" class="headerlink" title="“AI整活”"></a>“AI整活”</h1><p>了。</p>
+<p>而是：</p>
+<ul>
+<li>数字人</li>
+<li>VTuber</li>
+<li>游戏配音</li>
+<li>AI客服</li>
+<li>AI陪伴</li>
+<li>语音助手</li>
+<li>AI主播</li>
+</ul>
+<p>整个产业链都已经开始形成。</p>
+<p>而且：</p>
+<p>未来很可能会继续和：</p>
+<ul>
+<li>LLM</li>
+<li>Agent</li>
+<li>多模态</li>
+</ul>
+<p>彻底融合。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io">thchen</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io/2023/10/04/ai/AI-Voice-SVC-VITS-Workflow/">https://kesuoer-ui.github.io/2023/10/04/ai/AI-Voice-SVC-VITS-Workflow/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://kesuoer-ui.github.io" target="_blank">thchen的闲言碎语堆积处</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/AIGC/">AIGC</a><a class="post-meta__tags" href="/tags/VITS/">VITS</a><a class="post-meta__tags" href="/tags/UVR/">UVR</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2023/11/13/other/Algorithm-understanding/" title="刷题一年后，我对算法学习的理解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">刷题一年后，我对算法学习的理解</div></div><div class="info-2"><div class="info-item-1">背景刷题这件事一直比较矛盾。 一方面知道它重要，尤其在：  校招 面试 笔试  另一方面，真正进入工程开发之后，会更容易被：  项目开发 接口实现 自动化工具 后端系统设计  这些更“可见结果”的事情吸引。 相比之下，刷题的反馈确实更弱。  最开始为什么开始刷题原因很直接：  求职需要。  尤其在面试体系里：  算法题是常规环节 笔试基本绕不开  所以最初目标并不复杂，就是应付面试要求。  刚开始刷题的感受最直观的感受是：  不适应 + 挫败感明显  原因主要在于：  学校数据结构更偏概念 工程刷题是直接解问题 没有“标准模板路径”  两者之间差距很大。  学校知识 vs 刷题本质可以简单区分： 学校阶段 记概念 写固定结构 偏考试导向  刷题阶段 识别问题模型 选择合适算法 自己构造解法  核心差异是：  从“知道”变成“能识别并使用”。   最大的误解之一早期有一个很典型的误区：  算法强 &#x3D; 数学好  实际刷题后会发现： 工程面试中的算法更偏：  模式识别 数据结构选择 边界处理能力 代码实现能力  数学能力反而不是核心门槛。  数组与基础问题数组是最常见的起点。...</div></div></div></a><a class="pagination-related" href="/2023/08/01/ops/Docker-Compose-Environment/" title="Docker 与 Compose：从能跑到可交付的工程化转变"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Docker 与 Compose：从能跑到可交付的工程化转变</div></div><div class="info-2"><div class="info-item-1">Docker 与 Compose：从能跑到可交付的工程化转变经典问题始终没变： 你本地能跑 我本地不能跑 服务器直接炸  排查一圈之后通常会发现：  Python &#x2F; Node 版本不一致 系统库差异（glibc &#x2F; openssl） 依赖版本漂移 环境变量缺失 数据库版本不一致 甚至时区都不一致  最后沟通会变成一句： “要不你把环境打包给我？”  Docker 本质就是把这句话变成现实。  一、Docker 解决的不是“部署问题”，而是“环境不可控问题”早期理解 Docker 很容易停留在：  打包代码 + 运行  但实际本质是： 应用 + 依赖 + 运行时 + 系统行为 = 可重复执行单元  它解决的是：  “环境不可复现导致的工程不确定性”   二、虚拟机 vs Docker：本质差异虚拟机宿主机  └── 虚拟硬件       └── 完整操作系统  特点：  重 慢 隔离强但成本高   Docker宿主机 Linux 内核  └── Namespace + Cgroups 隔离的进程  特点：  共享内核 轻量 启动快 更偏“进程级隔离”   关键...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2023/02/25/ai/StableDiffusion-Workflow/" title="Stable Diffusion 工作流与模型体系整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-02-26</div><div class="info-item-2">Stable Diffusion 工作流与模型体系整理</div></div><div class="info-2"><div class="info-item-1">Stable Diffusion 工作流与模型体系整理AI 绘画刚火的时候，其实很多人第一反应都是：  “这玩意是不是以后画师要失业了？”  但真正自己上手后才发现： 这东西更像： 新的生产工具  而且门槛其实不低。 尤其是：  模型 参数 插件 显存 工作流 提示词 ControlNet LoRA  这一套东西刚接触时真的非常混乱。  我最开始接触 SD 的方式最早其实是从 B 站开始。 那时候最出名的应该就是：  秋葉aaaki 整合包 各种 NovelAI 二创模型 二次元炼丹教程  当时很多人： 连 Python 都不会  但已经能开始跑 AI 绘画了。 某种意义上：  SD 能火，很大原因就是社区整合做得太好了。  尤其秋叶整合包。 基本已经做到： 下载 → 解压 → 双击启动  对普通用户非常友好。  Stable Diffusion 到底是什么第一次接触时我也很懵。 各种概念满天飞：  checkpoint vae embedding hypernetwork lora controlnet  后来慢慢理解后发现： 其实核心逻辑没那么复杂。  SD 本质上在干什么简...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">thchen</div><div class="author-info-description">全栈开发 / AI Agent / 系统设计</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/kesuoer-ui" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#AI-%E8%AF%AD%E9%9F%B3%E3%80%81AI-%E7%BF%BB%E5%94%B1%E4%B8%8E%E9%9F%B3%E8%89%B2%E8%BD%AC%E6%8D%A2%E6%8A%80%E6%9C%AF%E6%95%B4%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">AI 语音、AI 翻唱与音色转换技术整理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%88%91%E6%8E%A5%E8%A7%A6-AI-%E8%AF%AD%E9%9F%B3%E7%9A%84%E6%95%B4%E4%B8%AA%E8%BF%87%E7%A8%8B"><span class="toc-number">2.</span> <span class="toc-text">一、我接触 AI 语音的整个过程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E2%80%9C%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E3%80%82%E2%80%9D"><span class="toc-number">3.</span> <span class="toc-text">“数据处理。”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81AI%E8%AF%AD%E9%9F%B3%E9%A2%86%E5%9F%9F%E5%88%B0%E5%BA%95%E5%9C%A8%E5%81%9A%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">4.</span> <span class="toc-text">二、AI语音领域到底在做什么？</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#TTS%EF%BC%88Text-To-Speech%EF%BC%89"><span class="toc-number">4.1.</span> <span class="toc-text">TTS（Text To Speech）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SVC%EF%BC%88Singing-Voice-Conversion%EF%BC%89"><span class="toc-number">4.2.</span> <span class="toc-text">SVC（Singing Voice Conversion）</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81VITS%EF%BC%9A%E5%BD%93%E5%B9%B4%E7%9C%9F%E6%AD%A3%E6%84%8F%E4%B9%89%E4%B8%8A%E7%9A%84%E2%80%9C%E9%9D%A9%E5%91%BD%E2%80%9D"><span class="toc-number">5.</span> <span class="toc-text">三、VITS：当年真正意义上的“革命”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E3%80%81VITS-%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">6.</span> <span class="toc-text">四、VITS 到底是什么？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%94%E3%80%81VITS-%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BC%BA%EF%BC%9F"><span class="toc-number">7.</span> <span class="toc-text">五、VITS 为什么强？</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E4%B8%8D%E5%86%8D%E6%8B%BC%E6%8E%A5%E9%9F%B3%E7%B4%A0"><span class="toc-number">7.1.</span> <span class="toc-text">1. 不再拼接音素</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E2%80%9C%E7%9B%B4%E6%8E%A5%E5%AD%A6%E4%B9%A0%E4%BA%BA%E7%B1%BB%E5%8F%91%E5%A3%B0%E8%A7%84%E5%BE%8B%E2%80%9D"><span class="toc-number">7.2.</span> <span class="toc-text">“直接学习人类发声规律”</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%AD%E3%80%81VITS-%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-number">8.</span> <span class="toc-text">六、VITS 的工作流程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E2%80%9C%E8%AE%A9%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%BC%9A%E6%80%8E%E4%B9%88%E5%8F%91%E5%A3%B0%E2%80%9D"><span class="toc-number">8.1.</span> <span class="toc-text">“让模型学会怎么发声”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E2%80%9C%E8%AE%A9%E7%A8%8B%E5%BA%8F%E6%8B%BC%E5%A3%B0%E9%9F%B3%E2%80%9D"><span class="toc-number">8.2.</span> <span class="toc-text">“让程序拼声音”</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%83%E3%80%81VITS-%E8%AE%AD%E7%BB%83%E6%9C%80%E9%9A%BE%E7%9A%84%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">9.</span> <span class="toc-text">七、VITS 训练最难的是什么？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E9%9B%86%E3%80%82"><span class="toc-number">10.</span> <span class="toc-text">数据集。</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E5%A5%BD%E6%A8%A1%E5%9E%8B%E9%9C%80%E8%A6%81%EF%BC%9A"><span class="toc-number">10.1.</span> <span class="toc-text">一个好模型需要：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B9%B2%E5%A3%B0%E3%80%82"><span class="toc-number">11.</span> <span class="toc-text">干声。</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E4%BB%80%E4%B9%88%E5%8F%AB%E5%B9%B2%E5%A3%B0%EF%BC%9F"><span class="toc-number">12.</span> <span class="toc-text">八、什么叫干声？</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%B9%B2%E5%A3%B0%E8%BF%99%E4%B9%88%E9%87%8D%E8%A6%81%EF%BC%9F"><span class="toc-number">12.1.</span> <span class="toc-text">为什么干声这么重要？</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E2%80%9C%E6%8A%8A%E8%AE%AD%E7%BB%83%E9%9B%86%E9%87%8C%E7%9A%84%E6%89%80%E6%9C%89%E4%B8%9C%E8%A5%BF%E4%B8%80%E8%B5%B7%E5%AD%A6%E8%BF%9B%E5%8E%BB%E3%80%82%E2%80%9D"><span class="toc-number">13.</span> <span class="toc-text">“把训练集里的所有东西一起学进去。”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E6%88%91%E5%BD%93%E6%97%B6%E6%80%8E%E4%B9%88%E6%94%B6%E9%9B%86%E8%AE%AD%E7%BB%83%E9%9B%86"><span class="toc-number">14.</span> <span class="toc-text">九、我当时怎么收集训练集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E6%9D%A5%E6%BA%90%EF%BC%9A"><span class="toc-number">14.1.</span> <span class="toc-text">常见来源：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%A4%A7%E9%97%AE%E9%A2%98%EF%BC%9A"><span class="toc-number">14.2.</span> <span class="toc-text">最大问题：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%80%9C%E6%B2%A1%E6%9C%89%E5%B9%B2%E5%87%80%E9%9F%B3%E9%A2%91%E3%80%82%E2%80%9D"><span class="toc-number">14.2.1.</span> <span class="toc-text">“没有干净音频。”</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%87%AA%E5%B7%B1%E6%8B%86%E3%80%82"><span class="toc-number">15.</span> <span class="toc-text">自己拆。</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E3%80%81UVR%EF%BC%9A%E6%95%B4%E4%B8%AA-AI-%E7%BF%BB%E5%94%B1%E5%9C%88%E7%9A%84%E6%A0%B8%E5%BF%83%E5%B7%A5%E5%85%B7%E4%B9%8B%E4%B8%80"><span class="toc-number">16.</span> <span class="toc-text">十、UVR：整个 AI 翻唱圈的核心工具之一</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Ultimate-Vocal-Remover%EF%BC%88UVR%EF%BC%89"><span class="toc-number">17.</span> <span class="toc-text">Ultimate Vocal Remover（UVR）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#AI%E7%BF%BB%E5%94%B1%E5%89%8D%E7%BD%AE%E5%B7%A5%E5%85%B7%E3%80%82"><span class="toc-number">17.1.</span> <span class="toc-text">AI翻唱前置工具。</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E4%B8%80%E3%80%81UVR-%E8%83%BD%E5%81%9A%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">18.</span> <span class="toc-text">十一、UVR 能做什么？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E4%BA%8C%E3%80%81AI%E7%BF%BB%E5%94%B1%E4%B8%BA%E4%BB%80%E4%B9%88%E7%A6%BB%E4%B8%8D%E5%BC%80-UVR"><span class="toc-number">19.</span> <span class="toc-text">十二、AI翻唱为什么离不开 UVR</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#SVC-%E8%AE%AD%E7%BB%83%E8%A6%81%E6%B1%82%E2%80%9C%E7%BA%AF%E4%BA%BA%E5%A3%B0%E2%80%9D%E3%80%82"><span class="toc-number">20.</span> <span class="toc-text">SVC 训练要求“纯人声”。</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E4%B8%89%E3%80%81%E6%88%91%E8%B8%A9%E8%BF%87%E6%9C%80%E5%A4%9A%E7%9A%84%E5%9D%91%EF%BC%9A%E8%AE%AD%E7%BB%83%E9%9B%86%E8%B4%A8%E9%87%8F"><span class="toc-number">21.</span> <span class="toc-text">十三、我踩过最多的坑：训练集质量</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#70-%E9%97%AE%E9%A2%98%E6%9D%A5%E8%87%AA%E6%95%B0%E6%8D%AE%E9%9B%86%E3%80%82"><span class="toc-number">22.</span> <span class="toc-text">70%问题来自数据集。</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E7%BF%BB%E8%BD%A6%EF%BC%9A"><span class="toc-number">22.1.</span> <span class="toc-text">常见翻车：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E9%9F%B3%E9%87%8F%E4%B8%8D%E7%BB%9F%E4%B8%80"><span class="toc-number">22.1.1.</span> <span class="toc-text">1. 音量不统一</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E9%87%87%E6%A0%B7%E7%8E%87%E6%B7%B7%E4%B9%B1"><span class="toc-number">22.1.2.</span> <span class="toc-text">2. 采样率混乱</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%83%85%E7%BB%AA%E5%B7%AE%E5%BC%82%E5%A4%AA%E5%A4%A7"><span class="toc-number">22.1.3.</span> <span class="toc-text">3. 情绪差异太大</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%B7%B7%E5%93%8D%E5%A4%AA%E9%87%8D"><span class="toc-number">22.1.4.</span> <span class="toc-text">4. 混响太重</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E5%9B%9B%E3%80%81SVC-%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">23.</span> <span class="toc-text">十四、SVC 到底是什么？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BF%9D%E7%95%99%E6%97%8B%E5%BE%8B%EF%BC%8C%E5%8F%AA%E6%9B%BF%E6%8D%A2%E9%9F%B3%E8%89%B2%E3%80%82"><span class="toc-number">24.</span> <span class="toc-text">保留旋律，只替换音色。</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BE%93%E5%85%A5%EF%BC%9A"><span class="toc-number">24.1.</span> <span class="toc-text">输入：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BE%93%E5%87%BA%EF%BC%9A"><span class="toc-number">24.2.</span> <span class="toc-text">输出：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E4%BA%94%E3%80%81SVC-%E7%9A%84%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B"><span class="toc-number">25.</span> <span class="toc-text">十五、SVC 的核心流程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Pitch%EF%BC%88%E9%9F%B3%E9%AB%98%EF%BC%89"><span class="toc-number">25.1.</span> <span class="toc-text">Pitch（音高）</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E2%80%9C%E6%97%8B%E5%BE%8B%E6%9C%AC%E8%BA%AB%E4%B8%8D%E8%83%BD%E4%B8%A2%E3%80%82%E2%80%9D"><span class="toc-number">26.</span> <span class="toc-text">“旋律本身不能丢。”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E5%85%AD%E3%80%81DDSP-SVC-%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BD%93%E5%B9%B4%E5%BE%88%E7%81%AB"><span class="toc-number">27.</span> <span class="toc-text">十六、DDSP-SVC 为什么当年很火</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%9D%9E%E5%B8%B8%E8%BD%BB%E3%80%82"><span class="toc-number">28.</span> <span class="toc-text">非常轻。</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#DDSP-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">28.1.</span> <span class="toc-text">DDSP 是什么？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E2%80%9C%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-%E6%95%B0%E5%AD%97%E4%BF%A1%E5%8F%B7%E5%A4%84%E7%90%86%E2%80%9D"><span class="toc-number">28.2.</span> <span class="toc-text">“神经网络 + 数字信号处理”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%83%E7%9A%84%E7%89%B9%E7%82%B9%EF%BC%9A"><span class="toc-number">28.3.</span> <span class="toc-text">它的特点：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BE%88%E9%80%82%E5%90%88%E4%BD%8E%E9%85%8D%E7%BD%AE%E7%8E%A9%E5%AE%B6%E3%80%82"><span class="toc-number">29.</span> <span class="toc-text">很适合低配置玩家。</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E4%B8%83%E3%80%81Diffusion-SVC-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%95%88%E6%9E%9C%E6%9B%B4%E5%BC%BA"><span class="toc-number">30.</span> <span class="toc-text">十七、Diffusion-SVC 为什么效果更强</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%80%9D%E8%B7%AF%EF%BC%9A"><span class="toc-number">30.1.</span> <span class="toc-text">核心思路：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E2%80%9C%E4%B8%8D%E6%96%AD%E9%99%8D%E5%99%AA%E7%94%9F%E6%88%90%E9%9F%B3%E9%A2%91%E2%80%9D"><span class="toc-number">31.</span> <span class="toc-text">“不断降噪生成音频”</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%88%E6%9E%9C%EF%BC%9A"><span class="toc-number">31.1.</span> <span class="toc-text">效果：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E5%85%AB%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88-Diffusion-%E6%9B%B4%E5%83%8F%E7%9C%9F%E4%BA%BA"><span class="toc-number">32.</span> <span class="toc-text">十八、为什么 Diffusion 更像真人</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9B%B4%E6%93%85%E9%95%BF%E8%A1%A5%E7%BB%86%E8%8A%82%E3%80%82"><span class="toc-number">33.</span> <span class="toc-text">更擅长补细节。</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%81%E4%B9%9D%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BE%88%E5%A4%9A%E4%BA%BA%E5%90%8E%E6%9D%A5%E8%BD%AC%E5%90%91-RVC"><span class="toc-number">34.</span> <span class="toc-text">十九、为什么很多人后来转向 RVC</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%AA%E6%96%B9%E4%BE%BF%E4%BA%86%E3%80%82"><span class="toc-number">35.</span> <span class="toc-text">太方便了。</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#RVC-%E7%9A%84%E4%BC%98%E5%8A%BF%EF%BC%9A"><span class="toc-number">35.1.</span> <span class="toc-text">RVC 的优势：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E5%8D%81%E3%80%81%E6%98%BE%E5%8D%A1%E7%9C%9F%E7%9A%84%E6%98%AF%E9%97%A8%E6%A7%9B"><span class="toc-number">36.</span> <span class="toc-text">二十、显卡真的是门槛</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#GPU-%E5%86%B3%E5%AE%9A%E4%BD%93%E9%AA%8C%E3%80%82"><span class="toc-number">37.</span> <span class="toc-text">GPU 决定体验。</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BD%93%E5%B9%B4%E6%9C%80%E7%97%9B%E8%8B%A6%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%9A"><span class="toc-number">37.1.</span> <span class="toc-text">当年最痛苦的问题：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%EF%BC%9A"><span class="toc-number">37.2.</span> <span class="toc-text">常见问题：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E5%8D%81%E4%B8%80%E3%80%81AMD-%E5%BD%93%E5%B9%B4%E7%9C%9F%E7%9A%84%E5%BE%88%E9%9A%BE%E5%8F%97"><span class="toc-number">38.</span> <span class="toc-text">二十一、AMD 当年真的很难受</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%BB%98%E8%AE%A4-CUDA%E3%80%82"><span class="toc-number">39.</span> <span class="toc-text">默认 CUDA。</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E5%8D%81%E4%BA%8C%E3%80%81Google-Colab-%E5%BD%93%E5%B9%B4%E7%9C%9F%E7%9A%84%E6%98%AF%E6%95%91%E6%98%9F"><span class="toc-number">40.</span> <span class="toc-text">二十二、Google Colab 当年真的是救星</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%99%BD%E5%AB%96-GPU%E3%80%82"><span class="toc-number">41.</span> <span class="toc-text">白嫖 GPU。</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BD%93%E5%B9%B4%E6%9C%80%E7%BB%8F%E5%85%B8%EF%BC%9A"><span class="toc-number">41.1.</span> <span class="toc-text">当年最经典：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E5%8D%81%E4%B8%89%E3%80%81AI%E7%BF%BB%E5%94%B1%E7%9C%9F%E6%AD%A3%E9%9A%BE%E7%9A%84%E9%83%A8%E5%88%86%E5%85%B6%E5%AE%9E%E6%98%AF%E5%B7%A5%E7%A8%8B"><span class="toc-number">42.</span> <span class="toc-text">二十三、AI翻唱真正难的部分其实是工程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E5%90%8E%E5%A4%84%E7%90%86%E5%8D%A0%E4%BA%86%E5%A4%A7%E9%87%8F%E6%97%B6%E9%97%B4%E3%80%82"><span class="toc-number">43.</span> <span class="toc-text">前后处理占了大量时间。</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E5%8D%81%E5%9B%9B%E3%80%81%E4%B8%80%E4%B8%AA%E5%AE%8C%E6%95%B4-AI%E7%BF%BB%E5%94%B1%E6%B5%81%E7%A8%8B"><span class="toc-number">44.</span> <span class="toc-text">二十四、一个完整 AI翻唱流程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E5%8D%81%E4%BA%94%E3%80%81%E5%90%8E%E6%9C%9F%E6%B7%B7%E9%9F%B3%E4%B9%9F%E5%BE%88%E9%87%8D%E8%A6%81"><span class="toc-number">45.</span> <span class="toc-text">二十五、后期混音也很重要</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B2%A1%E6%B7%B7%E9%9F%B3%E3%80%82"><span class="toc-number">46.</span> <span class="toc-text">没混音。</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E5%A4%84%E7%90%86%EF%BC%9A"><span class="toc-number">46.1.</span> <span class="toc-text">常见处理：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E5%8D%81%E5%85%AD%E3%80%81AI%E8%AF%AD%E9%9F%B3%E9%A2%86%E5%9F%9F%E6%9C%80%E5%A4%A7%E7%9A%84%E5%8F%98%E5%8C%96"><span class="toc-number">47.</span> <span class="toc-text">二十六、AI语音领域最大的变化</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E2%80%9C%E8%83%BD%E7%94%A8%E2%80%9D"><span class="toc-number">48.</span> <span class="toc-text">“能用”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E5%8D%81%E4%B8%83%E3%80%81%E7%8E%B0%E5%9C%A8%E7%9A%84%E8%B6%8B%E5%8A%BF"><span class="toc-number">49.</span> <span class="toc-text">二十七、现在的趋势</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E2%80%9C%E4%B8%80%E5%8F%A5%E8%AF%9D%E5%85%8B%E9%9A%86%E5%A3%B0%E9%9F%B3%E2%80%9D"><span class="toc-number">50.</span> <span class="toc-text">“一句话克隆声音”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E5%8D%81%E5%85%AB%E3%80%81%E6%88%91%E5%AF%B9-AI%E8%AF%AD%E9%9F%B3%E6%9C%80%E5%A4%A7%E7%9A%84%E6%84%9F%E5%8F%97"><span class="toc-number">51.</span> <span class="toc-text">二十八、我对 AI语音最大的感受</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E2%80%9C%E6%B2%89%E8%BF%B7%E8%B0%83%E5%8F%82%E3%80%82%E2%80%9D"><span class="toc-number">52.</span> <span class="toc-text">“沉迷调参。”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E5%8D%81%E4%B9%9D%E3%80%81%E7%8E%B0%E5%9C%A8%E5%9B%9E%E5%A4%B4%E7%9C%8B"><span class="toc-number">53.</span> <span class="toc-text">二十九、现在回头看</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E2%80%9CAI%E7%BB%98%E7%94%BB%E7%9A%84%E5%8F%A6%E4%B8%80%E6%9D%A1%E5%B9%B3%E8%A1%8C%E7%BA%BF%E3%80%82%E2%80%9D"><span class="toc-number">54.</span> <span class="toc-text">“AI绘画的另一条平行线。”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E2%80%9C%E4%BD%A0%E4%BC%9A%E4%B8%8D%E4%BC%9A%E8%BF%90%E8%A1%8C%E6%A8%A1%E5%9E%8B%E2%80%9D"><span class="toc-number">55.</span> <span class="toc-text">“你会不会运行模型”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E2%80%9C%E4%BD%A0%E6%9C%89%E6%B2%A1%E6%9C%89%E5%AE%8C%E6%95%B4-workflow-%E7%9A%84%E7%90%86%E8%A7%A3%E2%80%9D"><span class="toc-number">56.</span> <span class="toc-text">“你有没有完整 workflow 的理解”</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E5%8D%81%E3%80%81%E6%9C%80%E5%90%8E%E8%A1%A5%E5%87%A0%E4%B8%AA%E7%8E%B0%E5%9C%A8%E5%B8%B8%E8%A7%81%E7%9A%84%E6%96%B0%E6%96%B9%E5%90%91"><span class="toc-number">57.</span> <span class="toc-text">三十、最后补几个现在常见的新方向</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#GPT-SoVITS"><span class="toc-number">57.1.</span> <span class="toc-text">GPT-SoVITS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#OpenVoice"><span class="toc-number">57.2.</span> <span class="toc-text">OpenVoice</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A3%B0%E9%9F%B3%E5%85%8B%E9%9A%86%E3%80%82"><span class="toc-number">58.</span> <span class="toc-text">声音克隆。</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Bert-VITS2"><span class="toc-number">58.1.</span> <span class="toc-text">Bert-VITS2</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E5%8D%81%E4%B8%80%E3%80%81%E4%B8%80%E4%BA%9B%E7%BB%8F%E5%85%B8%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95"><span class="toc-number">59.</span> <span class="toc-text">三十一、一些经典踩坑记录</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-ffmpeg-%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E6%B2%A1%E9%85%8D"><span class="toc-number">59.1.</span> <span class="toc-text">1. ffmpeg 环境变量没配</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-CUDA-%E7%89%88%E6%9C%AC%E4%B8%8D%E5%8C%B9%E9%85%8D"><span class="toc-number">59.2.</span> <span class="toc-text">2. CUDA 版本不匹配</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-half-precision-%E7%88%86-NaN"><span class="toc-number">59.3.</span> <span class="toc-text">3. half precision 爆 NaN</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-windows-%E8%B7%AF%E5%BE%84%E4%B8%AD%E6%96%87"><span class="toc-number">59.4.</span> <span class="toc-text">4. windows 路径中文</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-pytorch-%E7%89%88%E6%9C%AC%E5%86%B2%E7%AA%81"><span class="toc-number">59.5.</span> <span class="toc-text">5. pytorch 版本冲突</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E5%8D%81%E4%BA%8C%E3%80%81%E7%8E%B0%E5%9C%A8%E5%86%8D%E7%9C%8B%E8%BF%99%E4%BA%9B%E9%A1%B9%E7%9B%AE"><span class="toc-number">60.</span> <span class="toc-text">三十二、现在再看这些项目</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E2%80%9CAI%E6%95%B4%E6%B4%BB%E2%80%9D"><span class="toc-number">61.</span> <span class="toc-text">“AI整活”</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/19/life/two-failed-attempts-at-postgraduate-exam/" title="我的考研复习与调剂经历">我的考研复习与调剂经历</a><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/31/ai/Claude-Code-Agent-Architecture-Insights/" title="Claude Code 泄露源码带给我的 Agent 启发">Claude Code 泄露源码带给我的 Agent 启发</a><time datetime="2026-03-31T16:00:00.000Z" title="发表于 2026-04-01 00:00:00">2026-04-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/09/ops/Serverless-Practice/" title="记一次 Serverless 的认识与实践">记一次 Serverless 的认识与实践</a><time datetime="2026-03-09T16:00:00.000Z" title="发表于 2026-03-10 00:00:00">2026-03-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/11/19/ai/MCP-Tools-And-Prompt-Engineering-Trends/" title="MCP、Tools 与 Prompt Engineering 的工程化趋势">MCP、Tools 与 Prompt Engineering 的工程化趋势</a><time datetime="2025-11-19T16:00:00.000Z" title="发表于 2025-11-20 00:00:00">2025-11-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/15/ai/LangChain-LangGraph-Agent-Practice/" title="LangChain、LangGraph 与 AI Agent 工程实践">LangChain、LangGraph 与 AI Agent 工程实践</a><time datetime="2025-09-15T16:00:00.000Z" title="发表于 2025-09-16 00:00:00">2025-09-16</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By thchen</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'kesuoer-ui/kesuoer-ui.github.io',
+      'data-repo-id': 'R_kgDOSXiEqw',
+      'data-category-id': 'DIC_kwDOSXiEq84C8oeA',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>

@@ -1,0 +1,886 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>我研究过的网站反爬机制与破解思路整理 | thchen的闲言碎语堆积处</title><meta name="author" content="thchen"><meta name="copyright" content="thchen"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="我研究过的网站反爬机制与破解思路整理很多人刚学 Python 爬虫时。 都会经历一个阶段： requests.get(url)  然后： response.text  就觉得： “原来爬虫这么简单”  但真正开始做：  Twitter Pixiv 电商平台 社交网站 AI平台 视频网站  之后才会意识到：  现代网站对抗的已经不是“脚本”，而是“自动化系统”。  后来逐渐发现： 现代爬虫真正难的地">
+<meta property="og:type" content="article">
+<meta property="og:title" content="我研究过的网站反爬机制与破解思路整理">
+<meta property="og:url" content="https://kesuoer-ui.github.io/2021/02/10/network/Web-Anti-Scraping-Mechanisms-Analysis/index.html">
+<meta property="og:site_name" content="thchen的闲言碎语堆积处">
+<meta property="og:description" content="我研究过的网站反爬机制与破解思路整理很多人刚学 Python 爬虫时。 都会经历一个阶段： requests.get(url)  然后： response.text  就觉得： “原来爬虫这么简单”  但真正开始做：  Twitter Pixiv 电商平台 社交网站 AI平台 视频网站  之后才会意识到：  现代网站对抗的已经不是“脚本”，而是“自动化系统”。  后来逐渐发现： 现代爬虫真正难的地">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kesuoer-ui.github.io/img/avatar.png">
+<meta property="article:published_time" content="2021-02-10T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-11T13:28:55.282Z">
+<meta property="article:author" content="thchen">
+<meta property="article:tag" content="反爬">
+<meta property="article:tag" content="爬虫">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kesuoer-ui.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "我研究过的网站反爬机制与破解思路整理",
+  "url": "https://kesuoer-ui.github.io/2021/02/10/network/Web-Anti-Scraping-Mechanisms-Analysis/",
+  "image": "https://kesuoer-ui.github.io/img/avatar.png",
+  "datePublished": "2021-02-10T16:00:00.000Z",
+  "dateModified": "2026-05-11T13:28:55.282Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "thchen",
+      "url": "https://kesuoer-ui.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://kesuoer-ui.github.io/2021/02/10/network/Web-Anti-Scraping-Mechanisms-Analysis/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '我研究过的网站反爬机制与破解思路整理',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 8.1.2"><link rel="alternate" href="/atom.xml" title="thchen的闲言碎语堆积处" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">thchen的闲言碎语堆积处</span></a><a class="nav-page-title" href="/"><span class="site-name">我研究过的网站反爬机制与破解思路整理</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">我研究过的网站反爬机制与破解思路整理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-02-10T16:00:00.000Z" title="发表于 2021-02-11 00:00:00">2021-02-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-11T13:28:55.282Z" title="更新于 2026-05-11 21:28:55">2026-05-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Web%E5%AE%89%E5%85%A8/">Web安全</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="我研究过的网站反爬机制与破解思路整理"><a href="#我研究过的网站反爬机制与破解思路整理" class="headerlink" title="我研究过的网站反爬机制与破解思路整理"></a>我研究过的网站反爬机制与破解思路整理</h1><p>很多人刚学 Python 爬虫时。</p>
+<p>都会经历一个阶段：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">requests<span class="token punctuation">.</span>get<span class="token punctuation">(</span>url<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>然后：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">response<span class="token punctuation">.</span>text<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>就觉得：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">“原来爬虫这么简单”<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>但真正开始做：</p>
+<ul>
+<li>Twitter</li>
+<li>Pixiv</li>
+<li>电商平台</li>
+<li>社交网站</li>
+<li>AI平台</li>
+<li>视频网站</li>
+</ul>
+<p>之后才会意识到：</p>
+<blockquote>
+<p>现代网站对抗的已经不是“脚本”，而是“自动化系统”。</p>
+</blockquote>
+<p>后来逐渐发现：</p>
+<p>现代爬虫真正难的地方不是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">怎么发请求<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>而是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">怎么伪装成“正常人”<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="现代反爬的核心思路"><a href="#现代反爬的核心思路" class="headerlink" title="现代反爬的核心思路"></a>现代反爬的核心思路</h1><p>反爬从来不是单点策略，而是分层体系：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">请求层
+↓
+账号层
+↓
+行为层
+↓
+浏览器层
+↓
+设备层
+↓
+网络层<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>任意一层异常都会触发：</p>
+<ul>
+<li>403</li>
+<li>限流</li>
+<li>风控</li>
+<li>验证码</li>
+<li>登录失效</li>
+</ul>
+<hr>
+<h1 id="第一阶段：Header-检测"><a href="#第一阶段：Header-检测" class="headerlink" title="第一阶段：Header 检测"></a>第一阶段：Header 检测</h1><p>这是最早遇到的一层门槛。</p>
+<p>最初写法：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> requests
+
+requests<span class="token punctuation">.</span>get<span class="token punctuation">(</span>url<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>结果直接：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">403 Forbidden<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="User-Agent-只是最低门槛"><a href="#User-Agent-只是最低门槛" class="headerlink" title="User-Agent 只是最低门槛"></a>User-Agent 只是最低门槛</h1><p>补上：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">headers <span class="token operator">=</span> <span class="token punctuation">&#123;</span>
+    <span class="token string">"User-Agent"</span><span class="token punctuation">:</span> <span class="token string">"Mozilla/5.0"</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>部分站点可用，但很快会失效。</p>
+<p>后来逐渐意识到：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">网站判断的不是“有没有UA”
+而是“像不像浏览器”<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="更完整的-Header-体系"><a href="#更完整的-Header-体系" class="headerlink" title="更完整的 Header 体系"></a>更完整的 Header 体系</h1><p>通过 F12 抓包后，开始复现浏览器请求：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">headers <span class="token operator">=</span> <span class="token punctuation">&#123;</span>
+    <span class="token string">"User-Agent"</span><span class="token punctuation">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span>
+    <span class="token string">"Referer"</span><span class="token punctuation">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span>
+    <span class="token string">"Accept-Language"</span><span class="token punctuation">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span>
+    <span class="token string">"sec-fetch-site"</span><span class="token punctuation">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span>
+    <span class="token string">"sec-ch-ua"</span><span class="token punctuation">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>结论很明确：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Header不能随便拼，只能“复刻浏览器”<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="Session-的重要性"><a href="#Session-的重要性" class="headerlink" title="Session 的重要性"></a>Session 的重要性</h1><p>开始用：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">session <span class="token operator">=</span> requests<span class="token punctuation">.</span>Session<span class="token punctuation">(</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>原因很直接：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Cookie + 连接复用 = 登录态维持基础<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="第二阶段：Cookie-与-Session"><a href="#第二阶段：Cookie-与-Session" class="headerlink" title="第二阶段：Cookie 与 Session"></a>第二阶段：Cookie 与 Session</h1><p>真正的分水岭是理解：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">登录状态本质是 Cookie<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>浏览器自动携带：</p>
+<pre class="line-numbers language-http" data-language="http"><code class="language-http"><span class="token header"><span class="token header-name keyword">Cookie</span><span class="token punctuation">:</span> <span class="token header-value">sessionid=xxx</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="常见三种处理方式"><a href="#常见三种处理方式" class="headerlink" title="常见三种处理方式"></a>常见三种处理方式</h1><h2 id="1-手动-Cookie"><a href="#1-手动-Cookie" class="headerlink" title="1. 手动 Cookie"></a>1. 手动 Cookie</h2><p>直接从浏览器复制。</p>
+<p>适用于快速验证。</p>
+<hr>
+<h2 id="2-Session-维持"><a href="#2-Session-维持" class="headerlink" title="2. Session 维持"></a>2. Session 维持</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python">session <span class="token operator">=</span> requests<span class="token punctuation">.</span>Session<span class="token punctuation">(</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>通过登录接口自动获取 Cookie。</p>
+<hr>
+<h2 id="3-浏览器复用"><a href="#3-浏览器复用" class="headerlink" title="3. 浏览器复用"></a>3. 浏览器复用</h2><p>后期更稳定方案：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">直接复用真实浏览器登录态<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="第三阶段：动态参数与签名"><a href="#第三阶段：动态参数与签名" class="headerlink" title="第三阶段：动态参数与签名"></a>第三阶段：动态参数与签名</h1><p>进入真正的 JS 对抗阶段。</p>
+<p>典型特征：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">请求参数每次都不同<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>常见字段：</p>
+<ul>
+<li>sign</li>
+<li>token</li>
+<li>nonce</li>
+<li>timestamp</li>
+</ul>
+<hr>
+<h1 id="排查流程"><a href="#排查流程" class="headerlink" title="排查流程"></a>排查流程</h1><p>标准分析路径：</p>
+<h2 id="1-抓包定位接口"><a href="#1-抓包定位接口" class="headerlink" title="1. 抓包定位接口"></a>1. 抓包定位接口</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">Network → XHR / Fetch<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h2 id="2-请求重放"><a href="#2-请求重放" class="headerlink" title="2. 请求重放"></a>2. 请求重放</h2><p>Python 复现请求。</p>
+<hr>
+<h2 id="3-逐参数排除"><a href="#3-逐参数排除" class="headerlink" title="3. 逐参数排除"></a>3. 逐参数排除</h2><p>删除：</p>
+<ul>
+<li>sign</li>
+<li>token</li>
+<li>timestamp</li>
+</ul>
+<p>定位失败点。</p>
+<hr>
+<h2 id="4-JS-关键词搜索"><a href="#4-JS-关键词搜索" class="headerlink" title="4. JS 关键词搜索"></a>4. JS 关键词搜索</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">md5
+sha1
+CryptoJS
+sign<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="动态参数分类"><a href="#动态参数分类" class="headerlink" title="动态参数分类"></a>动态参数分类</h1><h2 id="时间戳"><a href="#时间戳" class="headerlink" title="时间戳"></a>时间戳</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token builtin">int</span><span class="token punctuation">(</span>time<span class="token punctuation">.</span>time<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">1000</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h2 id="随机值"><a href="#随机值" class="headerlink" title="随机值"></a>随机值</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">uuid / nonce<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h2 id="哈希签名"><a href="#哈希签名" class="headerlink" title="哈希签名"></a>哈希签名</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python">md5<span class="token punctuation">(</span>token <span class="token operator">+</span> timestamp <span class="token operator">+</span> data<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="三种实现策略"><a href="#三种实现策略" class="headerlink" title="三种实现策略"></a>三种实现策略</h1><h2 id="1-Python复刻"><a href="#1-Python复刻" class="headerlink" title="1. Python复刻"></a>1. Python复刻</h2><p>适用于简单签名逻辑。</p>
+<hr>
+<h2 id="2-execjs执行原JS"><a href="#2-execjs执行原JS" class="headerlink" title="2. execjs执行原JS"></a>2. execjs执行原JS</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> execjs<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>直接复用前端逻辑。</p>
+<hr>
+<h2 id="3-浏览器执行"><a href="#3-浏览器执行" class="headerlink" title="3. 浏览器执行"></a>3. 浏览器执行</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">Playwright / Selenium<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>让浏览器自己生成参数。</p>
+<hr>
+<h1 id="JavaScript-混淆分析"><a href="#JavaScript-混淆分析" class="headerlink" title="JavaScript 混淆分析"></a>JavaScript 混淆分析</h1><p>混淆的本质不是加密，而是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">增加阅读成本<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>常见形式：</p>
+<ul>
+<li>字符串数组映射</li>
+<li>eval 执行</li>
+<li>控制流平坦化</li>
+</ul>
+<hr>
+<h1 id="常见破解方式"><a href="#常见破解方式" class="headerlink" title="常见破解方式"></a>常见破解方式</h1><h2 id="1-关键字搜索"><a href="#1-关键字搜索" class="headerlink" title="1. 关键字搜索"></a>1. 关键字搜索</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">sign / token / md5 / CryptoJS<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h2 id="2-断点调试"><a href="#2-断点调试" class="headerlink" title="2. 断点调试"></a>2. 断点调试</h2><pre class="line-numbers language-text" data-language="text"><code class="language-text">Sources → Breakpoint<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h2 id="3-Hook-API"><a href="#3-Hook-API" class="headerlink" title="3. Hook API"></a>3. Hook API</h2><pre class="line-numbers language-javascript" data-language="javascript"><code class="language-javascript">fetch<span class="token punctuation">;</span>
+XMLHttpRequest<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<h1 id="Selenium-反检测问题"><a href="#Selenium-反检测问题" class="headerlink" title="Selenium 反检测问题"></a>Selenium 反检测问题</h1><p>现代网站检测：</p>
+<pre class="line-numbers language-javascript" data-language="javascript"><code class="language-javascript">navigator<span class="token punctuation">.</span>webdriver<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>Selenium 默认：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">true<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="解决方案演进"><a href="#解决方案演进" class="headerlink" title="解决方案演进"></a>解决方案演进</h1><h2 id="undetected-chromedriver"><a href="#undetected-chromedriver" class="headerlink" title="undetected-chromedriver"></a>undetected-chromedriver</h2><p>基础绕过方案。</p>
+<hr>
+<h2 id="Playwright"><a href="#Playwright" class="headerlink" title="Playwright"></a>Playwright</h2><p>更现代方案：</p>
+<ul>
+<li>自动等待</li>
+<li>更真实行为</li>
+<li>更稳定上下文</li>
+</ul>
+<hr>
+<h2 id="行为控制"><a href="#行为控制" class="headerlink" title="行为控制"></a>行为控制</h2><p>避免：</p>
+<ul>
+<li>高频请求</li>
+<li>瞬时翻页</li>
+<li>固定节奏操作</li>
+</ul>
+<hr>
+<h1 id="验证码问题的本质"><a href="#验证码问题的本质" class="headerlink" title="验证码问题的本质"></a>验证码问题的本质</h1><p>验证码本质不是识别问题，而是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">判断是否为自动化行为<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="实战策略"><a href="#实战策略" class="headerlink" title="实战策略"></a>实战策略</h1><p>核心思路：</p>
+<h2 id="1-降低风控触发"><a href="#1-降低风控触发" class="headerlink" title="1. 降低风控触发"></a>1. 降低风控触发</h2><ul>
+<li>限速</li>
+<li>随机等待</li>
+<li>模拟真实操作</li>
+</ul>
+<hr>
+<h2 id="2-复用登录态"><a href="#2-复用登录态" class="headerlink" title="2. 复用登录态"></a>2. 复用登录态</h2><p>避免频繁登录。</p>
+<hr>
+<h2 id="3-使用真实浏览器"><a href="#3-使用真实浏览器" class="headerlink" title="3. 使用真实浏览器"></a>3. 使用真实浏览器</h2><p>优先 Playwright。</p>
+<hr>
+<h1 id="Cloudflare-风控体系"><a href="#Cloudflare-风控体系" class="headerlink" title="Cloudflare 风控体系"></a>Cloudflare 风控体系</h1><p>典型页面：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Checking your browser...<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="检测维度"><a href="#检测维度" class="headerlink" title="检测维度"></a>检测维度</h1><p>不仅是 HTTP：</p>
+<ul>
+<li>TLS 指纹</li>
+<li>JS执行环境</li>
+<li>浏览器指纹</li>
+<li>Cookie状态</li>
+<li>IP信誉</li>
+</ul>
+<hr>
+<h1 id="应对路径"><a href="#应对路径" class="headerlink" title="应对路径"></a>应对路径</h1><h2 id="cloudscraper"><a href="#cloudscraper" class="headerlink" title="cloudscraper"></a>cloudscraper</h2><p>适用于轻度站点。</p>
+<hr>
+<h2 id="Selenium"><a href="#Selenium" class="headerlink" title="Selenium"></a>Selenium</h2><p>兼容性强但较重。</p>
+<hr>
+<h2 id="Playwright-1"><a href="#Playwright-1" class="headerlink" title="Playwright"></a>Playwright</h2><p>当前最稳定方案。</p>
+<hr>
+<h2 id="持久化浏览器上下文"><a href="#持久化浏览器上下文" class="headerlink" title="持久化浏览器上下文"></a>持久化浏览器上下文</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python">launch_persistent_context<span class="token punctuation">(</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>保存：</p>
+<ul>
+<li>Cookie</li>
+<li>LocalStorage</li>
+<li>登录态</li>
+</ul>
+<hr>
+<h1 id="浏览器指纹体系"><a href="#浏览器指纹体系" class="headerlink" title="浏览器指纹体系"></a>浏览器指纹体系</h1><p>网站可识别：</p>
+<ul>
+<li>Canvas</li>
+<li>WebGL</li>
+<li>字体</li>
+<li>分辨率</li>
+<li>时区</li>
+<li>GPU特征</li>
+</ul>
+<p>结论：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">换IP不等于匿名<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="IP-与代理策略"><a href="#IP-与代理策略" class="headerlink" title="IP 与代理策略"></a>IP 与代理策略</h1><p>常见问题：</p>
+<ul>
+<li>免费代理不可用</li>
+<li>机房IP容易风控</li>
+<li>住宅IP更稳定</li>
+</ul>
+<hr>
+<h1 id="分层策略"><a href="#分层策略" class="headerlink" title="分层策略"></a>分层策略</h1><h2 id="小规模"><a href="#小规模" class="headerlink" title="小规模"></a>小规模</h2><p>单 IP + 限速</p>
+<hr>
+<h2 id="中规模"><a href="#中规模" class="headerlink" title="中规模"></a>中规模</h2><p>代理池轮换</p>
+<hr>
+<h2 id="大规模"><a href="#大规模" class="headerlink" title="大规模"></a>大规模</h2><p>真实浏览器 + 行为模拟</p>
+<hr>
+<h1 id="Playwright-的关键优势"><a href="#Playwright-的关键优势" class="headerlink" title="Playwright 的关键优势"></a>Playwright 的关键优势</h1><p>相比 Selenium：</p>
+<ul>
+<li>更稳定</li>
+<li>更现代 API</li>
+<li>自动等待机制</li>
+<li>多上下文支持</li>
+</ul>
+<hr>
+<h1 id="对爬虫认知的变化"><a href="#对爬虫认知的变化" class="headerlink" title="对爬虫认知的变化"></a>对爬虫认知的变化</h1><p>早期认知：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">爬虫 = requests<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>后期认知：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">爬虫 = 浏览器行为模拟系统<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="现代反爬的本质"><a href="#现代反爬的本质" class="headerlink" title="现代反爬的本质"></a>现代反爬的本质</h1><p>从阻止脚本执行，变成：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">识别非人类行为<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h1 id="最终结论"><a href="#最终结论" class="headerlink" title="最终结论"></a>最终结论</h1><p>真正稳定的策略不是对抗规则，而是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">尽可能贴近真实用户行为<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>包括：</p>
+<ul>
+<li>真实浏览器环境</li>
+<li>合理访问频率</li>
+<li>登录态复用</li>
+<li>行为自然化</li>
+</ul>
+<hr>
+<h1 id="核心能力迁移"><a href="#核心能力迁移" class="headerlink" title="核心能力迁移"></a>核心能力迁移</h1><p>最终能力不在代码层面，而在：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">理解 Web 系统如何运行<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>包括：</p>
+<ul>
+<li>HTTP</li>
+<li>Cookie &#x2F; Session</li>
+<li>JS逻辑</li>
+<li>浏览器机制</li>
+<li>风控体系</li>
+<li>前端行为</li>
+</ul>
+<hr>
+<h1 id="终点认知"><a href="#终点认知" class="headerlink" title="终点认知"></a>终点认知</h1><p>所有请求最终都会落到：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">Network<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>而真正的信息，也全部在那里。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io">thchen</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io/2021/02/10/network/Web-Anti-Scraping-Mechanisms-Analysis/">https://kesuoer-ui.github.io/2021/02/10/network/Web-Anti-Scraping-Mechanisms-Analysis/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://kesuoer-ui.github.io" target="_blank">thchen的闲言碎语堆积处</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%88%AC%E8%99%AB/">爬虫</a><a class="post-meta__tags" href="/tags/%E5%8F%8D%E7%88%AC/">反爬</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2021/04/13/network/from-fiddler-to-wireshark-packet-capture-notes/" title="从 Fiddler 到 Wireshark：抓包技术整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">从 Fiddler 到 Wireshark：抓包技术整理</div></div><div class="info-2"><div class="info-item-1">从 Fiddler 到 Wireshark：抓包技术整理最开始接触抓包，其实不是为了学习网络协议，而是很功利的目的：  看接口返回结构 改请求参数 找接口逻辑 做自动化 写 Bot  后来做的事情多了之后才发现，抓包本质是在看：  客户端到底是怎么和服务端通信的。   我接触抓包的工具演进大致是这么一路过来的： id浏览器 F12 → Fiddler → Charles / 小黄鸟 → BurpSuite → Wireshark  不同阶段解决的问题不一样：    工具 我当时主要用来干什么    F12 看接口   Fiddler HTTP&#x2F;HTTPS 抓包   Charles 手机抓包   BurpSuite 改包 &#x2F; 重放   Wireshark 看底层网络    抓包的本质我后来对它的理解其实很简单： id把客户端和服务端之间的通信拦下来  绝大多数工具都围绕一个核心机制： id代理（Proxy）  链路变成： id客户端 → 代理工具 → 服务器   HTTP 抓包阶段：Fiddler为什么 Fiddler 是起点因为它刚好解决我最早的需求：  看接...</div></div></div></a><a class="pagination-related" href="/2020/12/13/project/Twitter-And-Pixiv-Crawler-Practice/" title="Twitter 与 Pixiv 爬虫实践踩坑记录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Twitter 与 Pixiv 爬虫实践踩坑记录</div></div><div class="info-2"><div class="info-item-1">Twitter 与 Pixiv 爬虫实践踩坑记录这是我真正开始深入理解： 现代网站不是“网页” 而是“前端应用”  的一次项目实践。 当时主要目的其实很简单： 自动收集同人图  尤其：  Twitter Pixiv  这种二次元内容站。  最开始的想法其实很幼稚一开始我以为： requests.get()  就结束了。 后来才发现：  根本不是这么回事。   当时 Twitter 还叫 Twitter那时候： 还没改名 X。 而且： API 也没现在这么离谱。 但： 反爬已经很严重了。  第一次真正理解“动态网页”最开始。 我写的： 其实是： Selenium + XPath  传统浏览器爬虫。  当时的核心思路 1. 浏览器打开页面self.bro.get(self.link)   2. 下滑页面window.scrollTo()   3. 获取 HTMLcontent = self.bro.page_source   4. XPath 提取图片tree.xpath('//img/@src')   5. 下载图片urllib.request.urlretrieve()   现在...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2020/12/13/project/Twitter-And-Pixiv-Crawler-Practice/" title="Twitter 与 Pixiv 爬虫实践踩坑记录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-14</div><div class="info-item-2">Twitter 与 Pixiv 爬虫实践踩坑记录</div></div><div class="info-2"><div class="info-item-1">Twitter 与 Pixiv 爬虫实践踩坑记录这是我真正开始深入理解： 现代网站不是“网页” 而是“前端应用”  的一次项目实践。 当时主要目的其实很简单： 自动收集同人图  尤其：  Twitter Pixiv  这种二次元内容站。  最开始的想法其实很幼稚一开始我以为： requests.get()  就结束了。 后来才发现：  根本不是这么回事。   当时 Twitter 还叫 Twitter那时候： 还没改名 X。 而且： API 也没现在这么离谱。 但： 反爬已经很严重了。  第一次真正理解“动态网页”最开始。 我写的： 其实是： Selenium + XPath  传统浏览器爬虫。  当时的核心思路 1. 浏览器打开页面self.bro.get(self.link)   2. 下滑页面window.scrollTo()   3. 获取 HTMLcontent = self.bro.page_source   4. XPath 提取图片tree.xpath('//img/@src')   5. 下载图片urllib.request.urlretrieve()   现在...</div></div></div></a><a class="pagination-related" href="/2021/07/09/project/Twitter-And-Pixiv-Crawler-Practice-2/" title="Twitter 爬虫系统的第二次进化：从 Selenium 到 Playwright + API 并发架构"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2021-07-10</div><div class="info-item-2">Twitter 爬虫系统的第二次进化：从 Selenium 到 Playwright + API 并发架构</div></div><div class="info-2"><div class="info-item-1">Twitter 爬虫系统的第二次进化距离上一次写 Twitter &#x2F; Pixiv 爬虫实践，大概过去了 7 个月。 这段时间里，我对“爬虫”这件事的理解发生了一个比较明显的变化： 爬虫 ≠ 模拟浏览器 爬虫 = 数据入口工程化调度系统   这次目标其实更“现实”上一版还停留在：  Selenium 翻页 XPath 抓 HTML 人工 scroll + sleep  而这一版的目标变成： 尽可能稳定地批量处理 Twitter 推文数据  核心需求只有三个：  稳定拿到 tweet 结构化数据 高并发处理 URL 队列 避免浏览器阻塞成为瓶颈   技术栈的变化这一版明显分裂成两个层： 1. 数据层（API 优先）Twitter GraphQL API / v2 API  直接绕开 HTML。  2. 展示层（Playwright）Playwright（替代 Selenium）  只在必要场景下使用浏览器：  登录态继承 cookie 获取 页面验证辅助   一个关键转折：不再“解析网页”上一版核心是： XPath + DOM结构  这一版核心变成： GraphQL + J...</div></div></div></a><a class="pagination-related" href="/2022/09/17/backend/Modern-Python-Web-Scraping-And-Automation/" title="从 Scrapy 到 Playwright：现代 Python 爬虫技术整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2022-09-18</div><div class="info-item-2">从 Scrapy 到 Playwright：现代 Python 爬虫技术整理</div></div><div class="info-2"><div class="info-item-1">从 Scrapy 到 Playwright：现代 Python 爬虫技术整理很多人第一次接触 Python。 几乎都会接触： 爬虫  因为： Python 在这个领域生态太强了。 而我自己对爬虫技术的认知变化。 其实也是：  从“请求脚本小子” 到真正理解现代 Web 自动化。   最开始：requests + BeautifulSoup很多人入门爬虫。 基本都从： requests BeautifulSoup  开始。  requests：最经典 HTTP 库安装： pip install requests   最简单请求import requests  resp = requests.get("https://example.com")  print(resp.text)   BeautifulSoup：HTML 解析安装： pip install beautifulsoup4   最简单解析from bs4 import BeautifulSoup  soup = BeautifulSoup(resp.text, "html.parser")  title = soup.t...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">thchen</div><div class="author-info-description">全栈开发 / AI Agent / 系统设计</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/kesuoer-ui" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%88%91%E7%A0%94%E7%A9%B6%E8%BF%87%E7%9A%84%E7%BD%91%E7%AB%99%E5%8F%8D%E7%88%AC%E6%9C%BA%E5%88%B6%E4%B8%8E%E7%A0%B4%E8%A7%A3%E6%80%9D%E8%B7%AF%E6%95%B4%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">我研究过的网站反爬机制与破解思路整理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%8E%B0%E4%BB%A3%E5%8F%8D%E7%88%AC%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E8%B7%AF"><span class="toc-number">2.</span> <span class="toc-text">现代反爬的核心思路</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E9%98%B6%E6%AE%B5%EF%BC%9AHeader-%E6%A3%80%E6%B5%8B"><span class="toc-number">3.</span> <span class="toc-text">第一阶段：Header 检测</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#User-Agent-%E5%8F%AA%E6%98%AF%E6%9C%80%E4%BD%8E%E9%97%A8%E6%A7%9B"><span class="toc-number">4.</span> <span class="toc-text">User-Agent 只是最低门槛</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9B%B4%E5%AE%8C%E6%95%B4%E7%9A%84-Header-%E4%BD%93%E7%B3%BB"><span class="toc-number">5.</span> <span class="toc-text">更完整的 Header 体系</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Session-%E7%9A%84%E9%87%8D%E8%A6%81%E6%80%A7"><span class="toc-number">6.</span> <span class="toc-text">Session 的重要性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E9%98%B6%E6%AE%B5%EF%BC%9ACookie-%E4%B8%8E-Session"><span class="toc-number">7.</span> <span class="toc-text">第二阶段：Cookie 与 Session</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E4%B8%89%E7%A7%8D%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F"><span class="toc-number">8.</span> <span class="toc-text">常见三种处理方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%89%8B%E5%8A%A8-Cookie"><span class="toc-number">8.1.</span> <span class="toc-text">1. 手动 Cookie</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Session-%E7%BB%B4%E6%8C%81"><span class="toc-number">8.2.</span> <span class="toc-text">2. Session 维持</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%B5%8F%E8%A7%88%E5%99%A8%E5%A4%8D%E7%94%A8"><span class="toc-number">8.3.</span> <span class="toc-text">3. 浏览器复用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E9%98%B6%E6%AE%B5%EF%BC%9A%E5%8A%A8%E6%80%81%E5%8F%82%E6%95%B0%E4%B8%8E%E7%AD%BE%E5%90%8D"><span class="toc-number">9.</span> <span class="toc-text">第三阶段：动态参数与签名</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%92%E6%9F%A5%E6%B5%81%E7%A8%8B"><span class="toc-number">10.</span> <span class="toc-text">排查流程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%8A%93%E5%8C%85%E5%AE%9A%E4%BD%8D%E6%8E%A5%E5%8F%A3"><span class="toc-number">10.1.</span> <span class="toc-text">1. 抓包定位接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E8%AF%B7%E6%B1%82%E9%87%8D%E6%94%BE"><span class="toc-number">10.2.</span> <span class="toc-text">2. 请求重放</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E9%80%90%E5%8F%82%E6%95%B0%E6%8E%92%E9%99%A4"><span class="toc-number">10.3.</span> <span class="toc-text">3. 逐参数排除</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-JS-%E5%85%B3%E9%94%AE%E8%AF%8D%E6%90%9C%E7%B4%A2"><span class="toc-number">10.4.</span> <span class="toc-text">4. JS 关键词搜索</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E5%8F%82%E6%95%B0%E5%88%86%E7%B1%BB"><span class="toc-number">11.</span> <span class="toc-text">动态参数分类</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%B6%E9%97%B4%E6%88%B3"><span class="toc-number">11.1.</span> <span class="toc-text">时间戳</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9A%8F%E6%9C%BA%E5%80%BC"><span class="toc-number">11.2.</span> <span class="toc-text">随机值</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%93%88%E5%B8%8C%E7%AD%BE%E5%90%8D"><span class="toc-number">11.3.</span> <span class="toc-text">哈希签名</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E7%AD%96%E7%95%A5"><span class="toc-number">12.</span> <span class="toc-text">三种实现策略</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Python%E5%A4%8D%E5%88%BB"><span class="toc-number">12.1.</span> <span class="toc-text">1. Python复刻</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-execjs%E6%89%A7%E8%A1%8C%E5%8E%9FJS"><span class="toc-number">12.2.</span> <span class="toc-text">2. execjs执行原JS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%B5%8F%E8%A7%88%E5%99%A8%E6%89%A7%E8%A1%8C"><span class="toc-number">12.3.</span> <span class="toc-text">3. 浏览器执行</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#JavaScript-%E6%B7%B7%E6%B7%86%E5%88%86%E6%9E%90"><span class="toc-number">13.</span> <span class="toc-text">JavaScript 混淆分析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E7%A0%B4%E8%A7%A3%E6%96%B9%E5%BC%8F"><span class="toc-number">14.</span> <span class="toc-text">常见破解方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%85%B3%E9%94%AE%E5%AD%97%E6%90%9C%E7%B4%A2"><span class="toc-number">14.1.</span> <span class="toc-text">1. 关键字搜索</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%96%AD%E7%82%B9%E8%B0%83%E8%AF%95"><span class="toc-number">14.2.</span> <span class="toc-text">2. 断点调试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-Hook-API"><span class="toc-number">14.3.</span> <span class="toc-text">3. Hook API</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Selenium-%E5%8F%8D%E6%A3%80%E6%B5%8B%E9%97%AE%E9%A2%98"><span class="toc-number">15.</span> <span class="toc-text">Selenium 反检测问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E6%BC%94%E8%BF%9B"><span class="toc-number">16.</span> <span class="toc-text">解决方案演进</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#undetected-chromedriver"><span class="toc-number">16.1.</span> <span class="toc-text">undetected-chromedriver</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Playwright"><span class="toc-number">16.2.</span> <span class="toc-text">Playwright</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A1%8C%E4%B8%BA%E6%8E%A7%E5%88%B6"><span class="toc-number">16.3.</span> <span class="toc-text">行为控制</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E7%A0%81%E9%97%AE%E9%A2%98%E7%9A%84%E6%9C%AC%E8%B4%A8"><span class="toc-number">17.</span> <span class="toc-text">验证码问题的本质</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%9E%E6%88%98%E7%AD%96%E7%95%A5"><span class="toc-number">18.</span> <span class="toc-text">实战策略</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E9%99%8D%E4%BD%8E%E9%A3%8E%E6%8E%A7%E8%A7%A6%E5%8F%91"><span class="toc-number">18.1.</span> <span class="toc-text">1. 降低风控触发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%A4%8D%E7%94%A8%E7%99%BB%E5%BD%95%E6%80%81"><span class="toc-number">18.2.</span> <span class="toc-text">2. 复用登录态</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E4%BD%BF%E7%94%A8%E7%9C%9F%E5%AE%9E%E6%B5%8F%E8%A7%88%E5%99%A8"><span class="toc-number">18.3.</span> <span class="toc-text">3. 使用真实浏览器</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Cloudflare-%E9%A3%8E%E6%8E%A7%E4%BD%93%E7%B3%BB"><span class="toc-number">19.</span> <span class="toc-text">Cloudflare 风控体系</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A3%80%E6%B5%8B%E7%BB%B4%E5%BA%A6"><span class="toc-number">20.</span> <span class="toc-text">检测维度</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BA%94%E5%AF%B9%E8%B7%AF%E5%BE%84"><span class="toc-number">21.</span> <span class="toc-text">应对路径</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#cloudscraper"><span class="toc-number">21.1.</span> <span class="toc-text">cloudscraper</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Selenium"><span class="toc-number">21.2.</span> <span class="toc-text">Selenium</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Playwright-1"><span class="toc-number">21.3.</span> <span class="toc-text">Playwright</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%81%E4%B9%85%E5%8C%96%E6%B5%8F%E8%A7%88%E5%99%A8%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="toc-number">21.4.</span> <span class="toc-text">持久化浏览器上下文</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E6%8C%87%E7%BA%B9%E4%BD%93%E7%B3%BB"><span class="toc-number">22.</span> <span class="toc-text">浏览器指纹体系</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#IP-%E4%B8%8E%E4%BB%A3%E7%90%86%E7%AD%96%E7%95%A5"><span class="toc-number">23.</span> <span class="toc-text">IP 与代理策略</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%88%86%E5%B1%82%E7%AD%96%E7%95%A5"><span class="toc-number">24.</span> <span class="toc-text">分层策略</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E8%A7%84%E6%A8%A1"><span class="toc-number">24.1.</span> <span class="toc-text">小规模</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%AD%E8%A7%84%E6%A8%A1"><span class="toc-number">24.2.</span> <span class="toc-text">中规模</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%A7%E8%A7%84%E6%A8%A1"><span class="toc-number">24.3.</span> <span class="toc-text">大规模</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Playwright-%E7%9A%84%E5%85%B3%E9%94%AE%E4%BC%98%E5%8A%BF"><span class="toc-number">25.</span> <span class="toc-text">Playwright 的关键优势</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AF%B9%E7%88%AC%E8%99%AB%E8%AE%A4%E7%9F%A5%E7%9A%84%E5%8F%98%E5%8C%96"><span class="toc-number">26.</span> <span class="toc-text">对爬虫认知的变化</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%8E%B0%E4%BB%A3%E5%8F%8D%E7%88%AC%E7%9A%84%E6%9C%AC%E8%B4%A8"><span class="toc-number">27.</span> <span class="toc-text">现代反爬的本质</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%80%E7%BB%88%E7%BB%93%E8%AE%BA"><span class="toc-number">28.</span> <span class="toc-text">最终结论</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B%E8%BF%81%E7%A7%BB"><span class="toc-number">29.</span> <span class="toc-text">核心能力迁移</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%88%E7%82%B9%E8%AE%A4%E7%9F%A5"><span class="toc-number">30.</span> <span class="toc-text">终点认知</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/19/life/two-failed-attempts-at-postgraduate-exam/" title="我的考研复习与调剂经历">我的考研复习与调剂经历</a><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/31/ai/Claude-Code-Agent-Architecture-Insights/" title="Claude Code 泄露源码带给我的 Agent 启发">Claude Code 泄露源码带给我的 Agent 启发</a><time datetime="2026-03-31T16:00:00.000Z" title="发表于 2026-04-01 00:00:00">2026-04-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/09/ops/Serverless-Practice/" title="记一次 Serverless 的认识与实践">记一次 Serverless 的认识与实践</a><time datetime="2026-03-09T16:00:00.000Z" title="发表于 2026-03-10 00:00:00">2026-03-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/11/19/ai/MCP-Tools-And-Prompt-Engineering-Trends/" title="MCP、Tools 与 Prompt Engineering 的工程化趋势">MCP、Tools 与 Prompt Engineering 的工程化趋势</a><time datetime="2025-11-19T16:00:00.000Z" title="发表于 2025-11-20 00:00:00">2025-11-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/15/ai/LangChain-LangGraph-Agent-Practice/" title="LangChain、LangGraph 与 AI Agent 工程实践">LangChain、LangGraph 与 AI Agent 工程实践</a><time datetime="2025-09-15T16:00:00.000Z" title="发表于 2025-09-16 00:00:00">2025-09-16</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By thchen</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'kesuoer-ui/kesuoer-ui.github.io',
+      'data-repo-id': 'R_kgDOSXiEqw',
+      'data-category-id': 'DIC_kwDOSXiEq84C8oeA',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>

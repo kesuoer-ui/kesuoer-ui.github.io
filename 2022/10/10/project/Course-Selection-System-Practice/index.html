@@ -1,0 +1,1037 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>学生选课系统开发记录 | thchen的闲言碎语堆积处</title><meta name="author" content="thchen"><meta name="copyright" content="thchen"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="一次基于 SpringMVC + MyBatisPlus + Vue3 的完整课程设计实践，从数据库设计、后端接口、前端交互到 Nginx 部署，对学生选课系统开发过程的完整整理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="学生选课系统开发记录">
+<meta property="og:url" content="https://kesuoer-ui.github.io/2022/10/10/project/Course-Selection-System-Practice/index.html">
+<meta property="og:site_name" content="thchen的闲言碎语堆积处">
+<meta property="og:description" content="一次基于 SpringMVC + MyBatisPlus + Vue3 的完整课程设计实践，从数据库设计、后端接口、前端交互到 Nginx 部署，对学生选课系统开发过程的完整整理。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kesuoer-ui.github.io/img/avatar.png">
+<meta property="article:published_time" content="2022-10-10T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-11T13:28:55.284Z">
+<meta property="article:author" content="thchen">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="MyBatisPlus">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="Nginx">
+<meta property="article:tag" content="SpringBoot">
+<meta property="article:tag" content="SpringMVC">
+<meta property="article:tag" content="Vue3">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kesuoer-ui.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "学生选课系统开发记录",
+  "url": "https://kesuoer-ui.github.io/2022/10/10/project/Course-Selection-System-Practice/",
+  "image": "https://kesuoer-ui.github.io/img/avatar.png",
+  "datePublished": "2022-10-10T16:00:00.000Z",
+  "dateModified": "2026-05-11T13:28:55.284Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "thchen",
+      "url": "https://kesuoer-ui.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://kesuoer-ui.github.io/2022/10/10/project/Course-Selection-System-Practice/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '学生选课系统开发记录',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 8.1.2"><link rel="alternate" href="/atom.xml" title="thchen的闲言碎语堆积处" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">thchen的闲言碎语堆积处</span></a><a class="nav-page-title" href="/"><span class="site-name">学生选课系统开发记录</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">学生选课系统开发记录</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-10-10T16:00:00.000Z" title="发表于 2022-10-11 00:00:00">2022-10-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-11T13:28:55.284Z" title="更新于 2026-05-11 21:28:55">2026-05-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E9%A1%B9%E7%9B%AE%E5%AE%9E%E8%B7%B5/">项目实践</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="学生选课系统开发记录"><a href="#学生选课系统开发记录" class="headerlink" title="学生选课系统开发记录"></a>学生选课系统开发记录</h1><p>这是第一次独立完成一个完整的前后端分离系统。</p>
+<p>当时目标很明确：</p>
+<h1 id="复刻学校选课系统"><a href="#复刻学校选课系统" class="headerlink" title="复刻学校选课系统"></a>复刻学校选课系统</h1><p>但原系统存在明显问题：</p>
+<ul>
+<li>UI 老旧</li>
+<li>操作卡顿</li>
+<li>高峰期响应慢</li>
+<li>功能体验不一致</li>
+</ul>
+<p>因此决定自行实现一套替代方案。</p>
+<hr>
+<h1 id="项目目标"><a href="#项目目标" class="headerlink" title="项目目标"></a>项目目标</h1><p>核心需求非常直接：</p>
+<ul>
+<li>学生登录</li>
+<li>课程列表展示</li>
+<li>学生选课 &#x2F; 退课</li>
+<li>教师课程管理</li>
+<li>基本数据统计</li>
+</ul>
+<p>本质是一个典型：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">CRUD + 关系建模系统<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<pre class="line-numbers language-none"><code class="language-none">
+---
+
+# 技术栈
+
+## 后端
+
+| 技术        | 作用     |
+| ----------- | -------- |
+| SpringMVC   | Web接口  |
+| MyBatisPlus | ORM层    |
+| MySQL       | 数据库   |
+| Maven       | 依赖管理 |
+| Tomcat      | 运行容器 |
+
+---
+
+## 前端
+
+| 技术         | 作用     |
+| ------------ | -------- |
+| Vue3         | 前端框架 |
+| TypeScript   | 类型约束 |
+| Vite         | 构建工具 |
+| Element Plus | UI组件库 |
+| Axios        | HTTP请求 |
+
+---
+
+## 部署
+
+| 技术  | 作用              |
+| ----- | ----------------- |
+| Nginx | 反向代理&#x2F;静态托管 |
+| Linux | 运行环境          |
+
+---
+
+# 系统架构
+
+整体流程如下：
+
+&#96;&#96;&#96;text
+Vue前端
+   ↓
+Axios请求
+   ↓
+Nginx反向代理
+   ↓
+SpringMVC Controller
+   ↓
+Service业务层
+   ↓
+MyBatisPlus
+   ↓
+MySQL
+&#96;&#96;&#96;
+
+典型的前后端分离架构。
+
+---
+
+# 数据库设计
+
+项目中第一次完整接触关系型建模。
+
+---
+
+## 学生表
+
+&#96;&#96;&#96;sql
+CREATE TABLE student (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    student_no VARCHAR(20),
+    username VARCHAR(50),
+    password VARCHAR(100),
+    major VARCHAR(100)
+);
+&#96;&#96;&#96;
+
+---
+
+## 课程表
+
+&#96;&#96;&#96;sql
+CREATE TABLE course (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    course_name VARCHAR(100),
+    teacher_name VARCHAR(100),
+    max_count INT,
+    selected_count INT
+);
+&#96;&#96;&#96;
+
+---
+
+## 学生选课关系表
+
+多对多关系必须拆分：
+
+&#96;&#96;&#96;sql
+CREATE TABLE student_course (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    student_id BIGINT,
+    course_id BIGINT,
+    create_time DATETIME
+);
+&#96;&#96;&#96;
+
+这里是第一次明确理解：
+
+# 多对多必须依赖中间表
+
+---
+
+# 后端结构设计
+
+标准分层结构：
+
+&#96;&#96;&#96;text
+controller
+service
+mapper
+entity
+dto
+config
+utils
+common
+&#96;&#96;&#96;
+
+---
+
+# Controller层
+
+负责请求接入：
+
+&#96;&#96;&#96;java
+@RestController
+@RequestMapping(&quot;&#x2F;course&quot;)
+public class CourseController &#123;
+
+    @Autowired
+    private CourseService courseService;
+
+    @PostMapping(&quot;&#x2F;select&quot;)
+    public Result selectCourse(Long courseId)&#123;
+        return courseService.select(courseId);
+    &#125;
+&#125;
+&#96;&#96;&#96;
+
+---
+
+# Service层（业务核心）
+
+&#96;&#96;&#96;java
+public Result select(Long courseId)&#123;
+
+    Course course &#x3D; courseMapper.selectById(courseId);
+
+    if(course.getSelectedCount() &gt;&#x3D; course.getMaxCount())&#123;
+        return Result.fail(&quot;课程人数已满&quot;);
+    &#125;
+
+    course.setSelectedCount(course.getSelectedCount() + 1);
+
+    courseMapper.updateById(course);
+
+    return Result.ok();
+&#125;
+&#96;&#96;&#96;
+
+---
+
+# 并发问题（核心缺陷）
+
+这里存在典型问题：
+
+&#96;&#96;&#96;text
+同时多个请求读取同一库存
+&#96;&#96;&#96;
+
+示例：
+
+&#96;&#96;&#96;text
+A读到99
+B读到99
+
+A写100
+B写100
+&#96;&#96;&#96;
+
+结果：
+
+&#96;&#96;&#96;text
+实际变成101（超卖）
+&#96;&#96;&#96;
+
+---
+
+# 并发问题本质
+
+这是典型：
+
+&#96;&#96;&#96;text
+竞态条件（Race Condition）
+&#96;&#96;&#96;
+
+---
+
+# 可选优化方案（后续扩展）
+
+## Redis预扣减
+
+&#96;&#96;&#96;text
+先扣Redis
+再写数据库
+&#96;&#96;&#96;
+
+---
+
+## MQ削峰
+
+&#96;&#96;&#96;text
+请求 → MQ → 消费
+&#96;&#96;&#96;
+
+---
+
+## 乐观锁
+
+&#96;&#96;&#96;sql
+WHERE version &#x3D; ?
+&#96;&#96;&#96;
+
+防止覆盖写。
+
+---
+
+# MyBatisPlus使用体验
+
+初期最大的变化：
+
+&#96;&#96;&#96;text
+从 JDBC → ORM
+&#96;&#96;&#96;
+
+例如：
+
+&#96;&#96;&#96;java
+courseMapper.selectById(id);
+&#96;&#96;&#96;
+
+但也暴露问题：
+
+- 复杂SQL仍需手写
+- JOIN能力有限
+- 性能需控制
+
+---
+
+# 前端实现
+
+## Vue3 + Element Plus
+
+快速构建管理界面：
+
+&#96;&#96;&#96;vue
+&lt;el-table :data&#x3D;&quot;courseList&quot;&gt;
+  &lt;el-table-column prop&#x3D;&quot;courseName&quot; label&#x3D;&quot;课程名&quot; &#x2F;&gt;
+&lt;&#x2F;el-table&gt;
+&#96;&#96;&#96;
+
+---
+
+## Vite构建体验
+
+相比Webpack：
+
+&#96;&#96;&#96;text
+启动速度明显提升
+&#96;&#96;&#96;
+
+---
+
+## Axios请求封装
+
+&#96;&#96;&#96;ts
+export function selectCourse(courseId: number) &#123;
+  return axios.post(&quot;&#x2F;api&#x2F;course&#x2F;select&quot;, &#123;
+    courseId,
+  &#125;);
+&#125;
+&#96;&#96;&#96;
+
+---
+
+# 登录与认证
+
+初期实现较简单：
+
+- 基础登录
+- 简单Token
+
+缺乏：
+
+- 权限体系
+- RBAC模型
+- 会话管理
+
+---
+
+# JWT设计问题
+
+理想结构：
+
+| 数据        | 存储  |
+| ----------- | ----- |
+| JWT         | 前端  |
+| Session状态 | Redis |
+
+用于：
+
+- 登录失效控制
+- 踢人机制
+- 分布式支持
+
+---
+
+# Nginx部署
+
+第一次完整接触上线流程。
+
+---
+
+## 核心配置
+
+&#96;&#96;&#96;nginx
+server &#123;
+
+    listen 80;
+
+    location &#x2F; &#123;
+        root html;
+        index index.html;
+    &#125;
+
+    location &#x2F;api&#x2F; &#123;
+        proxy_pass http:&#x2F;&#x2F;127.0.0.1:8080&#x2F;;
+    &#125;
+&#125;
+&#96;&#96;&#96;
+
+---
+
+# 系统上线流程理解
+
+第一次形成完整认知：
+
+&#96;&#96;&#96;text
+代码运行 ≠ 系统上线
+&#96;&#96;&#96;
+
+上线还包括：
+
+- Linux环境
+- Nginx代理
+- 数据库部署
+- 静态资源托管
+- 端口与域名配置
+
+---
+
+# 项目主要问题
+
+## 1. 并发控制缺失
+
+选课核心问题未解决。
+
+---
+
+## 2. 数据库设计不完善
+
+- 索引不足
+- 约束不严格
+- 冗余字段存在
+
+---
+
+## 3. 缓存缺失
+
+所有请求直接打数据库。
+
+---
+
+## 4. 前端状态管理弱
+
+未使用成熟状态管理方案。
+
+---
+
+## 5. 异常处理分散
+
+缺少统一错误体系。
+
+---
+
+# 项目价值
+
+虽然存在明显不足，但完成了完整闭环：
+
+&#96;&#96;&#96;text
+数据库 → 后端 → 前端 → 部署
+&#96;&#96;&#96;
+
+这是第一次真正意义上的：
+
+# 全栈系统实践
+
+---
+
+# 后续可扩展方向
+
+| 模块   | 优化方向    |
+| ------ | ----------- |
+| 登录   | Redis + JWT |
+| 选课   | MQ + Redis  |
+| 数据库 | 索引优化    |
+| API    | 限流机制    |
+| 前端   | 状态管理    |
+| 部署   | Docker化    |
+| 架构   | 微服务化    |
+
+---
+
+# 总结
+
+该项目的意义不在复杂度，而在于完整性。
+
+第一次把一个系统从：
+
+&#96;&#96;&#96;text
+设计 → 实现 → 部署
+&#96;&#96;&#96;
+
+完整跑通，建立了对工程系统的基础认知。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io">thchen</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io/2022/10/10/project/Course-Selection-System-Practice/">https://kesuoer-ui.github.io/2022/10/10/project/Course-Selection-System-Practice/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://kesuoer-ui.github.io" target="_blank">thchen的闲言碎语堆积处</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/SpringBoot/">SpringBoot</a><a class="post-meta__tags" href="/tags/SpringMVC/">SpringMVC</a><a class="post-meta__tags" href="/tags/MySQL/">MySQL</a><a class="post-meta__tags" href="/tags/Vue3/">Vue3</a><a class="post-meta__tags" href="/tags/Nginx/">Nginx</a><a class="post-meta__tags" href="/tags/Java/">Java</a><a class="post-meta__tags" href="/tags/MyBatisPlus/">MyBatisPlus</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2022/11/17/backend/Java-OOP-And-Web-Stack/" title="从 C 到 Java：我对面向对象的理解变化"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">从 C 到 Java：我对面向对象的理解变化</div></div><div class="info-2"><div class="info-item-1">从 C 到 Java：我对面向对象的理解变化很多人第一次学 Java 时，会觉得：  “不就是把函数塞进 class 里吗？”  但真正开始做项目之后会发现： Java 和 C 的区别，从来不只是语法。 而是：  代码组织方式 模块协作方式 大型项目维护方式 团队开发思维 软件工程体系  这些东西加在一起，才是“面向对象”的真正意义。  为什么很多人学不会 OOP很多教程的问题是：  一上来讲 class 然后讲 extends 然后讲“万物皆对象”  结果新人完全不知道这些东西到底解决了什么问题。 实际上：  OOP 本质是在解决“大型程序复杂度失控”的问题。  小项目： main()  当然能跑。 但项目越来越大后： 用户模块 订单模块 权限模块 支付模块 消息模块 缓存模块 数据库模块 日志模块  如果还是： xxx_user() xxx_order() xxx_pay()  最后会变成： 全局变量到处飞 函数互相调用 模块互相依赖 改一个地方全崩  这也是很多 C 项目后期极其痛苦的原因。  C 语言的核心思维C 的核心是：  数据结构 内存 指针 过程控制  例如： s...</div></div></div></a><a class="pagination-related" href="/2022/09/17/backend/Modern-Python-Web-Scraping-And-Automation/" title="从 Scrapy 到 Playwright：现代 Python 爬虫技术整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">从 Scrapy 到 Playwright：现代 Python 爬虫技术整理</div></div><div class="info-2"><div class="info-item-1">从 Scrapy 到 Playwright：现代 Python 爬虫技术整理很多人第一次接触 Python。 几乎都会接触： 爬虫  因为： Python 在这个领域生态太强了。 而我自己对爬虫技术的认知变化。 其实也是：  从“请求脚本小子” 到真正理解现代 Web 自动化。   最开始：requests + BeautifulSoup很多人入门爬虫。 基本都从： requests BeautifulSoup  开始。  requests：最经典 HTTP 库安装： pip install requests   最简单请求import requests  resp = requests.get("https://example.com")  print(resp.text)   BeautifulSoup：HTML 解析安装： pip install beautifulsoup4   最简单解析from bs4 import BeautifulSoup  soup = BeautifulSoup(resp.text, "html.parser")  title = soup.t...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/10/02/backend/SpringBoot-Java-Web-Stack/" title="Spring Boot 与 Java Web 开发体系整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-03</div><div class="info-item-2">Spring Boot 与 Java Web 开发体系整理</div></div><div class="info-2"><div class="info-item-1">Spring Boot 与 Java Web 开发体系整理很多人第一次接触 Java Web 时都会懵。 因为会同时出现：  Spring SpringBoot SpringMVC MyBatis Maven Tomcat Lombok  甚至还有：  Redis RabbitMQ Nacos Gateway Dubbo  新人非常容易： 概念混乱  这篇文章尽量把： Java Web 整个体系的关系讲清楚。  Java Web 到底是什么本质上： 浏览器 ↓ HTTP请求 ↓ Java服务器 ↓ 数据库  Java Web 就是在处理：  路由 参数 登录 数据库 权限 JSON 文件上传 接口响应  这些东西。  Java Web 项目的典型结构现代项目通常： src ├── controller ├── service ├── mapper ├── entity ├── dto ├── config ├── utils └── common  对应：    层 作用    controller 接口入口   service 业务逻辑   mapper 数据库操作   ent...</div></div></div></a><a class="pagination-related" href="/2025/01/03/database/Database-Relational-vs-NonRelational/" title="关系型与非关系型数据库的理解整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-01-04</div><div class="info-item-2">关系型与非关系型数据库的理解整理</div></div><div class="info-2"><div class="info-item-1">关系型与非关系型数据库的理解整理数据库这块，我一开始其实是没什么体系感的。 最早写后端的时候，基本就是：  CRUD 查表 写接口 能跑就行  直到系统稍微复杂一点之后，问题就开始变了：  为什么这个 SQL 会慢 为什么加了索引还是慢 为什么线上偶尔卡死 为什么数据不一致 为什么一加并发就出问题  那时候才慢慢意识到： 数据库不是“存数据的地方”，更像是整个系统的底层调度器。  一、关系型数据库（RDBMS）最早接触的一类就是关系型数据库。 常见的基本就是：  MySQL PostgreSQL Oracle SQL Server SQLite  当时我的理解很简单：  表 + SQL + 能查数据 &#x3D; 数据库  后来做项目多了才发现，关系型数据库真正核心是“关系”。 比如电商系统：  用户 商品 订单 支付  这些东西单独看都简单，但一旦连起来，就全是关系。  MySQL（最常用的一类）我第一个正式用在项目里的数据库就是 MySQL。 用下来最大的感受其实不是“强”，而是：  足够稳，够通用，出了问题也好查。  基本 Web 项目都绕不开它。  InnoDB 和 My...</div></div></div></a><a class="pagination-related" href="/2022/03/11/frontend/Modern-Vue3-Frontend-Development/" title="Vue3、Element Plus 与现代前端开发体验"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2022-03-12</div><div class="info-item-2">Vue3、Element Plus 与现代前端开发体验</div></div><div class="info-2"><div class="info-item-1"> # Vue3、Element Plus 与现代前端开发体验  这篇更多是我在从 Vue2 过渡到 Vue3 过程中，对整个前端开发方式变化的一些记录。  当时的感觉比较明显：前端不再是“写页面”，而是在往工程化应用靠。  ---  # Vue3 变化最直观的地方  如果用一句话概括 Vue3 的变化，其实不是性能，而是写代码的方式变了。  Vue2 时代的组件，大致是这样拆的：  &#96;&#96;&#96;js data methods computed watch  逻辑天然是“按类型分区”的。 项目稍微一大，就会出现一个问题： 同一个功能的代码，被拆散在不同位置。  Vue2 的问题：逻辑分散比如一个用户模块： data() &#123;   return &#123;     user: &#123;&#125;,     loading: false   &#125; &#125;, methods: &#123;   async getUser() &#123;&#125; &#125;, watch: &#123;   user() &#123;&#125; &...</div></div></div></a><a class="pagination-related" href="/2022/08/16/frontend/Frontend-Waterfall-Project-Practice/" title="从前后端分离到瀑布流页面：我的 Web 开发实践"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2022-08-17</div><div class="info-item-2">从前后端分离到瀑布流页面：我的 Web 开发实践</div></div><div class="info-2"><div class="info-item-1">从前后端分离到瀑布流页面：我的 Web 开发实践这个项目本质上是一个偏 Pinterest &#x2F; Pixiv 风格的图片社区。 一开始目标其实很简单，就是做一个“能看图的网站”。但做着做着，功能不断往里加：  用户登录与权限 图片上传与管理 评论与互动 标签与搜索 收藏与点赞 推荐流 后台管理  到后面已经不是 Demo，更像一个完整的内容社区雏形。 也是从这个项目开始，我明显感觉到：  Web 开发真正难的地方，从来不是“写页面”，而是控制复杂度。   一、技术栈与整体结构整体是典型前后端分离架构： Vue3 + Vite         ↓ Axios API         ↓ FastAPI         ↓ PostgreSQL  技术选型大致如下：    模块 技术    前端 Vue3   UI Element Plus   状态管理 Pinia   路由 Vue Router   请求 Axios   后端 FastAPI   ORM Gino   数据库 PostgreSQL   鉴权 JWT   瀑布流 自实现 Virtual Masonry    ...</div></div></div></a><a class="pagination-related" href="/2022/02/07/ops/Nginx-Practice-and-Configuration/" title="Nginx 在实际开发中的用途整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-08</div><div class="info-item-2">Nginx 在实际开发中的用途整理</div></div><div class="info-2"><div class="info-item-1">Nginx 在实际开发中的用途整理前言我第一次认真接触 Nginx，其实不是因为“想学 Web Server”，而是因为一堆线上问题开始集中爆发：  前端部署后 404 API 跨域 502 Bad Gateway WebSocket 连不上 Docker 容器互相访问失败 静态资源加载异常  这些问题最后都指向同一个东西：  Nginx 是整个请求链路的入口。  后来在实际项目里，我逐渐把它理解成一个“流量分发与边界控制层”，而不只是静态文件服务器。  一、Nginx 到底是什么本质上我对它的定义是：  一个高性能 HTTP 服务器 + 反向代理 + 流量入口控制器  它在我的项目里通常承担这些角色：  静态资源服务 反向代理 负载均衡 HTTPS 终止 API 网关雏形 WebSocket 转发入口  典型链路是： 用户  ↓ Nginx  ↓ 后端服务（FastAPI / SpringBoot / Node）  ↓ 数据库   二、为什么实际项目离不开 Nginx在纯开发阶段，我最初其实是直接跑后端服务的，比如： uvicorn main:app  但一旦进入部署阶段，会立...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">thchen</div><div class="author-info-description">全栈开发 / AI Agent / 系统设计</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/kesuoer-ui" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AD%A6%E7%94%9F%E9%80%89%E8%AF%BE%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%8F%91%E8%AE%B0%E5%BD%95"><span class="toc-number">1.</span> <span class="toc-text">学生选课系统开发记录</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%8D%E5%88%BB%E5%AD%A6%E6%A0%A1%E9%80%89%E8%AF%BE%E7%B3%BB%E7%BB%9F"><span class="toc-number">2.</span> <span class="toc-text">复刻学校选课系统</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%A1%B9%E7%9B%AE%E7%9B%AE%E6%A0%87"><span class="toc-number">3.</span> <span class="toc-text">项目目标</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/19/life/two-failed-attempts-at-postgraduate-exam/" title="我的考研复习与调剂经历">我的考研复习与调剂经历</a><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/31/ai/Claude-Code-Agent-Architecture-Insights/" title="Claude Code 泄露源码带给我的 Agent 启发">Claude Code 泄露源码带给我的 Agent 启发</a><time datetime="2026-03-31T16:00:00.000Z" title="发表于 2026-04-01 00:00:00">2026-04-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/09/ops/Serverless-Practice/" title="记一次 Serverless 的认识与实践">记一次 Serverless 的认识与实践</a><time datetime="2026-03-09T16:00:00.000Z" title="发表于 2026-03-10 00:00:00">2026-03-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/11/19/ai/MCP-Tools-And-Prompt-Engineering-Trends/" title="MCP、Tools 与 Prompt Engineering 的工程化趋势">MCP、Tools 与 Prompt Engineering 的工程化趋势</a><time datetime="2025-11-19T16:00:00.000Z" title="发表于 2025-11-20 00:00:00">2025-11-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/15/ai/LangChain-LangGraph-Agent-Practice/" title="LangChain、LangGraph 与 AI Agent 工程实践">LangChain、LangGraph 与 AI Agent 工程实践</a><time datetime="2025-09-15T16:00:00.000Z" title="发表于 2025-09-16 00:00:00">2025-09-16</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By thchen</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'kesuoer-ui/kesuoer-ui.github.io',
+      'data-repo-id': 'R_kgDOSXiEqw',
+      'data-category-id': 'DIC_kwDOSXiEq84C8oeA',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>

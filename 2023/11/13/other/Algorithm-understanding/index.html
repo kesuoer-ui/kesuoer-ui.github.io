@@ -1,0 +1,808 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>刷题一年后，我对算法学习的理解 | thchen的闲言碎语堆积处</title><meta name="author" content="thchen"><meta name="copyright" content="thchen"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="背景刷题这件事一直比较矛盾。 一方面知道它重要，尤其在：  校招 面试 笔试  另一方面，真正进入工程开发之后，会更容易被：  项目开发 接口实现 自动化工具 后端系统设计  这些更“可见结果”的事情吸引。 相比之下，刷题的反馈确实更弱。  最开始为什么开始刷题原因很直接：  求职需要。  尤其在面试体系里：  算法题是常规环节 笔试基本绕不开  所以最初目标并不复杂，就是应付面试要求。  刚开始">
+<meta property="og:type" content="article">
+<meta property="og:title" content="刷题一年后，我对算法学习的理解">
+<meta property="og:url" content="https://kesuoer-ui.github.io/2023/11/13/other/Algorithm-understanding/index.html">
+<meta property="og:site_name" content="thchen的闲言碎语堆积处">
+<meta property="og:description" content="背景刷题这件事一直比较矛盾。 一方面知道它重要，尤其在：  校招 面试 笔试  另一方面，真正进入工程开发之后，会更容易被：  项目开发 接口实现 自动化工具 后端系统设计  这些更“可见结果”的事情吸引。 相比之下，刷题的反馈确实更弱。  最开始为什么开始刷题原因很直接：  求职需要。  尤其在面试体系里：  算法题是常规环节 笔试基本绕不开  所以最初目标并不复杂，就是应付面试要求。  刚开始">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kesuoer-ui.github.io/img/avatar.png">
+<meta property="article:published_time" content="2023-11-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-11T13:28:55.283Z">
+<meta property="article:author" content="thchen">
+<meta property="article:tag" content="LeetCode">
+<meta property="article:tag" content="动态规划">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kesuoer-ui.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "刷题一年后，我对算法学习的理解",
+  "url": "https://kesuoer-ui.github.io/2023/11/13/other/Algorithm-understanding/",
+  "image": "https://kesuoer-ui.github.io/img/avatar.png",
+  "datePublished": "2023-11-13T16:00:00.000Z",
+  "dateModified": "2026-05-11T13:28:55.283Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "thchen",
+      "url": "https://kesuoer-ui.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://kesuoer-ui.github.io/2023/11/13/other/Algorithm-understanding/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '刷题一年后，我对算法学习的理解',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 8.1.2"><link rel="alternate" href="/atom.xml" title="thchen的闲言碎语堆积处" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">thchen的闲言碎语堆积处</span></a><a class="nav-page-title" href="/"><span class="site-name">刷题一年后，我对算法学习的理解</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">刷题一年后，我对算法学习的理解</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-11-13T16:00:00.000Z" title="发表于 2023-11-14 00:00:00">2023-11-14</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-11T13:28:55.283Z" title="更新于 2026-05-11 21:28:55">2026-05-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>刷题这件事一直比较矛盾。</p>
+<p>一方面知道它重要，尤其在：</p>
+<ul>
+<li>校招</li>
+<li>面试</li>
+<li>笔试</li>
+</ul>
+<p>另一方面，真正进入工程开发之后，会更容易被：</p>
+<ul>
+<li>项目开发</li>
+<li>接口实现</li>
+<li>自动化工具</li>
+<li>后端系统设计</li>
+</ul>
+<p>这些更“可见结果”的事情吸引。</p>
+<p>相比之下，刷题的反馈确实更弱。</p>
+<hr>
+<h2 id="最开始为什么开始刷题"><a href="#最开始为什么开始刷题" class="headerlink" title="最开始为什么开始刷题"></a>最开始为什么开始刷题</h2><p>原因很直接：</p>
+<blockquote>
+<p>求职需要。</p>
+</blockquote>
+<p>尤其在面试体系里：</p>
+<ul>
+<li>算法题是常规环节</li>
+<li>笔试基本绕不开</li>
+</ul>
+<p>所以最初目标并不复杂，就是应付面试要求。</p>
+<hr>
+<h2 id="刚开始刷题的感受"><a href="#刚开始刷题的感受" class="headerlink" title="刚开始刷题的感受"></a>刚开始刷题的感受</h2><p>最直观的感受是：</p>
+<blockquote>
+<p>不适应 + 挫败感明显</p>
+</blockquote>
+<p>原因主要在于：</p>
+<ul>
+<li>学校数据结构更偏概念</li>
+<li>工程刷题是直接解问题</li>
+<li>没有“标准模板路径”</li>
+</ul>
+<p>两者之间差距很大。</p>
+<hr>
+<h2 id="学校知识-vs-刷题本质"><a href="#学校知识-vs-刷题本质" class="headerlink" title="学校知识 vs 刷题本质"></a>学校知识 vs 刷题本质</h2><p>可以简单区分：</p>
+<h3 id="学校阶段"><a href="#学校阶段" class="headerlink" title="学校阶段"></a>学校阶段</h3><ul>
+<li>记概念</li>
+<li>写固定结构</li>
+<li>偏考试导向</li>
+</ul>
+<h3 id="刷题阶段"><a href="#刷题阶段" class="headerlink" title="刷题阶段"></a>刷题阶段</h3><ul>
+<li>识别问题模型</li>
+<li>选择合适算法</li>
+<li>自己构造解法</li>
+</ul>
+<p>核心差异是：</p>
+<blockquote>
+<p>从“知道”变成“能识别并使用”。</p>
+</blockquote>
+<hr>
+<h2 id="最大的误解之一"><a href="#最大的误解之一" class="headerlink" title="最大的误解之一"></a>最大的误解之一</h2><p>早期有一个很典型的误区：</p>
+<blockquote>
+<p>算法强 &#x3D; 数学好</p>
+</blockquote>
+<p>实际刷题后会发现：</p>
+<p>工程面试中的算法更偏：</p>
+<ul>
+<li>模式识别</li>
+<li>数据结构选择</li>
+<li>边界处理能力</li>
+<li>代码实现能力</li>
+</ul>
+<p>数学能力反而不是核心门槛。</p>
+<hr>
+<h2 id="数组与基础问题"><a href="#数组与基础问题" class="headerlink" title="数组与基础问题"></a>数组与基础问题</h2><p>数组是最常见的起点。</p>
+<p>但实际上数组题覆盖了很多核心思想：</p>
+<ul>
+<li>双指针</li>
+<li>滑动窗口</li>
+<li>前缀和</li>
+<li>二分</li>
+<li>哈希</li>
+</ul>
+<p>看似简单，但结构很完整。</p>
+<hr>
+<h2 id="双指针的转折理解"><a href="#双指针的转折理解" class="headerlink" title="双指针的转折理解"></a>双指针的转折理解</h2><p>早期思路通常是暴力：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">O(n²) 遍历<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>后来双指针出现后，结构变为：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">O(n) 扫描<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>核心变化不是“技巧”，而是：</p>
+<blockquote>
+<p>减少重复计算。</p>
+</blockquote>
+<hr>
+<h2 id="字符串问题的复杂性"><a href="#字符串问题的复杂性" class="headerlink" title="字符串问题的复杂性"></a>字符串问题的复杂性</h2><p>字符串问题容易低估。</p>
+<p>但实际经常涉及：</p>
+<ul>
+<li>边界控制</li>
+<li>子串处理</li>
+<li>状态维护</li>
+<li>索引管理</li>
+</ul>
+<p>很多错误来自细节，而不是思路。</p>
+<hr>
+<h2 id="树结构的第一次转变"><a href="#树结构的第一次转变" class="headerlink" title="树结构的第一次转变"></a>树结构的第一次转变</h2><p>树结构开始引入递归思维。</p>
+<p>DFS 的关键理解点是：</p>
+<pre class="line-numbers language-python" data-language="python"><div class="caption"><span>id</span></div><code class="language-python"><span class="token keyword">def</span> <span class="token function">dfs</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>核心不是语法，而是：</p>
+<blockquote>
+<p>假设子问题已经被解决。</p>
+</blockquote>
+<hr>
+<h2 id="递归思维的本质变化"><a href="#递归思维的本质变化" class="headerlink" title="递归思维的本质变化"></a>递归思维的本质变化</h2><p>递归真正难点不在“调用自己”，而在于：</p>
+<blockquote>
+<p>接受问题可以被拆解并递归成立。</p>
+</blockquote>
+<p>这是思维习惯的变化。</p>
+<hr>
+<h2 id="树结构的工程意义"><a href="#树结构的工程意义" class="headerlink" title="树结构的工程意义"></a>树结构的工程意义</h2><p>树不仅仅是算法结构，也广泛存在于：</p>
+<ul>
+<li>文件系统</li>
+<li>DOM 结构</li>
+<li>AST</li>
+<li>组织结构</li>
+</ul>
+<p>本质是：</p>
+<blockquote>
+<p>层级关系表达方式。</p>
+</blockquote>
+<hr>
+<h2 id="图结构的复杂度提升"><a href="#图结构的复杂度提升" class="headerlink" title="图结构的复杂度提升"></a>图结构的复杂度提升</h2><p>图结构相比树增加了：</p>
+<ul>
+<li>环</li>
+<li>多路径</li>
+<li>权重</li>
+<li>方向</li>
+</ul>
+<p>复杂度明显上升。</p>
+<p>搜索问题通常变成：</p>
+<blockquote>
+<p>状态空间遍历问题</p>
+</blockquote>
+<hr>
+<h2 id="BFS-与-DFS"><a href="#BFS-与-DFS" class="headerlink" title="BFS 与 DFS"></a>BFS 与 DFS</h2><p>两种核心思想：</p>
+<ul>
+<li>DFS：深度探索</li>
+<li>BFS：层级扩展</li>
+</ul>
+<p>本质都是：</p>
+<blockquote>
+<p>状态搜索策略差异</p>
+</blockquote>
+<hr>
+<h2 id="动态规划的困难点"><a href="#动态规划的困难点" class="headerlink" title="动态规划的困难点"></a>动态规划的困难点</h2><p>动态规划的难点不在实现，而在建模。</p>
+<p>核心问题通常是：</p>
+<ul>
+<li>状态无法定义</li>
+<li>转移关系不清晰</li>
+</ul>
+<hr>
+<h2 id="动态规划的基本结构"><a href="#动态规划的基本结构" class="headerlink" title="动态规划的基本结构"></a>动态规划的基本结构</h2><p>DP 的基本组成：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">状态定义
+状态转移
+初始条件<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>其中最难的是：</p>
+<blockquote>
+<p>状态设计</p>
+</blockquote>
+<hr>
+<h2 id="为什么动态规划难"><a href="#为什么动态规划难" class="headerlink" title="为什么动态规划难"></a>为什么动态规划难</h2><p>因为它不符合直觉：</p>
+<ul>
+<li>直觉：一步一步做</li>
+<li>DP：先抽象结构再推导</li>
+</ul>
+<p>这是思维模式差异。</p>
+<hr>
+<h2 id="刷题中断的原因"><a href="#刷题中断的原因" class="headerlink" title="刷题中断的原因"></a>刷题中断的原因</h2><p>长期刷不下去通常有几个原因：</p>
+<h3 id="1-反馈周期长"><a href="#1-反馈周期长" class="headerlink" title="1. 反馈周期长"></a>1. 反馈周期长</h3><p>项目：</p>
+<ul>
+<li>做完能看到结果</li>
+</ul>
+<p>刷题：</p>
+<ul>
+<li>很多时候只有失败反馈</li>
+</ul>
+<hr>
+<h3 id="2-现实感不足"><a href="#2-现实感不足" class="headerlink" title="2. 现实感不足"></a>2. 现实感不足</h3><p>很多人会产生疑问：</p>
+<blockquote>
+<p>工作中是否真的用得到？</p>
+</blockquote>
+<p>尤其在 Web &#x2F; CRUD 场景下。</p>
+<hr>
+<h3 id="3-成长感不明显"><a href="#3-成长感不明显" class="headerlink" title="3. 成长感不明显"></a>3. 成长感不明显</h3><p>刷题进步不容易直观感知，容易出现：</p>
+<blockquote>
+<p>“感觉一直没变强”</p>
+</blockquote>
+<hr>
+<h2 id="算法与工程的关系"><a href="#算法与工程的关系" class="headerlink" title="算法与工程的关系"></a>算法与工程的关系</h2><p>后期逐渐会发现：</p>
+<p>算法并不完全独立于工程。</p>
+<p>例如：</p>
+<ul>
+<li>缓存策略</li>
+<li>路由匹配</li>
+<li>搜索排序</li>
+<li>限流机制</li>
+<li>调度系统</li>
+</ul>
+<p>本质都有算法思想参与。</p>
+<hr>
+<h2 id="对算法作用的重新理解"><a href="#对算法作用的重新理解" class="headerlink" title="对算法作用的重新理解"></a>对算法作用的重新理解</h2><p>算法训练更核心的价值是：</p>
+<ul>
+<li>抽象能力</li>
+<li>边界意识</li>
+<li>状态建模</li>
+<li>时间复杂度敏感度</li>
+</ul>
+<p>这些能力会间接影响工程质量。</p>
+<hr>
+<h2 id="大厂为什么仍然考算法"><a href="#大厂为什么仍然考算法" class="headerlink" title="大厂为什么仍然考算法"></a>大厂为什么仍然考算法</h2><p>算法题的作用并不是评估“工程能力本身”，而是用于筛选：</p>
+<ul>
+<li>学习能力</li>
+<li>基础编码能力</li>
+<li>抽象能力</li>
+<li>思维稳定性</li>
+</ul>
+<p>尤其在现场编码环境下更明显。</p>
+<hr>
+<h2 id="当前对刷题的态度"><a href="#当前对刷题的态度" class="headerlink" title="当前对刷题的态度"></a>当前对刷题的态度</h2><p>不再是高强度刷题模式。</p>
+<p>更接近：</p>
+<ul>
+<li>持续维护状态</li>
+<li>间歇性练习</li>
+<li>保持基本熟练度</li>
+</ul>
+<p>重点不再是数量，而是持续性。</p>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>算法更像一种长期训练工具。</p>
+<p>它不直接等价于工程能力，但会影响：</p>
+<blockquote>
+<p>思维方式与问题处理方式</p>
+</blockquote>
+<p>因此更适合作为长期维持的基础能力，而不是短期任务。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io">thchen</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io/2023/11/13/other/Algorithm-understanding/">https://kesuoer-ui.github.io/2023/11/13/other/Algorithm-understanding/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://kesuoer-ui.github.io" target="_blank">thchen的闲言碎语堆积处</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%AE%97%E6%B3%95/">算法</a><a class="post-meta__tags" href="/tags/LeetCode/">LeetCode</a><a class="post-meta__tags" href="/tags/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/">动态规划</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/02/08/life/learning-japanese-through-acg/" title="我的日语学习过程整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">我的日语学习过程整理</div></div><div class="info-2"><div class="info-item-1">我的日语学习过程整理我接触日语，其实不算什么特别“正规”的路线。 不是因为想留学，也不是为了工作，更不是因为看了什么“7天速通日语”的视频。 单纯就是小时候被年纪大的孩子带着看动漫、玩游戏、听歌，慢慢掉进了二次元坑。 然后发现：  怎么喜欢的东西全是日本那边产的。   从“看不懂”到“想看懂”最开始接触的其实是动漫。 后来慢慢变成：  VOCALOID 日语翻唱 Galgame 广播剧 日本电影 生放送 VTB 音游  尤其开始接触歌词以后，会很明显产生一种感觉：  “我不想一直等别人翻译了。”  这时候就会开始主动记词。  我最早学的，其实是“五十音”中学的时候，第一次认真背了五十音。 那时候其实没什么体系。 就是：  会认 会读 会拼  甚至很多还是从：  歌词 MAD 游戏UI 二创字幕  里面硬记下来的。 但后来发现：  五十音只是“键盘”。  真正麻烦的是后面的东西。  日语真正难的部分其实不是五十音很多人刚学的时候会觉得： “50音好难背啊。” 但实际上。 真正开始学以后会发现：  助词 语法 敬语 动词变形 听力 长句理解  才是真正开始坐牢的时候 😭 尤其是： ...</div></div></div></a><a class="pagination-related" href="/2023/10/04/ai/AI-Voice-SVC-VITS-Workflow/" title="AI 语音、AI 翻唱与音色转换技术整理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">AI 语音、AI 翻唱与音色转换技术整理</div></div><div class="info-2"><div class="info-item-1">AI 语音、AI 翻唱与音色转换技术整理AI绘画火起来之前，其实 AI 语音这边我就已经玩挺久了。 而且这玩意相比 AI 绘画，更容易让人产生一种“技术已经突破次元壁”的感觉。 尤其第一次：  输入一句文本 生成角色语音 再到把自己的歌翻唱成别人的声音  那个冲击感其实非常强。 这几年 AI 语音方向也迭代得非常快： TTS（文本转语音） ↓ VITS ↓ SVC ↓ DDSP-SVC ↓ Diffusion-SVC ↓ RVC / GPT-SoVITS / OpenVoice  整个领域已经从：  “能发声”  变成了：  “越来越像真人”   一、我接触 AI 语音的整个过程我最早接触的是：  文本转语音（TTS） VTuber 语音 日语角色语音合成  后来开始接触：  AI翻唱 歌声音色转换 干声提取 模型训练 推理部署  再后来：  开始自己收集训练集 自己训练模型 自己做整套 workflow  然后才意识到： AI语音最难的不是训练。 而是： “数据处理。”尤其是：  干净的人声 无背景音 无混响 无BGM 无电流麦 无环境噪声  这个真的比训练模型难太多了。  二...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2022/05/19/project/C-EasyX-BlackWhiteChess/" title="我用 C + EasyX 开发黑白棋游戏的过程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-20</div><div class="info-item-2">我用 C + EasyX 开发黑白棋游戏的过程</div></div><div class="info-2"><div class="info-item-1">我用 C + EasyX 开发黑白棋游戏的过程大学课程设计时期，做过一个黑白棋（Reversi &#x2F; Othello）小游戏。 当时要求：  必须有图形界面 需要玩家交互 最好有 AI 尽量体现算法设计  最后选了： C语言 + EasyX  原因很简单：  SDL 太重 WinAPI 太折磨 Qt 当时不会 控制台又太丑  而 EasyX： 几乎是 C/C++ 图形开发新手村  对课程设计来说刚好合适。  黑白棋为什么适合课程设计规则简单，但具备典型博弈结构： 非常适合做 AI 博弈  核心特征：  有明确状态空间 有合法行动集合 有局面优劣评估 有可预测的未来展开  相比五子棋： 搜索树更容易爆炸  黑白棋反而更适合做出“可用 AI”。  黑白棋规则初始布局⚪ ⚫ ⚫ ⚪   落子规则必须满足“夹子”规则： 夹住对方棋子才能落子  示例： ⚫ ⚪ ○  在右侧落 ⚫ 后： ⚫ ⚫ ⚫  被夹住的棋子发生翻转。  结束条件满足任一条件：  双方均无合法落子 棋盘填满  最终： 棋子数量多者获胜   项目结构设计整体结构比较直观： /project  ├── main.c...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">thchen</div><div class="author-info-description">全栈开发 / AI Agent / 系统设计</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">130</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/kesuoer-ui" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%BC%80%E5%A7%8B%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BC%80%E5%A7%8B%E5%88%B7%E9%A2%98"><span class="toc-number">2.</span> <span class="toc-text">最开始为什么开始刷题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9A%E5%BC%80%E5%A7%8B%E5%88%B7%E9%A2%98%E7%9A%84%E6%84%9F%E5%8F%97"><span class="toc-number">3.</span> <span class="toc-text">刚开始刷题的感受</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%A6%E6%A0%A1%E7%9F%A5%E8%AF%86-vs-%E5%88%B7%E9%A2%98%E6%9C%AC%E8%B4%A8"><span class="toc-number">4.</span> <span class="toc-text">学校知识 vs 刷题本质</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E6%A0%A1%E9%98%B6%E6%AE%B5"><span class="toc-number">4.1.</span> <span class="toc-text">学校阶段</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%B7%E9%A2%98%E9%98%B6%E6%AE%B5"><span class="toc-number">4.2.</span> <span class="toc-text">刷题阶段</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%A4%A7%E7%9A%84%E8%AF%AF%E8%A7%A3%E4%B9%8B%E4%B8%80"><span class="toc-number">5.</span> <span class="toc-text">最大的误解之一</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E4%B8%8E%E5%9F%BA%E7%A1%80%E9%97%AE%E9%A2%98"><span class="toc-number">6.</span> <span class="toc-text">数组与基础问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8C%E6%8C%87%E9%92%88%E7%9A%84%E8%BD%AC%E6%8A%98%E7%90%86%E8%A7%A3"><span class="toc-number">7.</span> <span class="toc-text">双指针的转折理解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E9%97%AE%E9%A2%98%E7%9A%84%E5%A4%8D%E6%9D%82%E6%80%A7"><span class="toc-number">8.</span> <span class="toc-text">字符串问题的复杂性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%91%E7%BB%93%E6%9E%84%E7%9A%84%E7%AC%AC%E4%B8%80%E6%AC%A1%E8%BD%AC%E5%8F%98"><span class="toc-number">9.</span> <span class="toc-text">树结构的第一次转变</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%92%E5%BD%92%E6%80%9D%E7%BB%B4%E7%9A%84%E6%9C%AC%E8%B4%A8%E5%8F%98%E5%8C%96"><span class="toc-number">10.</span> <span class="toc-text">递归思维的本质变化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%91%E7%BB%93%E6%9E%84%E7%9A%84%E5%B7%A5%E7%A8%8B%E6%84%8F%E4%B9%89"><span class="toc-number">11.</span> <span class="toc-text">树结构的工程意义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%BE%E7%BB%93%E6%9E%84%E7%9A%84%E5%A4%8D%E6%9D%82%E5%BA%A6%E6%8F%90%E5%8D%87"><span class="toc-number">12.</span> <span class="toc-text">图结构的复杂度提升</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#BFS-%E4%B8%8E-DFS"><span class="toc-number">13.</span> <span class="toc-text">BFS 与 DFS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E7%9A%84%E5%9B%B0%E9%9A%BE%E7%82%B9"><span class="toc-number">14.</span> <span class="toc-text">动态规划的困难点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%BB%93%E6%9E%84"><span class="toc-number">15.</span> <span class="toc-text">动态规划的基本结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E9%9A%BE"><span class="toc-number">16.</span> <span class="toc-text">为什么动态规划难</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%B7%E9%A2%98%E4%B8%AD%E6%96%AD%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-number">17.</span> <span class="toc-text">刷题中断的原因</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%8F%8D%E9%A6%88%E5%91%A8%E6%9C%9F%E9%95%BF"><span class="toc-number">17.1.</span> <span class="toc-text">1. 反馈周期长</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E7%8E%B0%E5%AE%9E%E6%84%9F%E4%B8%8D%E8%B6%B3"><span class="toc-number">17.2.</span> <span class="toc-text">2. 现实感不足</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%88%90%E9%95%BF%E6%84%9F%E4%B8%8D%E6%98%8E%E6%98%BE"><span class="toc-number">17.3.</span> <span class="toc-text">3. 成长感不明显</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%97%E6%B3%95%E4%B8%8E%E5%B7%A5%E7%A8%8B%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">18.</span> <span class="toc-text">算法与工程的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9%E7%AE%97%E6%B3%95%E4%BD%9C%E7%94%A8%E7%9A%84%E9%87%8D%E6%96%B0%E7%90%86%E8%A7%A3"><span class="toc-number">19.</span> <span class="toc-text">对算法作用的重新理解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%A7%E5%8E%82%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BB%8D%E7%84%B6%E8%80%83%E7%AE%97%E6%B3%95"><span class="toc-number">20.</span> <span class="toc-text">大厂为什么仍然考算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BD%93%E5%89%8D%E5%AF%B9%E5%88%B7%E9%A2%98%E7%9A%84%E6%80%81%E5%BA%A6"><span class="toc-number">21.</span> <span class="toc-text">当前对刷题的态度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">22.</span> <span class="toc-text">总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/19/life/two-failed-attempts-at-postgraduate-exam/" title="我的考研复习与调剂经历">我的考研复习与调剂经历</a><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/31/ai/Claude-Code-Agent-Architecture-Insights/" title="Claude Code 泄露源码带给我的 Agent 启发">Claude Code 泄露源码带给我的 Agent 启发</a><time datetime="2026-03-31T16:00:00.000Z" title="发表于 2026-04-01 00:00:00">2026-04-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/09/ops/Serverless-Practice/" title="记一次 Serverless 的认识与实践">记一次 Serverless 的认识与实践</a><time datetime="2026-03-09T16:00:00.000Z" title="发表于 2026-03-10 00:00:00">2026-03-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/11/19/ai/MCP-Tools-And-Prompt-Engineering-Trends/" title="MCP、Tools 与 Prompt Engineering 的工程化趋势">MCP、Tools 与 Prompt Engineering 的工程化趋势</a><time datetime="2025-11-19T16:00:00.000Z" title="发表于 2025-11-20 00:00:00">2025-11-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/15/ai/LangChain-LangGraph-Agent-Practice/" title="LangChain、LangGraph 与 AI Agent 工程实践">LangChain、LangGraph 与 AI Agent 工程实践</a><time datetime="2025-09-15T16:00:00.000Z" title="发表于 2025-09-16 00:00:00">2025-09-16</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By thchen</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'kesuoer-ui/kesuoer-ui.github.io',
+      'data-repo-id': 'R_kgDOSXiEqw',
+      'data-category-id': 'DIC_kwDOSXiEq84C8oeA',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>
