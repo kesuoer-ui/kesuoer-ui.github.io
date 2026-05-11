@@ -9,8 +9,6 @@ tag:
   - AI Agent
 ---
 
-````
-
 # Claude Code 泄露源码带来的真实启发
 
 这件事最有价值的地方，其实不是“AI 又进步了”。
@@ -21,9 +19,9 @@ tag:
 
 在这之前，大部分 Agent 项目都停留在“组合 Demo”的阶段：
 
-* LLM + Prompt
-* LLM + Tool
-* LLM + Memory
+- LLM + Prompt
+- LLM + Tool
+- LLM + Memory
 
 能跑，但不稳定，也谈不上工程体系。
 
@@ -39,7 +37,7 @@ Claude Code 的源码让我第一次看到另一种东西：
 
 ```text
 用户输入 → LLM → Tool → 输出
-````
+```
 
 或者稍微复杂一点：
 

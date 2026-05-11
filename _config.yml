@@ -3,7 +3,7 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: kesuoer的技术博客
+title: thchen的闲言碎语堆积处
 subtitle: ""
 description: "全栈开发 / AI Agent / 系统设计"
 keywords:
@@ -11,7 +11,7 @@ keywords:
   - Python
   - Reverse
   - FastAPI
-author: kesuoer
+author: thchen
 language: zh-CN
 timezone: Asia/Shanghai
 
