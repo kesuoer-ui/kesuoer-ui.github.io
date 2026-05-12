@@ -2324,6 +2324,414 @@ id某个模型又提升了多少分
       </tags>
   </entry>
   <entry>
+    <title>Stable Diffusion 工作流与模型体系整理</title>
+    <url>/2023/02/25/ai/StableDiffusion-Workflow/</url>
+    <content><![CDATA[Stable Diffusion 工作流与模型体系整理AI 绘画刚火的时候，其实很多人第一反应都是：
+
+“这玩意是不是以后画师要失业了？”
+
+但真正自己上手后才发现：
+这东西更像：
+新的生产工具
+
+而且门槛其实不低。
+尤其是：
+
+模型
+参数
+插件
+显存
+工作流
+提示词
+ControlNet
+LoRA
+
+这一套东西刚接触时真的非常混乱。
+
+我最开始接触 SD 的方式最早其实是从 B 站开始。
+那时候最出名的应该就是：
+
+秋葉aaaki 整合包
+各种 NovelAI 二创模型
+二次元炼丹教程
+
+当时很多人：
+连 Python 都不会
+
+但已经能开始跑 AI 绘画了。
+某种意义上：
+
+SD 能火，很大原因就是社区整合做得太好了。
+
+尤其秋叶整合包。
+基本已经做到：
+下载
+→ 解压
+→ 双击启动
+
+对普通用户非常友好。
+
+Stable Diffusion 到底是什么第一次接触时我也很懵。
+各种概念满天飞：
+
+checkpoint
+vae
+embedding
+hypernetwork
+lora
+controlnet
+
+后来慢慢理解后发现：
+其实核心逻辑没那么复杂。
+
+SD 本质上在干什么简单理解：
+随机噪声
+↓
+不断去噪
+↓
+最后生成图片
+
+例如：
+一团雪花
+↓
+逐渐变成二次元老婆
+
+这就是 diffusion 的核心思想。
+
+最核心的几个组件checkpoint &#x2F; 大模型也就是：
+xx.safetensors
+
+这是主体模型。
+决定：
+
+画风
+角色风格
+构图倾向
+色彩习惯
+
+例如：
+
+Anything
+Counterfeit
+AbyssOrangeMix
+MeinaMix
+
+那时候 C 站几乎天天都在出新模型。
+
+C站是什么AI 圈里说的 C 站：
+一般就是：
+Civitai大量：
+
+模型
+LoRA
+Embedding
+工作流
+
+都在上面分享。
+某种意义上：
+它已经算 AI 绘画时代的 NexusMods 了。
+
+HuggingFace 又是什么相比 C 站偏“社区模型分享”。
+HuggingFace 更偏：
+AI 开源生态平台
+
+上面会有：
+
+官方模型
+论文模型
+Transformers
+Diffusers
+Dataset
+
+很多真正底层的东西其实都在 HF。
+
+VAE 是什么这玩意一开始我也完全没懂。
+后来发现：
+它更像“色彩修正器”。有些模型：
+不加载 VAE
+
+会：
+
+发灰
+发白
+颜色奇怪
+
+加载后会正常很多。
+特别是以前很多 NAI 系模型。
+
+LoRA 才是真正改变生态的东西LoRA 出现后：
+AI 绘画才真正进入：
+全民炼丹时代
+
+以前训练模型：
+
+时间长
+显存大
+成本高
+
+LoRA 出现后：
+几张图就能训练。
+于是开始出现：
+
+角色 LoRA
+服装 LoRA
+动作 LoRA
+画风 LoRA
+
+后来甚至：
+一个模型挂十几个 LoRA
+
+已经成常态了。
+
+我当时最震惊的一件事就是：
+“模型套模型”例如：
+底模
++ VAE
++ LoRA
++ Embedding
++ ControlNet
+
+最后生成出来的图：
+已经完全不是单一模型的效果了。
+这和传统软件时代差异非常大。
+
+WebUI 时代最开始大家基本都在用：
+A1111 WebUI启动：
+webui-user.bat
+
+然后浏览器打开：
+127.0.0.1:7860
+
+那个界面估计很多人都很熟。
+
+当时最常踩的坑爆显存尤其：
+AMD 显卡用户
+
+体验非常痛苦。
+当时：
+
+CUDA 基本 NVIDIA 专属
+ROCm 支持又一般
+Windows 下兼容更差
+
+于是经常：
+torch not compiled with cuda
+
+或者：
+CUDA out of memory
+
+看到想吐。
+
+我甚至用过 Google Colab 白嫖显卡这应该很多老 SD 用户都经历过。
+因为那时候：
+本地显卡根本跑不动
+
+于是：
+
+Colab
+Kaggle
+云 GPU
+
+开始疯狂流行。
+尤其：
+免费 T4
+
+真的救过命。
+
+那时候典型工作流基本长这样：
+本地写 Prompt
+↓
+上传云端
+↓
+生成图片
+↓
+下载结果
+
+有时候甚至：
+Google 一断连
+白跑半小时
+
+非常真实。
+
+Prompt 也是个大坑刚开始很多人以为：
+
+“随便输一句话就行。”
+
+后来发现：
+AI 绘画其实非常吃 Prompt。
+例如：
+masterpiece, best quality, ultra detailed
+
+这种“咒语流” Prompt。
+一度特别流行。
+
+Negative Prompt 也很重要尤其二次元模型。
+不写负面词：
+多手
+崩脸
+畸形
+
+几乎是家常便饭。
+于是后来：
+EasyNegative
+badhand
+bad anatomy
+
+这些 embedding 基本人手必备。
+
+SDXL 出来后变化很大SD1.5 时代：
+比较偏：
+二次元炼丹
+
+而 SDXL 后：
+
+构图
+光影
+真实感
+
+提升明显。
+但代价也很明显：
+更吃显存。很多：
+6G 显卡用户
+
+直接阵亡。
+
+ComfyUI 是另一种世界第一次看 ComfyUI：
+我是真懵了。
+满屏：
+节点
+连线
+工作流
+
+像：
+UE蓝图
++
+NodeRed
++
+AI绘画
+
+后来用久了才发现：
+它本质是“图形化推理流水线”。例如：
+模型加载
+↓
+Prompt编码
+↓
+LoRA注入
+↓
+采样
+↓
+VAE解码
+↓
+输出图片
+
+全部节点化。
+
+为什么很多高级玩家后来转 ComfyUI因为：
+可控性太强了。WebUI 更像：
+给普通用户用
+
+而 ComfyUI：
+更像工程化工具
+
+特别适合：
+
+批量生成
+API化
+工作流复用
+自动化处理
+多模型组合
+
+
+AI 绘画最容易被低估的一点很多人觉得：
+
+“不就是输入 Prompt 出图？”
+
+实际上：
+后面已经逐渐变成：
+工作流工程
+
+了。
+尤其：
+
+ControlNet
+OpenPose
+局部重绘
+区域重绘
+多阶段放大
+批处理
+
+这些东西组合起来后。
+复杂度已经不低了。
+
+我后来对 AI 绘画的理解我现在反而觉得：
+它不像：
+替代创作
+
+更像：
+提高素材生产效率
+
+尤其：
+
+二创
+UI素材
+背景图
+头像
+网站配图
+概念草图
+
+效率确实非常夸张。
+
+但它也确实很吃硬件尤其：
+
+显卡
+显存
+SSD
+内存
+
+模型一多后：
+几十 GB 很正常
+
+而且：
+不同模型还互相抢显存
+
+后来甚至：
+整理模型
+
+本身都快变成一种运维工作了。
+
+现在再回头看Stable Diffusion 最厉害的地方其实不是：
+
+“AI 会画画了”
+
+而是：
+它把 AI 内容生产真正带进了普通人的电脑。以前：
+AI 基本是：
+论文
+实验室
+大公司
+
+而 SD 开始后。
+第一次变成：
+普通人也能自己部署
+自己训练
+自己折腾
+
+这件事其实影响非常大。
+
+]]></content>
+      <categories>
+        <category>AI</category>
+        <category>AIGC</category>
+      </categories>
+      <tags>
+        <tag>AIGC</tag>
+        <tag>StableDiffusion</tag>
+        <tag>SDXL</tag>
+        <tag>LoRA</tag>
+        <tag>ComfyUI</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>YOLO 与 DETR：目标检测模型理解整理</title>
     <url>/2024/07/09/ai/YOLO-DETR-Object-Detection/</url>
     <content><![CDATA[YOLO 与 DETR：目标检测模型理解整理本科做毕设的时候，真正让我感觉“深度学习开始进入工程领域”而不只是调包调用的，就是目标检测。
@@ -3554,414 +3962,6 @@ GPT
       </tags>
   </entry>
   <entry>
-    <title>Stable Diffusion 工作流与模型体系整理</title>
-    <url>/2023/02/25/ai/StableDiffusion-Workflow/</url>
-    <content><![CDATA[Stable Diffusion 工作流与模型体系整理AI 绘画刚火的时候，其实很多人第一反应都是：
-
-“这玩意是不是以后画师要失业了？”
-
-但真正自己上手后才发现：
-这东西更像：
-新的生产工具
-
-而且门槛其实不低。
-尤其是：
-
-模型
-参数
-插件
-显存
-工作流
-提示词
-ControlNet
-LoRA
-
-这一套东西刚接触时真的非常混乱。
-
-我最开始接触 SD 的方式最早其实是从 B 站开始。
-那时候最出名的应该就是：
-
-秋葉aaaki 整合包
-各种 NovelAI 二创模型
-二次元炼丹教程
-
-当时很多人：
-连 Python 都不会
-
-但已经能开始跑 AI 绘画了。
-某种意义上：
-
-SD 能火，很大原因就是社区整合做得太好了。
-
-尤其秋叶整合包。
-基本已经做到：
-下载
-→ 解压
-→ 双击启动
-
-对普通用户非常友好。
-
-Stable Diffusion 到底是什么第一次接触时我也很懵。
-各种概念满天飞：
-
-checkpoint
-vae
-embedding
-hypernetwork
-lora
-controlnet
-
-后来慢慢理解后发现：
-其实核心逻辑没那么复杂。
-
-SD 本质上在干什么简单理解：
-随机噪声
-↓
-不断去噪
-↓
-最后生成图片
-
-例如：
-一团雪花
-↓
-逐渐变成二次元老婆
-
-这就是 diffusion 的核心思想。
-
-最核心的几个组件checkpoint &#x2F; 大模型也就是：
-xx.safetensors
-
-这是主体模型。
-决定：
-
-画风
-角色风格
-构图倾向
-色彩习惯
-
-例如：
-
-Anything
-Counterfeit
-AbyssOrangeMix
-MeinaMix
-
-那时候 C 站几乎天天都在出新模型。
-
-C站是什么AI 圈里说的 C 站：
-一般就是：
-Civitai大量：
-
-模型
-LoRA
-Embedding
-工作流
-
-都在上面分享。
-某种意义上：
-它已经算 AI 绘画时代的 NexusMods 了。
-
-HuggingFace 又是什么相比 C 站偏“社区模型分享”。
-HuggingFace 更偏：
-AI 开源生态平台
-
-上面会有：
-
-官方模型
-论文模型
-Transformers
-Diffusers
-Dataset
-
-很多真正底层的东西其实都在 HF。
-
-VAE 是什么这玩意一开始我也完全没懂。
-后来发现：
-它更像“色彩修正器”。有些模型：
-不加载 VAE
-
-会：
-
-发灰
-发白
-颜色奇怪
-
-加载后会正常很多。
-特别是以前很多 NAI 系模型。
-
-LoRA 才是真正改变生态的东西LoRA 出现后：
-AI 绘画才真正进入：
-全民炼丹时代
-
-以前训练模型：
-
-时间长
-显存大
-成本高
-
-LoRA 出现后：
-几张图就能训练。
-于是开始出现：
-
-角色 LoRA
-服装 LoRA
-动作 LoRA
-画风 LoRA
-
-后来甚至：
-一个模型挂十几个 LoRA
-
-已经成常态了。
-
-我当时最震惊的一件事就是：
-“模型套模型”例如：
-底模
-+ VAE
-+ LoRA
-+ Embedding
-+ ControlNet
-
-最后生成出来的图：
-已经完全不是单一模型的效果了。
-这和传统软件时代差异非常大。
-
-WebUI 时代最开始大家基本都在用：
-A1111 WebUI启动：
-webui-user.bat
-
-然后浏览器打开：
-127.0.0.1:7860
-
-那个界面估计很多人都很熟。
-
-当时最常踩的坑爆显存尤其：
-AMD 显卡用户
-
-体验非常痛苦。
-当时：
-
-CUDA 基本 NVIDIA 专属
-ROCm 支持又一般
-Windows 下兼容更差
-
-于是经常：
-torch not compiled with cuda
-
-或者：
-CUDA out of memory
-
-看到想吐。
-
-我甚至用过 Google Colab 白嫖显卡这应该很多老 SD 用户都经历过。
-因为那时候：
-本地显卡根本跑不动
-
-于是：
-
-Colab
-Kaggle
-云 GPU
-
-开始疯狂流行。
-尤其：
-免费 T4
-
-真的救过命。
-
-那时候典型工作流基本长这样：
-本地写 Prompt
-↓
-上传云端
-↓
-生成图片
-↓
-下载结果
-
-有时候甚至：
-Google 一断连
-白跑半小时
-
-非常真实。
-
-Prompt 也是个大坑刚开始很多人以为：
-
-“随便输一句话就行。”
-
-后来发现：
-AI 绘画其实非常吃 Prompt。
-例如：
-masterpiece, best quality, ultra detailed
-
-这种“咒语流” Prompt。
-一度特别流行。
-
-Negative Prompt 也很重要尤其二次元模型。
-不写负面词：
-多手
-崩脸
-畸形
-
-几乎是家常便饭。
-于是后来：
-EasyNegative
-badhand
-bad anatomy
-
-这些 embedding 基本人手必备。
-
-SDXL 出来后变化很大SD1.5 时代：
-比较偏：
-二次元炼丹
-
-而 SDXL 后：
-
-构图
-光影
-真实感
-
-提升明显。
-但代价也很明显：
-更吃显存。很多：
-6G 显卡用户
-
-直接阵亡。
-
-ComfyUI 是另一种世界第一次看 ComfyUI：
-我是真懵了。
-满屏：
-节点
-连线
-工作流
-
-像：
-UE蓝图
-+
-NodeRed
-+
-AI绘画
-
-后来用久了才发现：
-它本质是“图形化推理流水线”。例如：
-模型加载
-↓
-Prompt编码
-↓
-LoRA注入
-↓
-采样
-↓
-VAE解码
-↓
-输出图片
-
-全部节点化。
-
-为什么很多高级玩家后来转 ComfyUI因为：
-可控性太强了。WebUI 更像：
-给普通用户用
-
-而 ComfyUI：
-更像工程化工具
-
-特别适合：
-
-批量生成
-API化
-工作流复用
-自动化处理
-多模型组合
-
-
-AI 绘画最容易被低估的一点很多人觉得：
-
-“不就是输入 Prompt 出图？”
-
-实际上：
-后面已经逐渐变成：
-工作流工程
-
-了。
-尤其：
-
-ControlNet
-OpenPose
-局部重绘
-区域重绘
-多阶段放大
-批处理
-
-这些东西组合起来后。
-复杂度已经不低了。
-
-我后来对 AI 绘画的理解我现在反而觉得：
-它不像：
-替代创作
-
-更像：
-提高素材生产效率
-
-尤其：
-
-二创
-UI素材
-背景图
-头像
-网站配图
-概念草图
-
-效率确实非常夸张。
-
-但它也确实很吃硬件尤其：
-
-显卡
-显存
-SSD
-内存
-
-模型一多后：
-几十 GB 很正常
-
-而且：
-不同模型还互相抢显存
-
-后来甚至：
-整理模型
-
-本身都快变成一种运维工作了。
-
-现在再回头看Stable Diffusion 最厉害的地方其实不是：
-
-“AI 会画画了”
-
-而是：
-它把 AI 内容生产真正带进了普通人的电脑。以前：
-AI 基本是：
-论文
-实验室
-大公司
-
-而 SD 开始后。
-第一次变成：
-普通人也能自己部署
-自己训练
-自己折腾
-
-这件事其实影响非常大。
-
-]]></content>
-      <categories>
-        <category>AI</category>
-        <category>AIGC</category>
-      </categories>
-      <tags>
-        <tag>AIGC</tag>
-        <tag>StableDiffusion</tag>
-        <tag>SDXL</tag>
-        <tag>LoRA</tag>
-        <tag>ComfyUI</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>我对 Benchmark 与模型评测的理解</title>
     <url>/2024/05/07/ai/understanding-benchmark-and-model-evaluation/</url>
     <content><![CDATA[我对 Benchmark 与模型评测的理解刚开始接触深度学习时，很容易进入一种错觉：
@@ -4557,6 +4557,589 @@ Benchmark 很重要。
       </tags>
   </entry>
   <entry>
+    <title>从 Scrapy 到 Playwright：现代 Python 爬虫技术整理</title>
+    <url>/2022/09/17/backend/Modern-Python-Web-Scraping-And-Automation/</url>
+    <content><![CDATA[从 Scrapy 到 Playwright：现代 Python 爬虫技术整理很多人第一次接触 Python。
+几乎都会接触：
+爬虫
+
+因为：
+Python 在这个领域生态太强了。
+而我自己对爬虫技术的认知变化。
+其实也是：
+
+从“请求脚本小子”
+到真正理解现代 Web 自动化。
+
+
+最开始：requests + BeautifulSoup很多人入门爬虫。
+基本都从：
+requests
+BeautifulSoup
+
+开始。
+
+requests：最经典 HTTP 库安装：
+pip install requests
+
+
+最简单请求import requests
+
+resp = requests.get("https://example.com")
+
+print(resp.text)
+
+
+BeautifulSoup：HTML 解析安装：
+pip install beautifulsoup4
+
+
+最简单解析from bs4 import BeautifulSoup
+
+soup = BeautifulSoup(resp.text, "html.parser")
+
+title = soup.title.text
+
+
+这阶段本质是什么其实：
+伪装浏览器发送HTTP请求
+
+然后：
+解析返回HTML
+
+
+为什么早期爬虫很好做因为：
+以前很多网站：
+服务端直接返回完整HTML
+
+
+浏览器拿到源码后直接：
+就有内容
+
+于是：
+requests.get()
+
+就够了。
+
+这阶段最常见技术
+请求头伪装headers = &#123;
+    "User-Agent": "Mozilla/5.0"
+&#125;
+
+
+Cookie很多网站：
+登录状态依赖 Cookie。
+
+Sessionsession = requests.Session()
+
+自动维持会话。
+
+POST 请求requests.post(url, data=data)
+
+
+JSON 接口resp.json()
+
+
+很多人后来才发现大量网站：
+其实：
+前端页面只是壳
+
+真正数据：
+来自：
+XHR / Fetch API
+
+
+所以后来爬虫开始进入第二阶段即：
+
+“抓接口”。
+
+
+接口爬虫时代这时候：
+开发者工具开始变得极其重要。
+
+Chrome DevTools按：
+F12
+
+进入：
+Network
+
+
+真正关键的是看：
+XHR
+Fetch
+
+
+因为很多页面：本质：
+前端调API
+
+
+例如：GET /api/list?page=1
+
+
+所以后来很多爬虫其实根本不解析 HTML。
+而是：
+直接请求后端API
+
+
+这阶段最大的提升是：
+速度极快
+
+因为：
+不用：
+
+渲染页面
+执行JS
+加载浏览器
+
+
+但问题也来了越来越多网站：
+开始：
+前端动态渲染
+
+
+什么叫动态网页例如：
+Vue &#x2F; React 页面。
+初始 HTML：
+可能只有：
+&lt;div id="app">&lt;/div>
+
+真正内容：
+靠：
+JavaScript运行后生成
+
+
+于是 requests 开始失效因为：
+requests.get()
+
+拿到的：
+只是：
+未渲染HTML
+
+
+所以后来 Selenium 开始流行
+Selenium 是什么本质：
+浏览器自动化工具
+
+
+安装pip install selenium
+
+
+Selenium 核心思想不是：
+模拟HTTP请求
+
+而是：
+真正启动浏览器
+
+
+最简单例子from selenium import webdriver
+
+driver = webdriver.Chrome()
+
+driver.get("https://example.com")
+
+print(driver.page_source)
+
+
+Selenium 真正强大的地方是：
+它会执行JS
+
+
+所以：动态网页终于能爬了。
+
+Selenium 能做什么不仅：
+
+获取HTML
+
+还可以：
+
+点击按钮
+输入文本
+登录
+上传文件
+模拟用户行为
+
+
+定位元素driver.find_element(By.ID, "username")
+
+
+点击按钮button.click()
+
+
+输入文本input.send_keys("hello")
+
+
+Selenium 为什么当年统治爬虫圈因为：
+它第一次真正解决了：
+动态网页问题
+
+
+但 Selenium 问题也很明显
+1. 太重因为：
+真浏览器
+
+资源占用巨大。
+
+2. 很慢尤其：
+批量并发。
+
+3. WebDriver 地狱这是经典噩梦。
+例如：
+Chrome版本不匹配
+
+
+常见错误session not created
+
+
+原因通常：chromedriver版本不对
+
+
+后来 webdriver-manager 才缓解一点pip install webdriver-manager
+
+
+4. 异步页面等待困难经典问题：
+元素还没加载出来
+
+
+于是：大量：
+time.sleep(5)
+
+开始出现。
+
+后来 Selenium 进入现代化阶段出现：
+WebDriverWait
+
+
+显式等待from selenium.webdriver.support.ui import WebDriverWait
+
+
+Scrapy：真正的工程化爬虫框架后来接触 Scrapy 时。
+第一次意识到：
+
+原来爬虫也能工程化。
+
+
+Scrapy 是什么本质：
+异步爬虫框架
+
+
+安装pip install scrapy
+
+
+创建项目scrapy startproject myspider
+
+
+运行爬虫scrapy crawl demo
+
+
+Scrapy 最大特点不是：
+会不会发请求
+
+而是：
+完整工程体系
+
+
+Scrapy 包含：
+调度器
+请求队列
+中间件
+Pipeline
+去重
+并发控制
+
+
+Spider负责：
+定义爬取逻辑
+
+
+Pipeline负责：
+处理数据
+
+例如：
+
+存数据库
+清洗
+导出
+
+
+Middleware负责：
+请求拦截
+
+例如：
+
+代理
+UA轮换
+Cookie处理
+
+
+Scrapy 最大优势
+1. 性能极强因为：
+Twisted异步架构
+
+
+2. 非常适合大规模采集例如：
+
+新闻站
+电商
+Wiki
+文档站
+
+
+3. 工程化成熟很多公司：
+内部爬虫平台：
+其实就是：
+Scrapy二次封装
+
+
+Scrapy 最大缺点就是：
+动态网页支持弱
+
+
+所以后来大量项目变成：
+Scrapy + Selenium
+
+
+即：Scrapy负责调度。
+Selenium负责渲染。
+
+但后来问题越来越明显现代网站：
+JS 越来越重。
+
+React&#x2F;Vue SPA开始普及。
+
+Cloudflare开始流行。
+
+各种反爬升级包括：
+
+指纹检测
+webdriver检测
+canvas检测
+行为分析
+
+
+Selenium 开始越来越吃力于是：
+Playwright 出现了。
+
+Playwright：现代浏览器自动化这是后来我认为：
+真正改变 Python Web 自动化体验的工具。
+
+Playwright 是什么微软推出的：
+现代浏览器自动化框架
+
+
+安装pip install playwright
+playwright install
+
+
+最简单例子from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch()
+
+    page = browser.new_page()
+
+    page.goto("https://example.com")
+
+    print(page.content())
+
+
+Playwright 为什么体验飞跃因为：
+它本质：
+已经不是：
+传统WebDriver体系
+
+了。
+
+最大变化是：
+直接控制浏览器协议
+
+
+Playwright 最强的地方
+1. 自动等待这是巨大提升。
+以前 Selenium：
+time.sleep()
+
+满天飞。
+
+Playwright：很多操作：
+自动等待元素加载。
+
+例如：page.click("button")
+
+内部：
+已经自动等待。
+
+2. 更稳定尤其：
+动态页面。
+
+3. 更现代天然适配：
+
+SPA
+React
+Vue
+WebSocket
+
+
+4. 多浏览器支持极好支持：
+
+Chromium
+Firefox
+WebKit
+
+
+5. API 非常统一开发体验明显比 Selenium 好。
+
+Playwright 另一个重要用途其实是：
+网页截图
+
+
+截图page.screenshot(path="test.png")
+
+
+后来很多 Bot 项目其实：
+都是：
+网页渲染 -> 截图 -> 发图片
+
+
+Playwright 最大问题
+1. 浏览器依赖重首次安装很大。
+
+2. Linux 部署复杂尤其 Docker。
+经常：
+缺依赖
+
+
+常见问题browser closed unexpectedly
+
+
+3. 并发内存高浏览器非常吃内存。
+
+所以后来大型项目通常会做：
+浏览器池
+
+
+Playwright 为什么越来越重要因为：
+现代 Web：
+已经逐渐：
+浏览器化
+
+
+很多内容：甚至：
+只有浏览器执行JS后才存在
+
+
+所以：现在越来越多“爬虫”。
+本质已经变成：
+
+Web 自动化。
+
+
+现代爬虫技术路线变化
+第一阶段requests + bs4
+
+静态网页时代。
+
+第二阶段抓XHR接口
+
+接口分析时代。
+
+第三阶段Selenium
+
+动态网页时代。
+
+第四阶段Playwright
+
+现代浏览器自动化时代。
+
+现在很多“爬虫”其实已经接近：
+自动化QA
+RPA
+浏览器机器人
+
+了。
+
+反爬也是越来越复杂现在常见：
+
+1. IP限制需要：
+
+代理
+IP池
+
+
+2. 指纹检测例如：
+
+webdriver
+canvas
+WebGL
+
+
+3. 行为检测例如：
+鼠标轨迹
+滚动行为
+点击间隔
+
+
+4. 登录验证例如：
+
+验证码
+风控
+二次验证
+
+
+所以后来我最大的认知变化以前觉得：
+爬虫 = requests.get()
+
+后来发现：
+现代爬虫本质：
+已经是：
+
+“模拟真实用户行为”。
+
+
+最后总结
+requests + bs4适合：
+简单静态网页
+
+
+Scrapy适合：
+大规模工程化采集
+
+
+Selenium适合：
+传统动态网页
+
+
+Playwright适合：
+现代Web自动化
+复杂SPA网站
+
+
+而现代爬虫技术的发展路线本质上其实是：
+从HTTP请求
+逐渐走向浏览器控制
+
+因为：
+现代互联网本身。
+已经越来越依赖：
+
+JavaScript
+前端渲染
+浏览器环境
+
+而不是：
+传统静态 HTML 了。
+]]></content>
+      <categories>
+        <category>后端开发</category>
+        <category>Python</category>
+      </categories>
+      <tags>
+        <tag>爬虫</tag>
+        <tag>Scrapy</tag>
+        <tag>Selenium</tag>
+        <tag>Playwright</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Python 环境管理终于不再混乱</title>
     <url>/2021/08/16/backend/Python-Environment-Management-Guide/</url>
     <content><![CDATA[Python 环境管理终于不再混乱Python 生态有一个很典型的问题：
@@ -5029,477 +5612,6 @@ Python 环境管理真正解决的其实不是：
       <tags>
         <tag>虚拟环境</tag>
         <tag>环境管理</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>我用 FastAPI 开发 Web 应用的实践整理</title>
-    <url>/2022/01/07/backend/FastAPI-PostgreSQL-Practice/</url>
-    <content><![CDATA[我用 FastAPI 开发 Web 应用的实践整理这个项目本质上是一个：
-图片社区类 Web 应用
-
-功能方向类似：
-
-Pinterest
-Pixiv
-图片收藏站
-
-核心功能包括：
-
-用户注册登录
-图片上传
-点赞收藏
-评论互动
-标签系统
-图片来源管理
-用户行为记录
-
-项目重点并不在前端。
-而在于：
-id现代 Python 后端工程化
-
-包括：
-
-FastAPI
-异步 ORM
-PostgreSQL
-JWT
-Redis
-Async 架构
-
-这些完整技术链路。
-
-技术栈项目后端技术栈大致如下：
-idFastAPI
-PostgreSQL
-GINO
-asyncpg
-Redis
-JWT
-Uvicorn
-Pydantic
-
-
-为什么选择 FastAPI这个项目本质是：
-id前后端分离 API 服务
-
-因此：
-
-类型系统
-自动文档
-异步能力
-数据校验
-
-会非常重要。
-FastAPI 在这些方面体验明显优于传统 Flask。
-
-为什么选择 PostgreSQL数据库最开始考虑过 MySQL。
-但最终还是选择 PostgreSQL。
-原因主要有几个。
-
-1. JSON 能力更强很多业务数据：
-其实是：
-id弱结构化
-
-例如：
-
-标签
-扩展属性
-元数据
-图片信息
-
-使用 PostgreSQL 的 JSON 字段会非常方便。
-
-2. 类型系统更完整PostgreSQL：
-支持：
-
-JSON
-ARRAY
-UUID
-ENUM
-
-复杂业务建模会更舒服。
-
-3. asyncpg 性能很好Python 异步生态里。
-idasyncpg
-
-性能一直很强。
-而很多异步 ORM：
-底层本质也是：
-id基于 asyncpg
-
-
-为什么使用 GINO项目开发时期。
-SQLAlchemy Async：
-还不算成熟。
-因此选择了：
-idGINO
-
-
-GINO 本质是什么GINO 本质上：
-可以理解为：
-idasyncpg + ORM 封装
-
-提供：
-
-Model
-Query
-Async ORM
-
-能力。
-
-一个简单 Model例如：
-idclass User(db.Model):
-    __tablename__ = "users"
-
-    id = db.Column(db.Integer(), primary_key=True)
-    username = db.Column(db.String())
-
-
-异步查询查询时：
-iduser = await User.query.where(
-    User.id == user_id
-).gino.first()
-
-这里：
-idawait
-
-本质是在等待：
-id数据库 IO
-
-完成。
-
-Async 在 Web 服务里的意义很多人误以为：
-异步是：
-id让代码执行更快
-
-实际上：
-异步核心意义是：
-id减少 IO 阻塞
-
-
-Web 服务里真正耗时的部分通常是：
-
-数据库
-Redis
-HTTP请求
-文件读写
-
-而不是 CPU。
-
-项目目录结构项目后期基本拆成：
-idapp
-├── api
-├── models
-├── schemas
-├── services
-├── dependencies
-├── middleware
-├── utils
-└── core
-
-
-各层职责
-api负责：
-id路由与接口定义
-
-例如：
-id@router.get("/images")
-
-
-models负责：
-id数据库模型
-
-
-schemas负责：
-idPydantic 数据结构
-
-包括：
-
-请求体
-返回结构
-参数校验
-
-
-services负责：
-id业务逻辑
-
-避免：
-idrouter 里塞满业务代码
-
-
-middleware负责：
-
-日志
-JWT解析
-请求耗时
-异常处理
-
-
-Pydantic 在项目里的作用FastAPI 真正的核心之一：
-其实是：
-idPydantic
-
-
-一个用户创建 Schema例如：
-idclass UserCreate(BaseModel):
-    username: str
-    password: str
-
-接口：
-id@router.post("/register")
-async def register(user: UserCreate):
-    pass
-
-
-Pydantic 的价值它会自动处理：
-
-类型校验
-缺失字段
-JSON解析
-参数转换
-
-避免：
-大量：
-idrequest.json.get()
-
-式代码。
-
-用户系统用户系统核心包括：
-
-注册
-登录
-JWT
-权限校验
-
-
-密码为什么不能明文密码必须：
-id哈希存储
-
-常见方案：
-
-bcrypt
-argon2
-
-
-JWT 的作用前后端分离后。
-大量项目开始使用：
-idJWT
-
-作为登录态。
-
-JWT 本质JWT 本质是：
-id签名令牌
-
-不是加密。
-
-JWT 通常包含
-用户ID
-过期时间
-权限信息
-
-
-FastAPI 鉴权依赖通常会配合：
-idDepends()
-
-实现。
-例如：
-idasync def get_current_user():
-    pass
-
-
-图片上传系统图片系统实际上比 CRUD 复杂很多。
-
-需要考虑的问题包括：
-
-文件命名
-重复上传
-缩略图
-原图存储
-CDN
-图片压缩
-路径管理
-
-
-为什么后期很多项目会对象存储化因为：
-本地文件：
-很难处理：
-
-扩容
-多机器部署
-CDN
-高并发读取
-
-因此很多项目最终都会：
-idOSS化
-
-
-点赞系统的实际问题点赞并不只是：
-idcount + 1
-
-
-实际需要考虑包括：
-
-重复点赞
-取消点赞
-并发问题
-热门排序
-Redis缓存
-
-
-评论系统的问题评论系统后期会逐渐复杂。
-例如：
-
-楼中楼
-分页
-删除状态
-审核状态
-敏感词
-
-
-Redis 在项目里的作用Redis 主要用于：
-
-热门数据缓存
-登录状态
-验证码
-高频读取
-
-
-为什么需要 Redis数据库不适合：
-id高频热点读取
-
-尤其：
-排行榜。
-
-Middleware 的作用中间件负责：
-id请求生命周期处理
-
-
-常见中间件包括：
-
-请求日志
-Trace ID
-JWT解析
-异常捕获
-耗时统计
-
-
-异步项目最大的坑真正踩坑最多的地方。
-其实是：
-id同步库混入异步项目
-
-
-最典型错误例如：
-idrequests.get()
-
-出现在：
-idasync def
-
-内部。
-
-为什么危险因为：
-requests 是同步阻塞。
-会直接：
-id阻塞事件循环
-
-
-正确做法异步项目里：
-应该使用：
-idhttpx.AsyncClient
-
-等异步库。
-
-FastAPI 自动文档FastAPI 默认生成：
-
-Swagger
-OpenAPI
-
-访问：
-id/docs
-
-即可查看接口。
-
-自动文档的意义它会自动生成：
-
-请求参数
-Schema
-类型
-返回值
-
-非常适合：
-前后端协作。
-
-部署方式项目最终通常使用：
-iduvicorn
-
-启动。
-例如：
-iduvicorn main:app --host 0.0.0.0 --port 8000
-
-生产环境一般会结合：
-
-nginx
-gunicorn
-docker
-
-一起部署。
-
-后期最大的认知变化真正的 Web 项目。
-难点通常不是：
-id功能开发
-
-而是：
-id工程维护
-
-
-包括：
-项目结构
-数据一致性
-权限
-缓存
-并发
-异步
-日志
-部署
-
-这些问题。
-
-FastAPI 真正适合什么场景FastAPI 最适合：
-
-API服务
-AI服务
-微服务
-异步系统
-WebSocket
-前后端分离
-
-
-最后总结现代 Python Web 开发。
-已经越来越偏向：
-idAPI化
-异步化
-类型化
-工程化
-
-FastAPI 基本就是围绕这一趋势设计的框架。
-而：
-
-PostgreSQL
-Async ORM
-Redis
-JWT
-
-这些组件。
-共同组成了现代 Python Web 后端的核心工程体系。
-]]></content>
-      <categories>
-        <category>后端开发</category>
-        <category>Python</category>
-        <category>Web</category>
-      </categories>
-      <tags>
-        <tag>FastAPI</tag>
-        <tag>PostgreSQL</tag>
-        <tag>ORM</tag>
       </tags>
   </entry>
   <entry>
@@ -6623,381 +6735,6 @@ Python 图片生成生态本质上其实已经分成：
       </tags>
   </entry>
   <entry>
-    <title>从 C 到 Java：我对面向对象的理解变化</title>
-    <url>/2022/11/17/backend/Java-OOP-And-Web-Stack/</url>
-    <content><![CDATA[从 C 到 Java：我对面向对象的理解变化很多人第一次学 Java 时，会觉得：
-
-“不就是把函数塞进 class 里吗？”
-
-但真正开始做项目之后会发现：
-Java 和 C 的区别，从来不只是语法。
-而是：
-
-代码组织方式
-模块协作方式
-大型项目维护方式
-团队开发思维
-软件工程体系
-
-这些东西加在一起，才是“面向对象”的真正意义。
-
-为什么很多人学不会 OOP很多教程的问题是：
-
-一上来讲 class
-然后讲 extends
-然后讲“万物皆对象”
-
-结果新人完全不知道这些东西到底解决了什么问题。
-实际上：
-
-OOP 本质是在解决“大型程序复杂度失控”的问题。
-
-小项目：
-main()
-
-当然能跑。
-但项目越来越大后：
-用户模块
-订单模块
-权限模块
-支付模块
-消息模块
-缓存模块
-数据库模块
-日志模块
-
-如果还是：
-xxx_user()
-xxx_order()
-xxx_pay()
-
-最后会变成：
-全局变量到处飞
-函数互相调用
-模块互相依赖
-改一个地方全崩
-
-这也是很多 C 项目后期极其痛苦的原因。
-
-C 语言的核心思维C 的核心是：
-
-数据结构
-内存
-指针
-过程控制
-
-例如：
-struct User &#123;
-    char name[20];
-    int age;
-&#125;;
-
-void print_user(struct User* user) &#123;
-    printf("%s", user->name);
-&#125;
-
-这里：
-
-数据是 struct
-行为是函数
-两者分离
-
-这种方式：
-优点
-性能高
-内存可控
-非常贴近底层
-非常适合系统开发
-
-所以：
-
-Linux
-Redis
-Nginx
-SQLite
-
-本质上都是 C 系生态。
-
-Java 的核心变化Java 开始强调：
-数据 + 行为
-应该绑定在一起
-
-于是：
-public class User &#123;
-
-    private String name;
-
-    public void printUser() &#123;
-        System.out.println(name);
-    &#125;
-&#125;
-
-核心思想：
-对象 &#x3D; 状态 + 行为这件事非常关键。
-因为它开始：
-
-限制数据访问
-控制模块边界
-减少外部破坏
-
-这就是：
-封装（Encapsulation）
-封装到底解决了什么很多人觉得：
-private
-getter
-setter
-
-很烦。
-但它实际上是在：
-防止系统失控例如：
-user.age = -100;
-
-显然非法。
-于是：
-public void setAge(int age)&#123;
-    if(age &lt; 0)&#123;
-        throw new RuntimeException();
-    &#125;
-    this.age = age;
-&#125;
-
-这样：
-
-数据合法性可控
-外部无法乱改
-模块更稳定
-
-大型系统里非常重要。
-
-继承为什么后期越来越少初学 Java 时：
-class Cat extends Animal
-
-感觉很帅。
-但工程实践后会发现：
-
-继承其实耦合度非常高。
-
-例如：
-父类改动
-↓
-所有子类受影响
-
-尤其：
-多层继承
-
-会变成灾难。
-所以现代 Java 越来越强调：
-组合优于继承例如：
-class UserService &#123;
-    private RedisService redisService;
-&#125;
-
-而不是：
-class UserService extends RedisService
-
-
-多态为什么是 Java 的核心真正让 Java 工程能力提升的：
-其实是：
-抽象接口例如：
-interface Storage &#123;
-    void save();
-&#125;
-
-然后：
-class MysqlStorage implements Storage
-class RedisStorage implements Storage
-class OssStorage implements Storage
-
-业务层：
-Storage storage
-
-根本不关心：
-到底是谁实现的
-
-这就是：
-解耦也是：
-
-Spring
-MyBatis
-Tomcat
-JDBC
-
-整个 Java 生态最核心的思想。
-
-为什么 Java 特别强调接口因为大型项目真正重要的是：
-规范而不是：
-某个具体实现例如：
-支付接口
-日志接口
-缓存接口
-消息接口
-
-大家只需要：
-遵守同一个协议
-
-就能协作。
-于是：
-团队开发能力会大幅提高。
-
-Java 为什么适合企业开发因为 Java 天生强调：
-工程化包括：
-
-
-
-能力
-Java生态
-
-
-
-包管理
-Maven
-
-
-IOC
-Spring
-
-
-ORM
-MyBatis&#x2F;Hibernate
-
-
-Web
-SpringMVC
-
-
-日志
-Logback
-
-
-监控
-Actuator
-
-
-构建
-Maven&#x2F;Gradle
-
-
-测试
-Junit
-
-
-它不是：
-单个语言强
-
-而是：
-整个企业开发生态成熟
-
-
-Java 与 Python 的区别后来再回头看：
-两者思维差异其实很明显。
-
-
-
-对比
-Java
-Python
-
-
-
-类型
-强类型
-动态类型
-
-
-工程约束
-强
-弱
-
-
-开发速度
-中等
-快
-
-
-大型协作
-强
-中等
-
-
-灵活性
-一般
-极强
-
-
-企业传统生态
-极强
-中等
-
-
-Python 更像：
-快速实现
-
-Java 更像：
-大型工业系统
-
-
-我后面才真正理解的东西以前觉得：
-面向对象 = class
-
-后来才发现：
-真正核心的是：
-软件复杂度管理包括：
-
-分层
-解耦
-依赖控制
-模块边界
-接口规范
-团队协作
-
-这些才是 OOP 真正重要的东西。
-
-为什么很多人学 Java 很痛苦因为：
-一开始接触的就是“工业体系”新人甚至：
-main 都没理解
-
-就开始：
-
-Spring
-Maven
-IOC
-AOP
-Bean
-注解
-
-自然会懵。
-Java 的难点：
-从来不是语法。
-而是：
-工程体系
-后来我对 Java 的理解Java 最强的地方不是：
-语言本身
-
-而是：
-一整套成熟的软件工程规范包括：
-
-怎么组织项目
-怎么管理依赖
-怎么分层
-怎么解耦
-怎么部署
-怎么团队协作
-
-这些东西结合起来：
-才构成了真正的：
-Java 企业开发体系]]></content>
-      <categories>
-        <category>后端开发</category>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>OOP</tag>
-        <tag>面向对象</tag>
-        <tag>C语言</tag>
-        <tag>软件设计</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Spring Boot 与 Java Web 开发体系整理</title>
     <url>/2024/10/02/backend/SpringBoot-Java-Web-Stack/</url>
     <content><![CDATA[Spring Boot 与 Java Web 开发体系整理很多人第一次接触 Java Web 时都会懵。
@@ -7404,1517 +7141,6 @@ Java 企业级开发生态]]></content>
         <tag>MyBatis</tag>
         <tag>Maven</tag>
         <tag>Tomcat</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>关系型与非关系型数据库的理解整理</title>
-    <url>/2025/01/03/database/Database-Relational-vs-NonRelational/</url>
-    <content><![CDATA[关系型与非关系型数据库的理解整理数据库这块，我一开始其实是没什么体系感的。
-最早写后端的时候，基本就是：
-
-CRUD
-查表
-写接口
-能跑就行
-
-直到系统稍微复杂一点之后，问题就开始变了：
-
-为什么这个 SQL 会慢
-为什么加了索引还是慢
-为什么线上偶尔卡死
-为什么数据不一致
-为什么一加并发就出问题
-
-那时候才慢慢意识到：
-数据库不是“存数据的地方”，更像是整个系统的底层调度器。
-
-一、关系型数据库（RDBMS）最早接触的一类就是关系型数据库。
-常见的基本就是：
-
-MySQL
-PostgreSQL
-Oracle
-SQL Server
-SQLite
-
-当时我的理解很简单：
-
-表 + SQL + 能查数据 &#x3D; 数据库
-
-后来做项目多了才发现，关系型数据库真正核心是“关系”。
-比如电商系统：
-
-用户
-商品
-订单
-支付
-
-这些东西单独看都简单，但一旦连起来，就全是关系。
-
-MySQL（最常用的一类）我第一个正式用在项目里的数据库就是 MySQL。
-用下来最大的感受其实不是“强”，而是：
-
-足够稳，够通用，出了问题也好查。
-
-基本 Web 项目都绕不开它。
-
-InnoDB 和 MyISAM我当时踩坑比较深的一点是存储引擎。
-
-MyISAM：早期用过，后来基本放弃
-InnoDB：现在默认用
-
-区别当时我其实是踩出来的：
-MyISAM 写入稍微多一点就容易出问题，而且事务基本没法用。
-InnoDB 用起来就正常很多：
-
-能回滚
-支持事务
-崩了还能恢复
-
-
-事务这块（ACID）事务这块我第一次真正有感知，是在做转账逻辑的时候。
-大概就是这种逻辑：
-BEGIN;
-
-UPDATE user SET money = money - 100 WHERE id = 1;
-UPDATE user SET money = money + 100 WHERE id = 2;
-
-COMMIT;
-
-当时踩过一次问题是：
-中间服务挂了，钱扣了但没加上。
-后来才知道数据库会帮你回滚，这就是事务的意义。
-ACID 当时是背的，后来是靠事故理解的：
-
-原子性：要么都成功，要么都失败
-一致性：数据不能乱
-隔离性：互不影响
-持久性：提交了就不会丢
-
-
-隔离级别这个其实一开始我也只是背概念。
-真正有感觉是在高并发场景里。
-四个级别：
-
-读未提交
-读已提交
-可重复读（MySQL 默认）
-串行化
-
-后来才慢慢理解为什么默认是 RR：
-性能和一致性之间的一个折中。
-
-MVCC（后来才真正理解）MVCC 我最早是“知道这个词”，但没感觉。
-后来在并发读写冲突里才慢慢理解：
-数据库其实是靠“版本”在解决并发读的。
-简单说就是：
-
-读的不是当前数据，而是某个时间点的快照。
-
-这样才做到：
-
-读不阻塞写
-写不阻塞读
-
-
-锁（真正踩坑的地方）锁这个东西我是在线上问题里学的。
-典型问题就是死锁。
-比如两个事务：
-
-A 锁 user 再等 order
-B 锁 order 再等 user
-
-直接卡死。
-后来总结下来最有效的办法其实很朴素：
-
-加锁顺序统一
-事务尽量短
-少做大范围更新
-
-
-索引（性能问题核心）性能问题 80% 其实都和索引有关。
-我当时最大的误区是：
-
-慢就加索引。
-
-后来踩坑才知道不是这么简单。
-几个典型坑：
-
-like ‘%xxx’ 直接失效
-对字段做函数会失效
-类型不一致会失效
-
-最核心的理解其实是：
-
-索引不是加了就用，而是查询方式必须匹配它的结构。
-
-
-B+TreeInnoDB 默认用 B+Tree。
-我当时理解比较简单：
-
-树越矮越快
-磁盘 IO 越少越好
-范围查询很适合
-
-后面看执行计划（EXPLAIN）才慢慢有感觉。
-
-二、PostgreSQLPostgreSQL 是后面接触的。
-当时换的原因很现实：
-
-MySQL 在一些复杂查询和结构化能力上开始不够用了。
-
-PG 给我最直观的感觉是：
-
-SQL 更规范
-JSON 支持更自然
-扩展能力强
-复杂查询更舒服
-
-尤其 JSONB，我后来在一些配置类数据里用得很多。
-
-三、非关系型数据库（NoSQL）后面系统复杂起来之后，开始接触 NoSQL。
-最常见的几个：
-
-Redis
-MongoDB
-
-
-Redis（我用得最多的 NoSQL）Redis 一开始我理解就是缓存。
-后来用多了才发现它其实更像：
-
-内存数据结构服务。
-
-常见用法：
-
-缓存
-Token
-限流
-排行榜
-分布式锁
-
-
-为什么快这个其实是踩坑之后慢慢理解的：
-
-内存操作
-单线程避免锁竞争
-IO 多路复用
-
-不是“数据库快”，而是压根不走传统数据库那套路径。
-
-我踩过的几个坑缓存相关问题基本都遇到过：
-
-缓存穿透（查不存在的数据）
-缓存击穿（热点失效瞬间打爆数据库）
-缓存雪崩（大量 key 同时过期）
-
-后来处理方式基本就几种：
-
-空值缓存
-随机过期时间
-热点保护
-
-
-MongoDBMongoDB 用得相对少一些。
-主要在一些结构不稳定的数据里用过：
-比如：
-
-配置
-日志
-用户扩展字段
-一些 JSON 结构数据
-
-它的特点很直接：
-
-不强约束结构，灵活，但一致性弱一些。
-
-
-四、数据库之间的分工理解后来我对数据库的理解变成了比较工程化的一种拆分：
-
-关系型数据库适合：
-
-强一致性
-核心业务数据
-结构稳定
-
-比如：
-
-订单
-用户
-资金
-
-
-Redis适合：
-
-快速访问
-缓存
-状态类数据
-临时数据
-
-
-MongoDB &#x2F; JSON 类数据库适合：
-
-结构不固定的数据
-配置类数据
-日志类数据
-
-
-五、一些后期才理解的东西1. 数据库慢不一定是数据库的问题很多时候是：
-
-索引设计问题
-SQL 写法问题
-数据量设计问题
-
-
-2. ORM 不是银弹我早期很依赖 ORM，后来踩坑后变成：
-
-简单查询用 ORM
-复杂查询直接 SQL
-
-
-3. 系统复杂之后，数据库只是其中一环后面做系统会发现：
-真正复杂的不是 SQL，而是：
-
-缓存一致性
-并发控制
-数据流设计
-异步链路
-
-
-六、最后的理解变化回头看数据库这条线，其实变化挺明显的：
-一开始是：
-
-会写 SQL 就够了
-
-后来变成：
-
-能跑就行，但开始关注性能
-
-再后来变成：
-
-数据结构、并发、缓存、分布式一起看
-
-数据库本身没有变复杂，是系统把它放到了更复杂的位置上。
-]]></content>
-      <categories>
-        <category>数据库与中间件</category>
-      </categories>
-      <tags>
-        <tag>PostgreSQL</tag>
-        <tag>Database</tag>
-        <tag>MySQL</tag>
-        <tag>Redis</tag>
-        <tag>MongoDB</tag>
-        <tag>Oracle</tag>
-        <tag>后端开发</tag>
-        <tag>Middleware</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Kafka、RabbitMQ、ES 与大数据组件认知整理</title>
-    <url>/2023/07/09/database/BigData-Middleware-Kafka-RabbitMQ-ES/</url>
-    <content><![CDATA[Kafka、RabbitMQ、ES 与大数据组件认知整理这篇基本是我在项目逐渐变复杂之后，开始被迫接触的一组东西。
-前期开发其实很简单：
-接口 + 数据库 = 完成需求
-
-但一旦系统稍微大一点，就会开始出现一些很现实的问题：
-
-接口变慢
-数据库开始吃不消
-同步调用互相阻塞
-搜索越来越慢
-数据越来越大之后开始扛不住
-
-然后就会自然进入一个阶段：
-
-开始被迫理解“系统不是一条直线，而是一堆数据在流动”。
-
-
-一、为什么开始接触这些组件最开始的问题其实很具体，不是架构问题，而是“卡住了”。
-比如我当时遇到的情况：
-
-注册接口越来越慢
-一次请求要做很多事（发短信、初始化数据、写日志）
-某些接口互相依赖导致阻塞
-搜索功能直接 LIKE 查询扛不住
-数据量一大 MySQL 开始明显变慢
-
-这时候才开始意识到：
-
-同步调用这条链路是有上限的。
-
-
-二、消息队列到底解决了什么问题一开始我对 MQ 的理解很粗糙，就是“异步”。
-后来在项目里踩过一次比较典型的坑：
-注册接口里做了太多事情：
-
-写用户表
-初始化配置
-发邮件
-发短信
-写日志
-风控检查
-
-全部同步执行。
-结果就是：
-用户请求 -> 一直卡住 -> 超时
-
-后来改成：
-核心逻辑完成
-↓
-丢消息进 MQ
-↓
-直接返回
-
-剩下的慢慢处理。
-这个改完之后，最直观的变化是：
-
-接口响应时间直接掉下来。
-
-
-三、RabbitMQ（当时我更常用的 MQ）RabbitMQ 给我的感觉是：
-
-更像“带规则的任务分发系统”。
-
-结构大概是：
-Producer -> Exchange -> Queue -> Consumer
-
-
-Exchange 这个设计一开始挺绕我当时踩的第一个坑就是：消息不是直接进队列的。
-而是要经过 Exchange：
-
-Direct（精准路由）
-Fanout（广播）
-Topic（通配符）
-
-刚开始写的时候经常搞错：
-消息发了，但消费者收不到
-
-后来才发现是 routing key 没配对。
-
-RabbitMQ 给我的真实体感优点比较明显：
-
-功能很完整（ACK &#x2F; 重试 &#x2F; 死信）
-路由能力强
-很适合业务系统
-
-但也有一个感觉：
-
-它更偏“可靠”，不是“极致吞吐”。
-
-
-四、Kafka（第一次感觉到“吞吐量差距”）Kafka 是在后面做日志和数据流的时候接触的。
-最开始我理解错了它：
-Kafka = 高级 MQ
-
-后来才慢慢意识到：
-
-Kafka 更像“分布式日志系统”。
-
-
-Kafka 为什么快（不是背概念）当时我最直观的理解来自一个很简单的现象：
-RabbitMQ 在高流量下开始吃紧，但 Kafka 还能扛。
-后来我才慢慢拆出来几个原因：
-
-1. 它基本是追加写Kafka 的数据是：
-一直 append 到文件末尾
-
-没有复杂的随机写。
-
-2. 它避免了随机 IO磁盘真正慢的不是写，是：
-随机寻址
-
-Kafka 这个基本不碰。
-
-3. Partition 带来的并行一个 topic 被拆成多个 partition：
-Partition 1
-Partition 2
-Partition 3
-
-天然可以扩展吞吐。
-
-Kafka 给我的真实感受它不是“更高级的 MQ”，而是：
-
-用日志模型在做数据流系统。
-
-
-五、RabbitMQ vs Kafka（实际项目里的体感）不是理论对比，是我后来在项目里真实用出来的区别：
-
-RabbitMQ更像：
-任务队列
-业务解耦
-强调可靠性
-有明确消费者逻辑
-
-
-Kafka更像：
-数据管道
-日志系统
-流式处理入口
-大规模数据分发
-
-
-一个很实际的结论（踩坑来的）我后来基本形成一个简单判断：
-
-业务系统：RabbitMQ
-数据流&#x2F;日志：Kafka
-
-不是绝对，但够用了。
-
-六、消息可靠性（踩坑集中区）这一块一开始我其实是“知道概念”，但不知道问题在哪。
-直到真的遇到：
-消息发出去了，但消费者没处理到
-
-
-断点其实在三个地方
-Producer 发送失败
-Broker 挂了
-Consumer 没消费成功
-
-
-RabbitMQ里我后来常用的手段
-confirm 机制确认消息到达
-queue 持久化
-消费 ACK
-死信队列兜底
-
-
-Kafka里更关键的是
-ack&#x3D;all
-ISR 副本
-offset 提交
-
-
-一个比较真实的理解所谓“可靠性”，不是保证不出问题，而是：
-
-出问题之后还能不能恢复状态。
-
-
-七、Elasticsearch（最开始完全误解的组件）我一开始以为 ES 是：
-一个更快的数据库
-
-后来才发现完全不是。
-
-一个典型踩坑场景MySQL 搜索用：
-LIKE '%keyword%'
-
-数据一多直接变慢。
-
-ES解决的不是存储问题，而是搜索问题它核心能力其实是：
-
-分词
-倒排索引
-相关性排序
-
-
-倒排索引第一次理解是在这里我当时做了一个简单类比才理解：
-
-普通数据库：文档 -&gt; 单词
-ES：单词 -&gt; 文档
-
-
-这个差异带来的结果是搜索速度完全不是一个级别。
-
-但 ES 也踩过坑最明显的是：
-
-不适合事务
-不适合强一致
-数据更新成本比想象高
-
-后来基本形成一个判断：
-
-ES 是搜索系统，不是业务数据库。
-
-
-八、HDFS 和 MapReduce（偏历史理解）这块更多是“理解演进”，不是项目里真正用过。
-
-HDFS核心思路很简单：
-一个文件拆成很多块，分布存
-
-解决的问题是：
-
-单机存储不够用。
-
-
-MapReduce我第一次理解它其实是从“统计单词”开始的：
-Map：拆任务
-Reduce：汇总结果
-
-
-后来实际感受是：
-
-它适合离线批处理，但不适合实时。
-
-
-九、Kafka + Flink 这种组合为什么后来会流行后来在一些资料里看到这种组合：
-Kafka -> Flink -> 实时计算
-
-当时才慢慢理解：
-
-Kafka负责“数据流入口”
-Flink负责“实时计算”
-
-本质是：
-
-从批处理走向流处理。
-
-
-十、这些组件本质在系统里的位置后来看整体系统结构时才慢慢清晰：
-Nginx
-  ↓
-业务服务
-  ↓
-MySQL / Redis
-  ↓
-Kafka / RabbitMQ
-  ↓
-ES / Flink / Hadoop
-
-
-一个比较关键的认知变化以前我理解系统是：
-功能堆叠
-
-后来变成：
-数据怎么流动
-
-
-十一、最后回头看的几个结论（踩坑总结）这些不是“总结”，更像是后来用出来的体感：
-
-1. MQ不是为了异步，是为了削耦合同步调用链一长，系统一定会变脆。
-
-2. Kafka解决的是数据流，不是业务它不是“更强MQ”，而是另一种系统模型。
-
-3. ES不是数据库，是搜索系统用错场景会非常痛苦。
-
-4. 中间件本质是在拆系统复杂度不是功能增强，而是：
-
-把一个大系统拆成多个可控小系统。
-
-
-十二、最后后来再回头看这些组件，其实不再是“技术点”，而是一种分层：
-
-数据怎么存（数据库）
-数据怎么流（MQ &#x2F; Kafka）
-数据怎么查（ES）
-数据怎么算（Flink &#x2F; MapReduce）
-
-系统复杂之后，本质问题会从：
-怎么写功能
-
-变成：
-数据在哪流动，在哪停留，在哪被消费
-]]></content>
-      <categories>
-        <category>数据库与中间件</category>
-      </categories>
-      <tags>
-        <tag>Redis</tag>
-        <tag>Middleware</tag>
-        <tag>Kafka</tag>
-        <tag>RabbitMQ</tag>
-        <tag>Elasticsearch</tag>
-        <tag>BigData</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Vue3、Element Plus 与现代前端开发体验</title>
-    <url>/2022/03/11/frontend/Modern-Vue3-Frontend-Development/</url>
-    <content><![CDATA[
-# Vue3、Element Plus 与现代前端开发体验
-
-这篇更多是我在从 Vue2 过渡到 Vue3 过程中，对整个前端开发方式变化的一些记录。
-
-当时的感觉比较明显：前端不再是“写页面”，而是在往工程化应用靠。
-
----
-
-# Vue3 变化最直观的地方
-
-如果用一句话概括 Vue3 的变化，其实不是性能，而是写代码的方式变了。
-
-Vue2 时代的组件，大致是这样拆的：
-
-&#96;&#96;&#96;js
-data
-methods
-computed
-watch
-
-逻辑天然是“按类型分区”的。
-项目稍微一大，就会出现一个问题：
-同一个功能的代码，被拆散在不同位置。
-
-Vue2 的问题：逻辑分散比如一个用户模块：
-data() &#123;
-  return &#123;
-    user: &#123;&#125;,
-    loading: false
-  &#125;
-&#125;,
-methods: &#123;
-  async getUser() &#123;&#125;
-&#125;,
-watch: &#123;
-  user() &#123;&#125;
-&#125;
-
-当功能复杂后，这种结构的问题会变得很明显：
-
-你要改一个功能，需要在多个区块之间跳
-相关逻辑无法集中阅读
-复用逻辑很难抽离
-
-当时我在做稍微大一点的页面时，这种割裂感很强。
-
-Vue3 的变化：按“功能”组织代码Vue3 后，逻辑基本可以集中写在一起：
-const user = ref(&#123;&#125;);
-const loading = ref(false);
-
-const getUser = async () => &#123;
-  loading.value = true;
-&#125;;
-
-我当时最直观的感受是：
-
-代码终于是“按业务块”组织的，而不是“按语法分类”。
-
-
-setup 的意义Vue3 的核心变化其实集中在 setup。
-或者更极端一点：
-&lt;script setup&gt;
-
-这个语法糖之后，组件基本变成：
-
-一个函数 + 一段模板
-
-&lt;script setup lang&#x3D;&quot;ts&quot;&gt;
-import &#123; ref &#125; from &quot;vue&quot;;
-
-const count &#x3D; ref(0);
-
-const add &#x3D; () &#x3D;&gt; &#123;
-  count.value++;
-&#125;;
-&lt;&#x2F;script&gt;
-
-&lt;template&gt;
-  &lt;button @click&#x3D;&quot;add&quot;&gt;
-    &#123;&#123; count &#125;&#125;
-  &lt;&#x2F;button&gt;
-&lt;&#x2F;template&gt;
-
-
-ref &#x2F; reactive 的理解成本Vue3 初期最容易卡的点就是这一块。
-大致可以粗暴理解为：
-
-ref：基础值（number&#x2F;string&#x2F;boolean）
-reactive：对象
-
-const count = ref(0);
-
-const user = reactive(&#123;
-  name: "test",
-&#125;);
-
-后面那个 .value 确实一开始很烦，但实际写多了之后会习惯。
-
-Vue3 + TypeScript 变成默认组合我后来越来越明显的感受是：
-Vue3 不单是框架升级，而是把 TS 强行带进主流开发流程。
-问题主要来自 Vue2：
-
-类型约束弱
-重构风险高
-接口字段容易错
-大项目维护成本上升
-
-所以 Vue3 + TS 基本变成默认组合。
-
-Vite 带来的体验变化在 Vite 出来之前，Vue CLI + Webpack 是主流，但体验问题比较明显：
-
-启动慢
-热更新慢
-配置复杂
-
-Vite 的变化本质是：
-
-不再从打包角度思考开发阶段，而是直接利用 ESM。
-
-开发体验上最明显的变化是：
-
-启动基本秒级
-HMR 很快
-配置明显变少
-
-
-一个标准 Vue3 项目结构后来看比较成熟的项目，大致都会变成这样：
-src
-├── api
-├── components
-├── composables
-├── layouts
-├── router
-├── stores
-├── styles
-├── utils
-├── views
-└── App.vue
-
-这里我当时印象比较深的一点是：
-
-项目结构越清晰，后期“乱写工具函数”的概率越低。
-
-
-composables 的实际作用Vue3 很重要的一点是 composables（类似 hooks）。
-比如：
-export function useLoading() &#123;
-  const loading = ref(false);
-
-  const start = () => (loading.value = true);
-  const stop = () => (loading.value = false);
-
-  return &#123; loading, start, stop &#125;;
-&#125;
-
-我后期基本开始把：
-
-请求逻辑
-状态逻辑
-UI 状态
-
-都往 composable 拆。
-本质是把“功能”抽成模块，而不是把“页面”当模块。
-
-Element Plus 的实际使用体验Element Plus 在后台系统里基本是绕不开的。
-它解决的问题很直接：
-
-直接提供一套可用的 UI 组件体系。
-
-比如表单：
-&lt;el-form&gt;
-  &lt;el-input v-model&#x3D;&quot;username&quot; &#x2F;&gt;
-  &lt;el-button type&#x3D;&quot;primary&quot;&gt;
-    登录
-  &lt;&#x2F;el-button&gt;
-&lt;&#x2F;el-form&gt;
-
-开发速度确实会快很多。
-
-Element Plus 的真实问题用了一段时间后比较明显的几个问题：
-1. UI 风格固定很容易一眼看出“Element UI 项目”。
-
-2. 深层样式修改成本高组件嵌套多之后：
-
-改样式需要层层覆盖
-CSS 优先级容易变复杂
-
-
-Ant Design Vue 的对比后面也接触过 Ant Design Vue，整体更偏企业规范体系：
-
-表格能力更强
-设计规范更严格
-更偏中后台复杂系统
-
-
-TailwindCSS 的转变感受传统 CSS 最大的问题是：
-
-项目一大，命名和结构会开始失控。
-
-比如：
-.user-card-header-wrapper
-
-这种命名会越来越多。
-
-Tailwind 的方式Tailwind 变成：
-&lt;div class="flex items-center p-4 rounded-xl">&lt;/div>
-
-当时的感受是：
-
-样式不再“写在文件里”，而是“写在结构里”。
-
-
-Tailwind 的优点
-不需要命名 CSS
-组合速度快
-很适合组件化开发
-
-
-Tailwind 的缺点
-class 会变长
-可读性依赖习惯
-初期不适应会觉得乱
-
-
-Pinia 状态管理的变化Vuex 在 Vue2 时代基本是标配，但后来逐渐被 Pinia 替代。
-原因很直接：
-
-写法更接近 Composition API。
-
-export const useUserStore = defineStore("user", &#123;
-  state: () => (&#123;
-    token: "",
-  &#125;),
-&#125;);
-
-整体更轻。
-
-前端真正复杂的地方当时做完一段时间后，我的感受比较明确：
-前端难点其实不在页面，而在这些地方：
-
-状态同步
-组件通信
-请求封装
-权限控制
-性能优化
-项目结构
-
-页面只是表层。
-
-请求层的统一封装项目稍微复杂一点后，Axios 基本都会抽一层：
-import axios from "axios";
-
-const request = axios.create(&#123;
-  baseURL: "/api",
-&#125;);
-
-统一处理：
-
-token
-错误处理
-loading
-超时
-
-否则后期一定会散。
-
-一点更底层的感受回头看 Vue3 这一代工具链，我当时最大的变化不是“会不会用”，而是：
-
-开始用工程的方式看前端，而不是页面的方式。
-
-
-最后Vue3 本身并没有改变“写页面”这件事，但它改变了组织代码的方式。
-再加上：
-
-Vite
-Pinia
-Tailwind
-Element Plus
-
-这些工具组合起来之后，前端逐渐变成：
-
-一个工程系统，而不是 UI 拼装过程。
-
-]]></content>
-      <categories>
-        <category>前端开发</category>
-      </categories>
-      <tags>
-        <tag>Vue3</tag>
-        <tag>Element Plus</tag>
-        <tag>TailwindCSS</tag>
-        <tag>Vite</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>从前后端分离到瀑布流页面：我的 Web 开发实践</title>
-    <url>/2022/08/16/frontend/Frontend-Waterfall-Project-Practice/</url>
-    <content><![CDATA[从前后端分离到瀑布流页面：我的 Web 开发实践这个项目本质上是一个偏 Pinterest &#x2F; Pixiv 风格的图片社区。
-一开始目标其实很简单，就是做一个“能看图的网站”。但做着做着，功能不断往里加：
-
-用户登录与权限
-图片上传与管理
-评论与互动
-标签与搜索
-收藏与点赞
-推荐流
-后台管理
-
-到后面已经不是 Demo，更像一个完整的内容社区雏形。
-也是从这个项目开始，我明显感觉到：
-
-Web 开发真正难的地方，从来不是“写页面”，而是控制复杂度。
-
-
-一、技术栈与整体结构整体是典型前后端分离架构：
-Vue3 + Vite
-        ↓
-Axios API
-        ↓
-FastAPI
-        ↓
-PostgreSQL
-
-技术选型大致如下：
-
-
-
-模块
-技术
-
-
-
-前端
-Vue3
-
-
-UI
-Element Plus
-
-
-状态管理
-Pinia
-
-
-路由
-Vue Router
-
-
-请求
-Axios
-
-
-后端
-FastAPI
-
-
-ORM
-Gino
-
-
-数据库
-PostgreSQL
-
-
-鉴权
-JWT
-
-
-瀑布流
-自实现 Virtual Masonry
-
-
-
-二、这个项目是怎么“变复杂”的最开始只是想做一个图片展示页。
-后来逐步加功能：
-
-登录
-点赞
-评论
-标签
-搜索
-推荐
-管理后台
-
-问题也随之出现：
-功能不是独立增长的，而是互相开始耦合。
-比如：
-
-点赞影响推荐
-评论影响排序
-标签影响搜索
-用户行为影响首页流
-
-这个时候才开始意识到：
-
-功能堆叠不是问题，功能之间的关系才是问题。
-
-
-三、项目结构（当时的整理方式）前端结构大致如下：
-frontend
-├── api
-├── components
-├── pages
-├── stores
-├── router
-├── utils
-└── views
-
-后端：
-backend
-├── router
-│   ├── auth
-│   ├── image
-│   ├── comment
-│   └── user
-├── model
-├── service
-├── middleware
-├── config
-└── utils
-
-后来回头看，这一阶段最大的问题其实不是技术，而是：
-目录结构没有“约束力”，后期很容易变成混乱堆文件。
-比如：
-utils.py
-utils2.py
-utils_final.py
-utils_new.py
-
-这是典型的失控前兆。
-
-四、登录系统（JWT 实践）这一块是标准的 JWT + 前后端分离方案。
-流程比较直接：
-用户登录
-  ↓
-后端校验账号密码
-  ↓
-生成 JWT
-  ↓
-前端保存 token
-  ↓
-请求自动携带 token
-
-FastAPI 登录接口大致如下：
-@router.post("/login")
-async def login(data: LoginSchema):
-
-    user = await User.query.where(
-        User.account == data.account
-    ).gino.first()
-
-    if not user:
-        raise Exception("用户不存在")
-
-    if not verify_password(data.password, user.password):
-        raise Exception("密码错误")
-
-    token = create_access_token(user.id)
-
-    return &#123;
-        "token": token
-    &#125;
-
-前端统一封装 Axios：
-const request = axios.create(&#123;
-  baseURL: "/api",
-  timeout: 10000,
-&#125;);
-
-request.interceptors.request.use((config) => &#123;
-  const token = localStorage.getItem("token");
-
-  if (token) &#123;
-    config.headers.Authorization = token;
-  &#125;
-
-  return config;
-&#125;);
-
-这一块的体会比较直接：
-
-前端项目一旦请求不统一管理，后期基本必炸。
-
-
-五、瀑布流：真正的第一个性能坑这个项目真正开始变“工程化”的地方，其实是瀑布流。
-原因很简单：图片网站有几个天然问题：
-
-图片高度不固定
-数量巨大
-无限滚动
-DOM 数量爆炸
-
-一开始我用的是现成库：
-
-masonry-layout
-vue-masonry
-
-问题很快出现：卡顿。
-本质原因很简单：
-
-页面 DOM 数量过多。
-
-几千张图片直接挂在 DOM 上，浏览器完全吃不消。
-
-六、虚拟瀑布流的实现后来我自己做了一个 Virtual Masonry。
-核心思路是：
-
-不渲染所有内容，只渲染可视区域附近的数据。
-
-滚动时只计算：
-indices.value = groupManager.getCellIndices(&#123;
-  height,
-  width,
-  x: scrollLeft,
-  y: scrollTop,
-&#125;);
-
-本质就是：
-当前视口应该看到哪些图片，就只渲染这些。
-DOM 数量从几千直接降到几十。
-这是第一次比较直观感受到：
-
-前端性能优化，本质是减少浏览器的工作量。
-
-
-七、瀑布流布局算法布局逻辑很简单：
-每次把新图片放到当前最短的列。
-列高度：
-1200 | 800 | 1500 | 900
-
-新图片 → 放到 800 那一列
-
-这样整体会更均衡。
-核心计算：
-const column = computed(() => &#123;
-  let col = Math.floor(
-    (height + props.gapWidth) / (props.gapWidth + props.itemWidth),
-  );
-
-  return props.minColumn > col ? props.minColumn : col;
-&#125;);
-
-用于动态控制列数，实现响应式布局。
-
-八、滚动性能优化如果直接监听 scroll，会变成性能灾难：
-scroll / scroll / scroll / scroll ...
-
-所以引入 throttle：
-export function throttle(fn, delay) &#123;
-  let valid = true;
-
-  return function () &#123;
-    if (valid) &#123;
-      valid = false;
-
-      setTimeout(() => &#123;
-        fn.apply(this, arguments);
-        valid = true;
-      &#125;, delay);
-    &#125;
-  &#125;;
-&#125;
-
-这里的关键点是：
-
-不是避免 scroll，而是控制 scroll 的计算频率。
-
-
-九、IntersectionObserver 的替代方案后来把“是否到底部”判断换成了：
-intersectionObserver = new IntersectionObserver(onContainerScroll);
-
-用浏览器原生能力判断元素是否进入视口。
-相比 scroll 判断：
-
-更稳定
-更低开销
-更不容易出 bug
-
-
-十、ResizeObserver 解决布局问题用于监听容器尺寸变化：
-resizeObserver = new ResizeObserver(onContainerResized);
-
-主要解决：
-
-窗口缩放
-布局变化
-响应式重排
-
-
-十一、图片才是真正的性能瓶颈后面继续优化才发现：
-真正拖垮性能的不是 Vue，而是图片本身。
-问题包括：
-
-原图过大（10MB+）
-未压缩
-未分级加载
-
-后面做了几件事：
-
-缩略图
-懒加载
-WebP
-占位图
-
-页面才真正稳定下来。
-
-十二、状态管理踩坑随着功能增加，状态开始变复杂：
-
-点赞
-收藏
-推荐
-用户状态
-页面缓存
-
-最容易出现的问题是：
-一个地方更新，其他地方不同步
-
-后来统一用 Pinia 管理用户状态：
-export const useUserStore = defineStore("user", &#123;
-  state: () => (&#123;
-    token: "",
-    userInfo: null,
-  &#125;),
-&#125;);
-
-
-十三、评论系统比想象复杂原本以为只是“发评论”。
-后来变成：
-
-回复
-嵌套
-删除
-敏感词
-通知
-
-复杂度直接上升一个量级。
-
-十四、推荐系统的现实问题推荐系统实现后才发现一个现实问题：
-
-冷启动基本无解。
-
-没有行为数据时：
-
-无法推荐
-无法排序
-无法建模
-
-只能做兜底策略。
-
-十五、这个项目带来的真正变化这个项目真正的收获不是某个技术点，而是：
-我开始理解“工程复杂度”本身。
-功能不是难点，难点是：
-
-功能之间的影响
-状态同步
-性能约束
-数据流控制
-
-
-最后总结回头看，这个项目更像一次完整的 Web 工程入门：
-从“写页面”逐渐变成理解：
-
-前端性能模型
-状态管理
-数据流设计
-浏览器渲染成本
-工程拆分方式
-
-也从这里开始，我才逐渐意识到：
-
-Web 开发的本质，其实更接近客户端工程，而不是单纯的页面开发。
-
-
-]]></content>
-      <categories>
-        <category>前端开发</category>
-      </categories>
-      <tags>
-        <tag>Vue3</tag>
-        <tag>瀑布流</tag>
-        <tag>虚拟滚动</tag>
-        <tag>无限加载</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>记录一次从 0 到 1 的 VuePress 项目文档搭建</title>
-    <url>/2022/04/04/frontend/Vuepress-Build/</url>
-    <content><![CDATA[我为什么开始用 VuePress 写项目文档最开始其实没想过要做“文档站”。
-当时做的是一个 Bot 项目，功能一点点往上堆，最后开始出现一些很典型的问题：
-
-新用户不会用
-群里重复问同样的问题
-配置越来越复杂
-功能越来越分散
-更新内容没人知道
-我自己隔一段时间也会忘怎么配
-
-一开始还能靠 README 撑一下，但很快就失控了。
-写到后面我基本是这种状态：
-
-README 变成“临时说明书”，但没人真的完整看完。
-
-然后我才开始意识到一件事：
-文档不是附属品，是项目的一部分。
-
-为什么选 VuePress当时刚接触 Vue，看到很多成熟项目的文档站：
-
-Vue
-Vite
-Element Plus
-Pinia
-
-结构都很统一：
-
-左侧导航
-Markdown 编写
-自动路由生成
-静态部署
-代码高亮
-
-对当时的我来说，这套东西刚好匹配需求：
-
-只写 Markdown 就够了
-不想自己造前端框架
-需要分类、导航、版本管理
-后面还要持续维护
-
-VuePress 基本就是“刚好能用”。
-
-为什么不继续用 README后面回头看，README 最大的问题不是“写不下”，而是结构会崩。
-1. 信息会堆成一坨安装、配置、指令、FAQ、更新日志全混在一起，后期基本没人愿意读。
-2. 没有层级Bot 项目通常是多模块的：
-
-群管
-查询
-图片
-娱乐
-API
-管理后台
-
-README 很难拆开管理。
-3. 很难维护功能一多之后，README 会变成：
-
-旧配置没删
-新功能补在底部
-示例过期但没人改
-
-最后就是“看起来很全，但实际不可用”。
-
-VuePress 在当时的定位当时的 VuePress（v1）更像一个：
-
-Markdown 驱动的静态文档生成器
-
-对我这种情况比较合适的点在于：
-
-文件即页面
-目录即导航
-不需要复杂构建流程
-可以按模块拆文档
-
-整体结构最后被我拆成这样：
-src/
-├── about/
-├── use/
-├── group/
-├── image/
-├── query/
-├── admin/
-├── update/
-└── faq/
-
-每个目录单独维护一块功能说明。
-
-当时的项目初始化VuePress v1 + Reco 主题（当时比较常见的组合）：
-&#123;
-  "scripts": &#123;
-    "dev": "SET NODE_OPTIONS=--openssl-legacy-provider &amp;&amp; vuepress dev src --open",
-    "build": "SET NODE_OPTIONS=--openssl-legacy-provider &amp;&amp; vuepress build src"
-  &#125;,
-  "devDependencies": &#123;
-    "vuepress": "1.9.7",
-    "vuepress-theme-reco": "1.6.17"
-  &#125;
-&#125;
-
-
-Reco 主题的选择选 Reco 其实没什么复杂原因，就是：
-
-默认主题太朴素
-想要一点“博客&#x2F;产品站”的感觉
-当时社区用的人也多
-
-后来看，它的价值更多在于：
-
-省掉了自己写首页和布局的时间。
-
-
-文档结构怎么慢慢变复杂的一开始只是写功能说明，后面逐渐变成一个完整体系。
-比如：
-插件文档结构群管插件
-  - 禁言
-  - 踢人
-  - 全体管理
-
-查询插件
-  - 天气
-  - 搜索
-  - 图片
-
-娱乐插件
-  - 点歌
-  - 抽卡
-
-每个功能都拆成独立 Markdown 文件。
-这样做之后才发现一个变化：
-
-文档开始反过来约束项目结构。
-
-
-更新日志的意义后来单独做了 update 模块之后，才逐渐形成习惯：
-每次改功能不再只发群公告，而是：
-# v1.2.0
-
-- 新增图片功能
-- 修复查询接口异常
-- 优化缓存逻辑
-
-当时的体感是：
-
-用户不再依赖“记忆”
-功能变化可以追溯
-项目状态变得可见
-
-但也踩过坑：更新写得太随意，后面回头看其实很难复现当时改了什么。
-
-VuePress 当时踩的一个环境坑当时 Node 版本和 VuePress v1 有兼容问题，经常直接报 OpenSSL 错误。
-最后用的是：
-SET NODE_OPTIONS=--openssl-legacy-provider
-
-现在回头看这个处理方式其实比较“临时”，但当时确实是最快能跑起来的方法。
-
-插件系统带来的“产品化错觉”当时 VuePress 可以很方便加各种插件：
-
-动态标题
-看板娘
-背景特效
-公告弹窗
-
-一度会有种错觉：
-
-好像在做一个真正的网站产品，而不是文档。
-
-但后面也意识到一个问题：
-这些东西对“文档本身”其实没什么帮助，只是视觉层面增强。
-
-VuePress v1 的问题（当时的真实感受）后期项目一大之后问题开始明显：
-
-启动变慢
-构建时间增加
-webpack 配置老旧
-插件兼容问题频繁
-
-尤其是文档目录变大后，热更新体验会明显下降。
-但当时没有太多替代方案，VitePress 生态还没完全成熟。
-
-这件事对我后来的影响回头看，这个 VuePress 项目真正带来的不是技术，而是一个转变：
-从“写代码”变成“维护项目”。
-开始意识到：
-
-功能不是随便加的
-结构需要提前规划
-文档本身也是系统的一部分
-项目会随着时间自然膨胀
-
-也就是从这个阶段开始，我后面做任何项目都会默认：
-
-先考虑“怎么维护”，再考虑“怎么实现”。
-
-
-后记现在再看 VuePress v1，其实已经有点过时了。
-但它在当时的作用更像一个过渡工具：
-
-帮我把散乱的说明变成结构化文档
-逼着我开始整理项目边界
-让“文档”和“功能”解耦
-
-严格来说，这个项目本身并不复杂，但它是我第一次明显感觉到：
-
-一个项目如果没有结构，会在后期自然崩掉。
-
-]]></content>
-      <categories>
-        <category>前端开发</category>
-      </categories>
-      <tags>
-        <tag>VuePress</tag>
-        <tag>Vue</tag>
       </tags>
   </entry>
   <entry>
@@ -9396,6 +7622,1302 @@ API化
       </tags>
   </entry>
   <entry>
+    <title>关系型与非关系型数据库的理解整理</title>
+    <url>/2025/01/03/database/Database-Relational-vs-NonRelational/</url>
+    <content><![CDATA[关系型与非关系型数据库的理解整理数据库这块，我一开始其实是没什么体系感的。
+最早写后端的时候，基本就是：
+
+CRUD
+查表
+写接口
+能跑就行
+
+直到系统稍微复杂一点之后，问题就开始变了：
+
+为什么这个 SQL 会慢
+为什么加了索引还是慢
+为什么线上偶尔卡死
+为什么数据不一致
+为什么一加并发就出问题
+
+那时候才慢慢意识到：
+数据库不是“存数据的地方”，更像是整个系统的底层调度器。
+
+一、关系型数据库（RDBMS）最早接触的一类就是关系型数据库。
+常见的基本就是：
+
+MySQL
+PostgreSQL
+Oracle
+SQL Server
+SQLite
+
+当时我的理解很简单：
+
+表 + SQL + 能查数据 &#x3D; 数据库
+
+后来做项目多了才发现，关系型数据库真正核心是“关系”。
+比如电商系统：
+
+用户
+商品
+订单
+支付
+
+这些东西单独看都简单，但一旦连起来，就全是关系。
+
+MySQL（最常用的一类）我第一个正式用在项目里的数据库就是 MySQL。
+用下来最大的感受其实不是“强”，而是：
+
+足够稳，够通用，出了问题也好查。
+
+基本 Web 项目都绕不开它。
+
+InnoDB 和 MyISAM我当时踩坑比较深的一点是存储引擎。
+
+MyISAM：早期用过，后来基本放弃
+InnoDB：现在默认用
+
+区别当时我其实是踩出来的：
+MyISAM 写入稍微多一点就容易出问题，而且事务基本没法用。
+InnoDB 用起来就正常很多：
+
+能回滚
+支持事务
+崩了还能恢复
+
+
+事务这块（ACID）事务这块我第一次真正有感知，是在做转账逻辑的时候。
+大概就是这种逻辑：
+BEGIN;
+
+UPDATE user SET money = money - 100 WHERE id = 1;
+UPDATE user SET money = money + 100 WHERE id = 2;
+
+COMMIT;
+
+当时踩过一次问题是：
+中间服务挂了，钱扣了但没加上。
+后来才知道数据库会帮你回滚，这就是事务的意义。
+ACID 当时是背的，后来是靠事故理解的：
+
+原子性：要么都成功，要么都失败
+一致性：数据不能乱
+隔离性：互不影响
+持久性：提交了就不会丢
+
+
+隔离级别这个其实一开始我也只是背概念。
+真正有感觉是在高并发场景里。
+四个级别：
+
+读未提交
+读已提交
+可重复读（MySQL 默认）
+串行化
+
+后来才慢慢理解为什么默认是 RR：
+性能和一致性之间的一个折中。
+
+MVCC（后来才真正理解）MVCC 我最早是“知道这个词”，但没感觉。
+后来在并发读写冲突里才慢慢理解：
+数据库其实是靠“版本”在解决并发读的。
+简单说就是：
+
+读的不是当前数据，而是某个时间点的快照。
+
+这样才做到：
+
+读不阻塞写
+写不阻塞读
+
+
+锁（真正踩坑的地方）锁这个东西我是在线上问题里学的。
+典型问题就是死锁。
+比如两个事务：
+
+A 锁 user 再等 order
+B 锁 order 再等 user
+
+直接卡死。
+后来总结下来最有效的办法其实很朴素：
+
+加锁顺序统一
+事务尽量短
+少做大范围更新
+
+
+索引（性能问题核心）性能问题 80% 其实都和索引有关。
+我当时最大的误区是：
+
+慢就加索引。
+
+后来踩坑才知道不是这么简单。
+几个典型坑：
+
+like ‘%xxx’ 直接失效
+对字段做函数会失效
+类型不一致会失效
+
+最核心的理解其实是：
+
+索引不是加了就用，而是查询方式必须匹配它的结构。
+
+
+B+TreeInnoDB 默认用 B+Tree。
+我当时理解比较简单：
+
+树越矮越快
+磁盘 IO 越少越好
+范围查询很适合
+
+后面看执行计划（EXPLAIN）才慢慢有感觉。
+
+二、PostgreSQLPostgreSQL 是后面接触的。
+当时换的原因很现实：
+
+MySQL 在一些复杂查询和结构化能力上开始不够用了。
+
+PG 给我最直观的感觉是：
+
+SQL 更规范
+JSON 支持更自然
+扩展能力强
+复杂查询更舒服
+
+尤其 JSONB，我后来在一些配置类数据里用得很多。
+
+三、非关系型数据库（NoSQL）后面系统复杂起来之后，开始接触 NoSQL。
+最常见的几个：
+
+Redis
+MongoDB
+
+
+Redis（我用得最多的 NoSQL）Redis 一开始我理解就是缓存。
+后来用多了才发现它其实更像：
+
+内存数据结构服务。
+
+常见用法：
+
+缓存
+Token
+限流
+排行榜
+分布式锁
+
+
+为什么快这个其实是踩坑之后慢慢理解的：
+
+内存操作
+单线程避免锁竞争
+IO 多路复用
+
+不是“数据库快”，而是压根不走传统数据库那套路径。
+
+我踩过的几个坑缓存相关问题基本都遇到过：
+
+缓存穿透（查不存在的数据）
+缓存击穿（热点失效瞬间打爆数据库）
+缓存雪崩（大量 key 同时过期）
+
+后来处理方式基本就几种：
+
+空值缓存
+随机过期时间
+热点保护
+
+
+MongoDBMongoDB 用得相对少一些。
+主要在一些结构不稳定的数据里用过：
+比如：
+
+配置
+日志
+用户扩展字段
+一些 JSON 结构数据
+
+它的特点很直接：
+
+不强约束结构，灵活，但一致性弱一些。
+
+
+四、数据库之间的分工理解后来我对数据库的理解变成了比较工程化的一种拆分：
+
+关系型数据库适合：
+
+强一致性
+核心业务数据
+结构稳定
+
+比如：
+
+订单
+用户
+资金
+
+
+Redis适合：
+
+快速访问
+缓存
+状态类数据
+临时数据
+
+
+MongoDB &#x2F; JSON 类数据库适合：
+
+结构不固定的数据
+配置类数据
+日志类数据
+
+
+五、一些后期才理解的东西1. 数据库慢不一定是数据库的问题很多时候是：
+
+索引设计问题
+SQL 写法问题
+数据量设计问题
+
+
+2. ORM 不是银弹我早期很依赖 ORM，后来踩坑后变成：
+
+简单查询用 ORM
+复杂查询直接 SQL
+
+
+3. 系统复杂之后，数据库只是其中一环后面做系统会发现：
+真正复杂的不是 SQL，而是：
+
+缓存一致性
+并发控制
+数据流设计
+异步链路
+
+
+六、最后的理解变化回头看数据库这条线，其实变化挺明显的：
+一开始是：
+
+会写 SQL 就够了
+
+后来变成：
+
+能跑就行，但开始关注性能
+
+再后来变成：
+
+数据结构、并发、缓存、分布式一起看
+
+数据库本身没有变复杂，是系统把它放到了更复杂的位置上。
+]]></content>
+      <categories>
+        <category>数据库与中间件</category>
+      </categories>
+      <tags>
+        <tag>Database</tag>
+        <tag>MySQL</tag>
+        <tag>PostgreSQL</tag>
+        <tag>Redis</tag>
+        <tag>MongoDB</tag>
+        <tag>Oracle</tag>
+        <tag>后端开发</tag>
+        <tag>Middleware</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Kafka、RabbitMQ、ES 与大数据组件认知整理</title>
+    <url>/2023/07/09/database/BigData-Middleware-Kafka-RabbitMQ-ES/</url>
+    <content><![CDATA[Kafka、RabbitMQ、ES 与大数据组件认知整理这篇基本是我在项目逐渐变复杂之后，开始被迫接触的一组东西。
+前期开发其实很简单：
+接口 + 数据库 = 完成需求
+
+但一旦系统稍微大一点，就会开始出现一些很现实的问题：
+
+接口变慢
+数据库开始吃不消
+同步调用互相阻塞
+搜索越来越慢
+数据越来越大之后开始扛不住
+
+然后就会自然进入一个阶段：
+
+开始被迫理解“系统不是一条直线，而是一堆数据在流动”。
+
+
+一、为什么开始接触这些组件最开始的问题其实很具体，不是架构问题，而是“卡住了”。
+比如我当时遇到的情况：
+
+注册接口越来越慢
+一次请求要做很多事（发短信、初始化数据、写日志）
+某些接口互相依赖导致阻塞
+搜索功能直接 LIKE 查询扛不住
+数据量一大 MySQL 开始明显变慢
+
+这时候才开始意识到：
+
+同步调用这条链路是有上限的。
+
+
+二、消息队列到底解决了什么问题一开始我对 MQ 的理解很粗糙，就是“异步”。
+后来在项目里踩过一次比较典型的坑：
+注册接口里做了太多事情：
+
+写用户表
+初始化配置
+发邮件
+发短信
+写日志
+风控检查
+
+全部同步执行。
+结果就是：
+用户请求 -> 一直卡住 -> 超时
+
+后来改成：
+核心逻辑完成
+↓
+丢消息进 MQ
+↓
+直接返回
+
+剩下的慢慢处理。
+这个改完之后，最直观的变化是：
+
+接口响应时间直接掉下来。
+
+
+三、RabbitMQ（当时我更常用的 MQ）RabbitMQ 给我的感觉是：
+
+更像“带规则的任务分发系统”。
+
+结构大概是：
+Producer -> Exchange -> Queue -> Consumer
+
+
+Exchange 这个设计一开始挺绕我当时踩的第一个坑就是：消息不是直接进队列的。
+而是要经过 Exchange：
+
+Direct（精准路由）
+Fanout（广播）
+Topic（通配符）
+
+刚开始写的时候经常搞错：
+消息发了，但消费者收不到
+
+后来才发现是 routing key 没配对。
+
+RabbitMQ 给我的真实体感优点比较明显：
+
+功能很完整（ACK &#x2F; 重试 &#x2F; 死信）
+路由能力强
+很适合业务系统
+
+但也有一个感觉：
+
+它更偏“可靠”，不是“极致吞吐”。
+
+
+四、Kafka（第一次感觉到“吞吐量差距”）Kafka 是在后面做日志和数据流的时候接触的。
+最开始我理解错了它：
+Kafka = 高级 MQ
+
+后来才慢慢意识到：
+
+Kafka 更像“分布式日志系统”。
+
+
+Kafka 为什么快（不是背概念）当时我最直观的理解来自一个很简单的现象：
+RabbitMQ 在高流量下开始吃紧，但 Kafka 还能扛。
+后来我才慢慢拆出来几个原因：
+
+1. 它基本是追加写Kafka 的数据是：
+一直 append 到文件末尾
+
+没有复杂的随机写。
+
+2. 它避免了随机 IO磁盘真正慢的不是写，是：
+随机寻址
+
+Kafka 这个基本不碰。
+
+3. Partition 带来的并行一个 topic 被拆成多个 partition：
+Partition 1
+Partition 2
+Partition 3
+
+天然可以扩展吞吐。
+
+Kafka 给我的真实感受它不是“更高级的 MQ”，而是：
+
+用日志模型在做数据流系统。
+
+
+五、RabbitMQ vs Kafka（实际项目里的体感）不是理论对比，是我后来在项目里真实用出来的区别：
+
+RabbitMQ更像：
+任务队列
+业务解耦
+强调可靠性
+有明确消费者逻辑
+
+
+Kafka更像：
+数据管道
+日志系统
+流式处理入口
+大规模数据分发
+
+
+一个很实际的结论（踩坑来的）我后来基本形成一个简单判断：
+
+业务系统：RabbitMQ
+数据流&#x2F;日志：Kafka
+
+不是绝对，但够用了。
+
+六、消息可靠性（踩坑集中区）这一块一开始我其实是“知道概念”，但不知道问题在哪。
+直到真的遇到：
+消息发出去了，但消费者没处理到
+
+
+断点其实在三个地方
+Producer 发送失败
+Broker 挂了
+Consumer 没消费成功
+
+
+RabbitMQ里我后来常用的手段
+confirm 机制确认消息到达
+queue 持久化
+消费 ACK
+死信队列兜底
+
+
+Kafka里更关键的是
+ack&#x3D;all
+ISR 副本
+offset 提交
+
+
+一个比较真实的理解所谓“可靠性”，不是保证不出问题，而是：
+
+出问题之后还能不能恢复状态。
+
+
+七、Elasticsearch（最开始完全误解的组件）我一开始以为 ES 是：
+一个更快的数据库
+
+后来才发现完全不是。
+
+一个典型踩坑场景MySQL 搜索用：
+LIKE '%keyword%'
+
+数据一多直接变慢。
+
+ES解决的不是存储问题，而是搜索问题它核心能力其实是：
+
+分词
+倒排索引
+相关性排序
+
+
+倒排索引第一次理解是在这里我当时做了一个简单类比才理解：
+
+普通数据库：文档 -&gt; 单词
+ES：单词 -&gt; 文档
+
+
+这个差异带来的结果是搜索速度完全不是一个级别。
+
+但 ES 也踩过坑最明显的是：
+
+不适合事务
+不适合强一致
+数据更新成本比想象高
+
+后来基本形成一个判断：
+
+ES 是搜索系统，不是业务数据库。
+
+
+八、HDFS 和 MapReduce（偏历史理解）这块更多是“理解演进”，不是项目里真正用过。
+
+HDFS核心思路很简单：
+一个文件拆成很多块，分布存
+
+解决的问题是：
+
+单机存储不够用。
+
+
+MapReduce我第一次理解它其实是从“统计单词”开始的：
+Map：拆任务
+Reduce：汇总结果
+
+
+后来实际感受是：
+
+它适合离线批处理，但不适合实时。
+
+
+九、Kafka + Flink 这种组合为什么后来会流行后来在一些资料里看到这种组合：
+Kafka -> Flink -> 实时计算
+
+当时才慢慢理解：
+
+Kafka负责“数据流入口”
+Flink负责“实时计算”
+
+本质是：
+
+从批处理走向流处理。
+
+
+十、这些组件本质在系统里的位置后来看整体系统结构时才慢慢清晰：
+Nginx
+  ↓
+业务服务
+  ↓
+MySQL / Redis
+  ↓
+Kafka / RabbitMQ
+  ↓
+ES / Flink / Hadoop
+
+
+一个比较关键的认知变化以前我理解系统是：
+功能堆叠
+
+后来变成：
+数据怎么流动
+
+
+十一、最后回头看的几个结论（踩坑总结）这些不是“总结”，更像是后来用出来的体感：
+
+1. MQ不是为了异步，是为了削耦合同步调用链一长，系统一定会变脆。
+
+2. Kafka解决的是数据流，不是业务它不是“更强MQ”，而是另一种系统模型。
+
+3. ES不是数据库，是搜索系统用错场景会非常痛苦。
+
+4. 中间件本质是在拆系统复杂度不是功能增强，而是：
+
+把一个大系统拆成多个可控小系统。
+
+
+十二、最后后来再回头看这些组件，其实不再是“技术点”，而是一种分层：
+
+数据怎么存（数据库）
+数据怎么流（MQ &#x2F; Kafka）
+数据怎么查（ES）
+数据怎么算（Flink &#x2F; MapReduce）
+
+系统复杂之后，本质问题会从：
+怎么写功能
+
+变成：
+数据在哪流动，在哪停留，在哪被消费
+]]></content>
+      <categories>
+        <category>数据库与中间件</category>
+      </categories>
+      <tags>
+        <tag>Redis</tag>
+        <tag>Middleware</tag>
+        <tag>Kafka</tag>
+        <tag>RabbitMQ</tag>
+        <tag>Elasticsearch</tag>
+        <tag>BigData</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>从前后端分离到瀑布流页面：我的 Web 开发实践</title>
+    <url>/2022/08/16/frontend/Frontend-Waterfall-Project-Practice/</url>
+    <content><![CDATA[从前后端分离到瀑布流页面：我的 Web 开发实践这个项目本质上是一个偏 Pinterest &#x2F; Pixiv 风格的图片社区。
+一开始目标其实很简单，就是做一个“能看图的网站”。但做着做着，功能不断往里加：
+
+用户登录与权限
+图片上传与管理
+评论与互动
+标签与搜索
+收藏与点赞
+推荐流
+后台管理
+
+到后面已经不是 Demo，更像一个完整的内容社区雏形。
+也是从这个项目开始，我明显感觉到：
+
+Web 开发真正难的地方，从来不是“写页面”，而是控制复杂度。
+
+
+一、技术栈与整体结构整体是典型前后端分离架构：
+Vue3 + Vite
+        ↓
+Axios API
+        ↓
+FastAPI
+        ↓
+PostgreSQL
+
+技术选型大致如下：
+
+
+
+模块
+技术
+
+
+
+前端
+Vue3
+
+
+UI
+Element Plus
+
+
+状态管理
+Pinia
+
+
+路由
+Vue Router
+
+
+请求
+Axios
+
+
+后端
+FastAPI
+
+
+ORM
+Gino
+
+
+数据库
+PostgreSQL
+
+
+鉴权
+JWT
+
+
+瀑布流
+自实现 Virtual Masonry
+
+
+
+二、这个项目是怎么“变复杂”的最开始只是想做一个图片展示页。
+后来逐步加功能：
+
+登录
+点赞
+评论
+标签
+搜索
+推荐
+管理后台
+
+问题也随之出现：
+功能不是独立增长的，而是互相开始耦合。
+比如：
+
+点赞影响推荐
+评论影响排序
+标签影响搜索
+用户行为影响首页流
+
+这个时候才开始意识到：
+
+功能堆叠不是问题，功能之间的关系才是问题。
+
+
+三、项目结构（当时的整理方式）前端结构大致如下：
+frontend
+├── api
+├── components
+├── pages
+├── stores
+├── router
+├── utils
+└── views
+
+后端：
+backend
+├── router
+│   ├── auth
+│   ├── image
+│   ├── comment
+│   └── user
+├── model
+├── service
+├── middleware
+├── config
+└── utils
+
+后来回头看，这一阶段最大的问题其实不是技术，而是：
+目录结构没有“约束力”，后期很容易变成混乱堆文件。
+比如：
+utils.py
+utils2.py
+utils_final.py
+utils_new.py
+
+这是典型的失控前兆。
+
+四、登录系统（JWT 实践）这一块是标准的 JWT + 前后端分离方案。
+流程比较直接：
+用户登录
+  ↓
+后端校验账号密码
+  ↓
+生成 JWT
+  ↓
+前端保存 token
+  ↓
+请求自动携带 token
+
+FastAPI 登录接口大致如下：
+@router.post("/login")
+async def login(data: LoginSchema):
+
+    user = await User.query.where(
+        User.account == data.account
+    ).gino.first()
+
+    if not user:
+        raise Exception("用户不存在")
+
+    if not verify_password(data.password, user.password):
+        raise Exception("密码错误")
+
+    token = create_access_token(user.id)
+
+    return &#123;
+        "token": token
+    &#125;
+
+前端统一封装 Axios：
+const request = axios.create(&#123;
+  baseURL: "/api",
+  timeout: 10000,
+&#125;);
+
+request.interceptors.request.use((config) => &#123;
+  const token = localStorage.getItem("token");
+
+  if (token) &#123;
+    config.headers.Authorization = token;
+  &#125;
+
+  return config;
+&#125;);
+
+这一块的体会比较直接：
+
+前端项目一旦请求不统一管理，后期基本必炸。
+
+
+五、瀑布流：真正的第一个性能坑这个项目真正开始变“工程化”的地方，其实是瀑布流。
+原因很简单：图片网站有几个天然问题：
+
+图片高度不固定
+数量巨大
+无限滚动
+DOM 数量爆炸
+
+一开始我用的是现成库：
+
+masonry-layout
+vue-masonry
+
+问题很快出现：卡顿。
+本质原因很简单：
+
+页面 DOM 数量过多。
+
+几千张图片直接挂在 DOM 上，浏览器完全吃不消。
+
+六、虚拟瀑布流的实现后来我自己做了一个 Virtual Masonry。
+核心思路是：
+
+不渲染所有内容，只渲染可视区域附近的数据。
+
+滚动时只计算：
+indices.value = groupManager.getCellIndices(&#123;
+  height,
+  width,
+  x: scrollLeft,
+  y: scrollTop,
+&#125;);
+
+本质就是：
+当前视口应该看到哪些图片，就只渲染这些。
+DOM 数量从几千直接降到几十。
+这是第一次比较直观感受到：
+
+前端性能优化，本质是减少浏览器的工作量。
+
+
+七、瀑布流布局算法布局逻辑很简单：
+每次把新图片放到当前最短的列。
+列高度：
+1200 | 800 | 1500 | 900
+
+新图片 → 放到 800 那一列
+
+这样整体会更均衡。
+核心计算：
+const column = computed(() => &#123;
+  let col = Math.floor(
+    (height + props.gapWidth) / (props.gapWidth + props.itemWidth),
+  );
+
+  return props.minColumn > col ? props.minColumn : col;
+&#125;);
+
+用于动态控制列数，实现响应式布局。
+
+八、滚动性能优化如果直接监听 scroll，会变成性能灾难：
+scroll / scroll / scroll / scroll ...
+
+所以引入 throttle：
+export function throttle(fn, delay) &#123;
+  let valid = true;
+
+  return function () &#123;
+    if (valid) &#123;
+      valid = false;
+
+      setTimeout(() => &#123;
+        fn.apply(this, arguments);
+        valid = true;
+      &#125;, delay);
+    &#125;
+  &#125;;
+&#125;
+
+这里的关键点是：
+
+不是避免 scroll，而是控制 scroll 的计算频率。
+
+
+九、IntersectionObserver 的替代方案后来把“是否到底部”判断换成了：
+intersectionObserver = new IntersectionObserver(onContainerScroll);
+
+用浏览器原生能力判断元素是否进入视口。
+相比 scroll 判断：
+
+更稳定
+更低开销
+更不容易出 bug
+
+
+十、ResizeObserver 解决布局问题用于监听容器尺寸变化：
+resizeObserver = new ResizeObserver(onContainerResized);
+
+主要解决：
+
+窗口缩放
+布局变化
+响应式重排
+
+
+十一、图片才是真正的性能瓶颈后面继续优化才发现：
+真正拖垮性能的不是 Vue，而是图片本身。
+问题包括：
+
+原图过大（10MB+）
+未压缩
+未分级加载
+
+后面做了几件事：
+
+缩略图
+懒加载
+WebP
+占位图
+
+页面才真正稳定下来。
+
+十二、状态管理踩坑随着功能增加，状态开始变复杂：
+
+点赞
+收藏
+推荐
+用户状态
+页面缓存
+
+最容易出现的问题是：
+一个地方更新，其他地方不同步
+
+后来统一用 Pinia 管理用户状态：
+export const useUserStore = defineStore("user", &#123;
+  state: () => (&#123;
+    token: "",
+    userInfo: null,
+  &#125;),
+&#125;);
+
+
+十三、评论系统比想象复杂原本以为只是“发评论”。
+后来变成：
+
+回复
+嵌套
+删除
+敏感词
+通知
+
+复杂度直接上升一个量级。
+
+十四、推荐系统的现实问题推荐系统实现后才发现一个现实问题：
+
+冷启动基本无解。
+
+没有行为数据时：
+
+无法推荐
+无法排序
+无法建模
+
+只能做兜底策略。
+
+十五、这个项目带来的真正变化这个项目真正的收获不是某个技术点，而是：
+我开始理解“工程复杂度”本身。
+功能不是难点，难点是：
+
+功能之间的影响
+状态同步
+性能约束
+数据流控制
+
+
+最后总结回头看，这个项目更像一次完整的 Web 工程入门：
+从“写页面”逐渐变成理解：
+
+前端性能模型
+状态管理
+数据流设计
+浏览器渲染成本
+工程拆分方式
+
+也从这里开始，我才逐渐意识到：
+
+Web 开发的本质，其实更接近客户端工程，而不是单纯的页面开发。
+
+
+]]></content>
+      <categories>
+        <category>前端开发</category>
+      </categories>
+      <tags>
+        <tag>Vue3</tag>
+        <tag>瀑布流</tag>
+        <tag>虚拟滚动</tag>
+        <tag>无限加载</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Vue3、Element Plus 与现代前端开发体验</title>
+    <url>/2022/03/11/frontend/Modern-Vue3-Frontend-Development/</url>
+    <content><![CDATA[
+# Vue3、Element Plus 与现代前端开发体验
+
+这篇更多是我在从 Vue2 过渡到 Vue3 过程中，对整个前端开发方式变化的一些记录。
+
+当时的感觉比较明显：前端不再是“写页面”，而是在往工程化应用靠。
+
+---
+
+# Vue3 变化最直观的地方
+
+如果用一句话概括 Vue3 的变化，其实不是性能，而是写代码的方式变了。
+
+Vue2 时代的组件，大致是这样拆的：
+
+&#96;&#96;&#96;js
+data
+methods
+computed
+watch
+
+逻辑天然是“按类型分区”的。
+项目稍微一大，就会出现一个问题：
+同一个功能的代码，被拆散在不同位置。
+
+Vue2 的问题：逻辑分散比如一个用户模块：
+data() &#123;
+  return &#123;
+    user: &#123;&#125;,
+    loading: false
+  &#125;
+&#125;,
+methods: &#123;
+  async getUser() &#123;&#125;
+&#125;,
+watch: &#123;
+  user() &#123;&#125;
+&#125;
+
+当功能复杂后，这种结构的问题会变得很明显：
+
+你要改一个功能，需要在多个区块之间跳
+相关逻辑无法集中阅读
+复用逻辑很难抽离
+
+当时我在做稍微大一点的页面时，这种割裂感很强。
+
+Vue3 的变化：按“功能”组织代码Vue3 后，逻辑基本可以集中写在一起：
+const user = ref(&#123;&#125;);
+const loading = ref(false);
+
+const getUser = async () => &#123;
+  loading.value = true;
+&#125;;
+
+我当时最直观的感受是：
+
+代码终于是“按业务块”组织的，而不是“按语法分类”。
+
+
+setup 的意义Vue3 的核心变化其实集中在 setup。
+或者更极端一点：
+&lt;script setup&gt;
+
+这个语法糖之后，组件基本变成：
+
+一个函数 + 一段模板
+
+&lt;script setup lang&#x3D;&quot;ts&quot;&gt;
+import &#123; ref &#125; from &quot;vue&quot;;
+
+const count &#x3D; ref(0);
+
+const add &#x3D; () &#x3D;&gt; &#123;
+  count.value++;
+&#125;;
+&lt;&#x2F;script&gt;
+
+&lt;template&gt;
+  &lt;button @click&#x3D;&quot;add&quot;&gt;
+    &#123;&#123; count &#125;&#125;
+  &lt;&#x2F;button&gt;
+&lt;&#x2F;template&gt;
+
+
+ref &#x2F; reactive 的理解成本Vue3 初期最容易卡的点就是这一块。
+大致可以粗暴理解为：
+
+ref：基础值（number&#x2F;string&#x2F;boolean）
+reactive：对象
+
+const count = ref(0);
+
+const user = reactive(&#123;
+  name: "test",
+&#125;);
+
+后面那个 .value 确实一开始很烦，但实际写多了之后会习惯。
+
+Vue3 + TypeScript 变成默认组合我后来越来越明显的感受是：
+Vue3 不单是框架升级，而是把 TS 强行带进主流开发流程。
+问题主要来自 Vue2：
+
+类型约束弱
+重构风险高
+接口字段容易错
+大项目维护成本上升
+
+所以 Vue3 + TS 基本变成默认组合。
+
+Vite 带来的体验变化在 Vite 出来之前，Vue CLI + Webpack 是主流，但体验问题比较明显：
+
+启动慢
+热更新慢
+配置复杂
+
+Vite 的变化本质是：
+
+不再从打包角度思考开发阶段，而是直接利用 ESM。
+
+开发体验上最明显的变化是：
+
+启动基本秒级
+HMR 很快
+配置明显变少
+
+
+一个标准 Vue3 项目结构后来看比较成熟的项目，大致都会变成这样：
+src
+├── api
+├── components
+├── composables
+├── layouts
+├── router
+├── stores
+├── styles
+├── utils
+├── views
+└── App.vue
+
+这里我当时印象比较深的一点是：
+
+项目结构越清晰，后期“乱写工具函数”的概率越低。
+
+
+composables 的实际作用Vue3 很重要的一点是 composables（类似 hooks）。
+比如：
+export function useLoading() &#123;
+  const loading = ref(false);
+
+  const start = () => (loading.value = true);
+  const stop = () => (loading.value = false);
+
+  return &#123; loading, start, stop &#125;;
+&#125;
+
+我后期基本开始把：
+
+请求逻辑
+状态逻辑
+UI 状态
+
+都往 composable 拆。
+本质是把“功能”抽成模块，而不是把“页面”当模块。
+
+Element Plus 的实际使用体验Element Plus 在后台系统里基本是绕不开的。
+它解决的问题很直接：
+
+直接提供一套可用的 UI 组件体系。
+
+比如表单：
+&lt;el-form&gt;
+  &lt;el-input v-model&#x3D;&quot;username&quot; &#x2F;&gt;
+  &lt;el-button type&#x3D;&quot;primary&quot;&gt;
+    登录
+  &lt;&#x2F;el-button&gt;
+&lt;&#x2F;el-form&gt;
+
+开发速度确实会快很多。
+
+Element Plus 的真实问题用了一段时间后比较明显的几个问题：
+1. UI 风格固定很容易一眼看出“Element UI 项目”。
+
+2. 深层样式修改成本高组件嵌套多之后：
+
+改样式需要层层覆盖
+CSS 优先级容易变复杂
+
+
+Ant Design Vue 的对比后面也接触过 Ant Design Vue，整体更偏企业规范体系：
+
+表格能力更强
+设计规范更严格
+更偏中后台复杂系统
+
+
+TailwindCSS 的转变感受传统 CSS 最大的问题是：
+
+项目一大，命名和结构会开始失控。
+
+比如：
+.user-card-header-wrapper
+
+这种命名会越来越多。
+
+Tailwind 的方式Tailwind 变成：
+&lt;div class="flex items-center p-4 rounded-xl">&lt;/div>
+
+当时的感受是：
+
+样式不再“写在文件里”，而是“写在结构里”。
+
+
+Tailwind 的优点
+不需要命名 CSS
+组合速度快
+很适合组件化开发
+
+
+Tailwind 的缺点
+class 会变长
+可读性依赖习惯
+初期不适应会觉得乱
+
+
+Pinia 状态管理的变化Vuex 在 Vue2 时代基本是标配，但后来逐渐被 Pinia 替代。
+原因很直接：
+
+写法更接近 Composition API。
+
+export const useUserStore = defineStore("user", &#123;
+  state: () => (&#123;
+    token: "",
+  &#125;),
+&#125;);
+
+整体更轻。
+
+前端真正复杂的地方当时做完一段时间后，我的感受比较明确：
+前端难点其实不在页面，而在这些地方：
+
+状态同步
+组件通信
+请求封装
+权限控制
+性能优化
+项目结构
+
+页面只是表层。
+
+请求层的统一封装项目稍微复杂一点后，Axios 基本都会抽一层：
+import axios from "axios";
+
+const request = axios.create(&#123;
+  baseURL: "/api",
+&#125;);
+
+统一处理：
+
+token
+错误处理
+loading
+超时
+
+否则后期一定会散。
+
+一点更底层的感受回头看 Vue3 这一代工具链，我当时最大的变化不是“会不会用”，而是：
+
+开始用工程的方式看前端，而不是页面的方式。
+
+
+最后Vue3 本身并没有改变“写页面”这件事，但它改变了组织代码的方式。
+再加上：
+
+Vite
+Pinia
+Tailwind
+Element Plus
+
+这些工具组合起来之后，前端逐渐变成：
+
+一个工程系统，而不是 UI 拼装过程。
+
+]]></content>
+      <categories>
+        <category>前端开发</category>
+      </categories>
+      <tags>
+        <tag>Vue3</tag>
+        <tag>Element Plus</tag>
+        <tag>TailwindCSS</tag>
+        <tag>Vite</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>我的日语学习过程整理</title>
     <url>/2024/02/08/life/learning-japanese-through-acg/</url>
     <content><![CDATA[我的日语学习过程整理我接触日语，其实不算什么特别“正规”的路线。
@@ -9685,6 +9207,221 @@ MOJi
       <tags>
         <tag>日语</tag>
         <tag>ACG</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>记录一次从 0 到 1 的 VuePress 项目文档搭建</title>
+    <url>/2022/04/04/frontend/Vuepress-Build/</url>
+    <content><![CDATA[我为什么开始用 VuePress 写项目文档最开始其实没想过要做“文档站”。
+当时做的是一个 Bot 项目，功能一点点往上堆，最后开始出现一些很典型的问题：
+
+新用户不会用
+群里重复问同样的问题
+配置越来越复杂
+功能越来越分散
+更新内容没人知道
+我自己隔一段时间也会忘怎么配
+
+一开始还能靠 README 撑一下，但很快就失控了。
+写到后面我基本是这种状态：
+
+README 变成“临时说明书”，但没人真的完整看完。
+
+然后我才开始意识到一件事：
+文档不是附属品，是项目的一部分。
+
+为什么选 VuePress当时刚接触 Vue，看到很多成熟项目的文档站：
+
+Vue
+Vite
+Element Plus
+Pinia
+
+结构都很统一：
+
+左侧导航
+Markdown 编写
+自动路由生成
+静态部署
+代码高亮
+
+对当时的我来说，这套东西刚好匹配需求：
+
+只写 Markdown 就够了
+不想自己造前端框架
+需要分类、导航、版本管理
+后面还要持续维护
+
+VuePress 基本就是“刚好能用”。
+
+为什么不继续用 README后面回头看，README 最大的问题不是“写不下”，而是结构会崩。
+1. 信息会堆成一坨安装、配置、指令、FAQ、更新日志全混在一起，后期基本没人愿意读。
+2. 没有层级Bot 项目通常是多模块的：
+
+群管
+查询
+图片
+娱乐
+API
+管理后台
+
+README 很难拆开管理。
+3. 很难维护功能一多之后，README 会变成：
+
+旧配置没删
+新功能补在底部
+示例过期但没人改
+
+最后就是“看起来很全，但实际不可用”。
+
+VuePress 在当时的定位当时的 VuePress（v1）更像一个：
+
+Markdown 驱动的静态文档生成器
+
+对我这种情况比较合适的点在于：
+
+文件即页面
+目录即导航
+不需要复杂构建流程
+可以按模块拆文档
+
+整体结构最后被我拆成这样：
+src/
+├── about/
+├── use/
+├── group/
+├── image/
+├── query/
+├── admin/
+├── update/
+└── faq/
+
+每个目录单独维护一块功能说明。
+
+当时的项目初始化VuePress v1 + Reco 主题（当时比较常见的组合）：
+&#123;
+  "scripts": &#123;
+    "dev": "SET NODE_OPTIONS=--openssl-legacy-provider &amp;&amp; vuepress dev src --open",
+    "build": "SET NODE_OPTIONS=--openssl-legacy-provider &amp;&amp; vuepress build src"
+  &#125;,
+  "devDependencies": &#123;
+    "vuepress": "1.9.7",
+    "vuepress-theme-reco": "1.6.17"
+  &#125;
+&#125;
+
+
+Reco 主题的选择选 Reco 其实没什么复杂原因，就是：
+
+默认主题太朴素
+想要一点“博客&#x2F;产品站”的感觉
+当时社区用的人也多
+
+后来看，它的价值更多在于：
+
+省掉了自己写首页和布局的时间。
+
+
+文档结构怎么慢慢变复杂的一开始只是写功能说明，后面逐渐变成一个完整体系。
+比如：
+插件文档结构群管插件
+  - 禁言
+  - 踢人
+  - 全体管理
+
+查询插件
+  - 天气
+  - 搜索
+  - 图片
+
+娱乐插件
+  - 点歌
+  - 抽卡
+
+每个功能都拆成独立 Markdown 文件。
+这样做之后才发现一个变化：
+
+文档开始反过来约束项目结构。
+
+
+更新日志的意义后来单独做了 update 模块之后，才逐渐形成习惯：
+每次改功能不再只发群公告，而是：
+# v1.2.0
+
+- 新增图片功能
+- 修复查询接口异常
+- 优化缓存逻辑
+
+当时的体感是：
+
+用户不再依赖“记忆”
+功能变化可以追溯
+项目状态变得可见
+
+但也踩过坑：更新写得太随意，后面回头看其实很难复现当时改了什么。
+
+VuePress 当时踩的一个环境坑当时 Node 版本和 VuePress v1 有兼容问题，经常直接报 OpenSSL 错误。
+最后用的是：
+SET NODE_OPTIONS=--openssl-legacy-provider
+
+现在回头看这个处理方式其实比较“临时”，但当时确实是最快能跑起来的方法。
+
+插件系统带来的“产品化错觉”当时 VuePress 可以很方便加各种插件：
+
+动态标题
+看板娘
+背景特效
+公告弹窗
+
+一度会有种错觉：
+
+好像在做一个真正的网站产品，而不是文档。
+
+但后面也意识到一个问题：
+这些东西对“文档本身”其实没什么帮助，只是视觉层面增强。
+
+VuePress v1 的问题（当时的真实感受）后期项目一大之后问题开始明显：
+
+启动变慢
+构建时间增加
+webpack 配置老旧
+插件兼容问题频繁
+
+尤其是文档目录变大后，热更新体验会明显下降。
+但当时没有太多替代方案，VitePress 生态还没完全成熟。
+
+这件事对我后来的影响回头看，这个 VuePress 项目真正带来的不是技术，而是一个转变：
+从“写代码”变成“维护项目”。
+开始意识到：
+
+功能不是随便加的
+结构需要提前规划
+文档本身也是系统的一部分
+项目会随着时间自然膨胀
+
+也就是从这个阶段开始，我后面做任何项目都会默认：
+
+先考虑“怎么维护”，再考虑“怎么实现”。
+
+
+后记现在再看 VuePress v1，其实已经有点过时了。
+但它在当时的作用更像一个过渡工具：
+
+帮我把散乱的说明变成结构化文档
+逼着我开始整理项目边界
+让“文档”和“功能”解耦
+
+严格来说，这个项目本身并不复杂，但它是我第一次明显感觉到：
+
+一个项目如果没有结构，会在后期自然崩掉。
+
+]]></content>
+      <categories>
+        <category>前端开发</category>
+      </categories>
+      <tags>
+        <tag>VuePress</tag>
+        <tag>Vue</tag>
       </tags>
   </entry>
   <entry>
@@ -10925,688 +10662,6 @@ K8S 解决的是：
       </tags>
   </entry>
   <entry>
-    <title>HTTP、Token、JWT 与网页鉴权机制整理</title>
-    <url>/2021/09/18/network/http-token-jwt-authentication-mechanisms/</url>
-    <content><![CDATA[HTTP、Token、JWT 与网页鉴权机制整理很多人第一次做前后端分离时都会疑惑：
-用户到底是怎么“登录状态持久化”的？
-
-浏览器关了。
-APP 重启了。
-为什么服务端还知道我是谁？
-这背后其实就是：
-鉴权（Authentication）
-
-
-HTTP 为什么天然无状态HTTP 本质：
-请求 -> 响应
-
-服务端默认：
-不记得我是谁
-
-即：
-每一次请求都是独立事件
-
-所以：
-
-登录状态
-用户身份
-权限信息
-
-都必须额外设计机制来承载。
-
-Cookie：最早的状态方案最传统的方式：
-Cookie + Session
-
-流程是：
-登录成功
-    ↓
-服务端生成 Session
-    ↓
-SessionID 写入 Cookie
-    ↓
-浏览器后续自动携带 Cookie
-
-
-Session 本质服务端通常存：
-&#123;
-  "session_id": &#123;
-    "user_id": 123
-  &#125;
-&#125;
-
-位置可能是：
-
-内存
-Redis
-数据库
-
-
-Cookie 的核心特点浏览器会：
-自动携带 Cookie
-
-因此早期 Web 系统基本依赖它完成登录态维持。
-
-Cookie 的问题1. 跨域复杂前后端分离后常见：
-前端 localhost:5173
-后端 localhost:8000
-
-随之出现：
-
-SameSite
-CORS
-Secure
-HttpOnly
-
-一整套配置问题。
-
-Token 机制的出现移动端普及之后，Cookie 不再是唯一选择。
-因为：
-APP 没有浏览器 Cookie 机制
-
-于是 Token 成为主流方案。
-
-Token 本质服务端：
-登录成功 -> 生成字符串
-
-客户端请求：
-Authorization: Bearer xxx
-
-服务端只负责验证：
-token 是否有效
-
-
-Token 与 Cookie 的区别
-
-
-机制
-状态位置
-
-
-
-Session
-服务端
-
-
-Token
-客户端
-
-
-
-JWT 为什么被广泛使用JWT（Json Web Token）核心特性：
-无状态认证
-
-
-JWT 结构典型 JWT：
-xxxxx.yyyyy.zzzzz
-
-三部分：
-
-
-
-结构
-含义
-
-
-
-Header
-算法信息
-
-
-Payload
-用户数据
-
-
-Signature
-签名校验
-
-
-
-Payload 的特点Payload 通常是：
-&#123;
-  "user_id": 1,
-  "username": "admin"
-&#125;
-
-它可以直接 Base64 解码。
-因此需要明确一点：
-JWT 默认不加密，只防篡改
-JWT 工作流程登录
-   ↓
-签发 JWT
-   ↓
-客户端保存
-   ↓
-请求携带 JWT
-   ↓
-服务端验签
-
-
-JWT 的优势在分布式系统中：
-不需要查 Session
-
-每个服务只需要：
-共享密钥
-
-即可完成验证。
-
-JWT 的核心问题无法主动失效因为：
-服务端不保存状态
-
-因此 token 一旦签发：
-理论上直到过期都有效
-
-
-Refresh Token 机制现代系统通常拆分：
-
-Access Token（短期）
-Refresh Token（长期）
-
-
-设计目的如果 Access Token 泄露：
-影响窗口较小
-
-Refresh Token 用于：
-重新获取 Access Token
-
-
-OAuth2：第三方授权体系常见场景：
-
-GitHub 登录
-Google 登录
-微信登录
-
-核心思想：
-不把密码交给第三方
-
-
-OAuth2 流程用户跳转授权页
-    ↓
-官方确认授权
-    ↓
-返回 access_token
-
-
-OAuth2 的意义本质是：
-授权代理机制
-
-而不是简单登录替代。
-
-SSO 单点登录企业系统常见：
-一次登录，多系统共享状态
-
-常见实现：
-
-CAS
-OAuth2
-SAML
-
-
-实际工程中的组合方案很多系统并不会只用 JWT。
-更常见组合是：
-JWT + Redis
-
-
-为什么需要 Redis纯 JWT 的问题：
-无法强制失效
-
-解决方式：
-
-黑名单
-token version 控制
-
-
-鉴权头的几种形式Authorization（标准）Authorization: Bearer xxx
-
-
-Cookie（传统 Web）Cookie: sessionid=xxx
-
-
-自定义 HeaderX-Token: xxx
-
-
-签名机制部分系统会引入签名：
-timestamp + nonce + sign
-
-
-为什么需要签名用于防护：
-
-重放攻击
-参数篡改
-接口伪造
-
-
-HMAC 签名模型典型方式：
-HMAC-SHA256(secret, data)
-
-客户端与服务端使用相同规则计算签名。
-
-WebSocket 鉴权长连接场景：
-WS 建立后持续通信
-
-常见做法：
-连接时携带 token
-
-例如：
-wss://xxx?token=abc
-
-
-鉴权的本质问题我在实际开发中逐渐明确的一点是：
-鉴权难点不在“登录”而在：
-
-权限边界
-数据隔离
-行为约束
-
-
-RBAC 权限模型典型结构：
-用户 -> 角色 -> 权限
-
-
-更细粒度权限系统例如：
-只能访问自己的资源
-
-或者：
-按部门 / 项目隔离
-
-
-我对鉴权体系的整体理解很多人容易把 JWT 等同于安全机制，但实际不是。
-真正的安全体系通常由以下构成：
-
-HTTPS
-服务端校验
-权限控制逻辑
-Token 生命周期管理
-风控与限流
-密钥管理
-
-
-JWT 的真实定位JWT 更准确的定位是：
-身份载体
-
-而不是安全本身。
-
-常见误区很多接口即使带 JWT：
-仍然可能越权
-
-原因通常在于：
-业务层没有做权限判断
-
-例如：
-DELETE /post/123
-
-如果没有校验：
-当前用户是否为作者
-
-鉴权体系依然是缺失的。
-
-总结HTTP 的无状态决定了：
-所有登录态必须外置设计
-
-而 Cookie、Token、JWT、OAuth2，本质都是：
-围绕“如何表达用户身份”这一问题的不同实现方案
-
-其中 JWT 解决的是：
-跨服务的身份传递问题
-
-但安全性本身仍然依赖完整的服务端权限体系。
-]]></content>
-      <categories>
-        <category>Web安全</category>
-      </categories>
-      <tags>
-        <tag>JWT</tag>
-        <tag>Token</tag>
-        <tag>OAuth</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux、WSL 与 Windows 开发环境折腾记录</title>
-    <url>/2022/07/17/ops/Linux-WSL-Windows-Dev-Environment/</url>
-    <content><![CDATA[Linux、WSL 与 Windows 开发环境折腾记录现在我的开发环境基本是：
-
-Windows 做日常使用
-WSL 跑 Linux 开发环境
-SSH 连远程服务器
-Docker 跑服务
-VSCode Remote 做远程开发
-
-于是一个很现实的问题一直存在：
-
-为什么本地能跑，服务器不能跑？
-
-随着这个问题反复出现，我开始逐步踩到一堆系统层面的差异：
-
-操作系统差异
-shell 差异
-文件系统差异
-权限模型差异
-环境变量差异
-换行符差异
-网络栈差异
-
-这篇不讲 Linux 概念本身，只记录我是怎么从 Windows 开发，一路“被迫”折腾成半个 Linux 使用者的。
-
-一、为什么最后还是绕不开 Linux最开始我的开发环境是：
-Windows + IDE + cmd
-
-但项目稍微复杂一点后，问题开始集中爆发：
-
-
-
-场景
-表现
-
-
-
-Python 依赖
-编译失败 &#x2F; wheel 构建报错
-
-
-Node 原生模块
-编译失败
-
-
-Docker
-性能和兼容问题
-
-
-shell 脚本
-不兼容
-
-
-nginx
-配置别扭
-
-
-ssh&#x2F;scp
-使用不顺手
-
-
-服务器模拟
-和本地环境不一致
-
-
-典型情况是：
-pip install xxx
-
-然后突然报：
-Microsoft Visual C++ 14.0 required
-
-这个阶段基本就会开始考虑：
-
-要不要直接上 Linux 环境算了
-
-
-二、WSL：Windows 和 Linux 的折中方案1. WSL 是什么WSL &#x3D; Windows Subsystem for Linux
-本质是：
-
-在 Windows 内运行 Linux 用户态环境（WSL2 已接近完整 Linux 内核体验）
-
-
-三、WSL 为什么最终变成主力在 WSL 之前，我的环境是：
-Windows 上混装：
-- Python
-- Node
-- Git Bash
-- Docker Desktop
-- 各种 CLI
-
-结果是：
-
-PATH 冲突
-工具链不一致
-环境污染严重
-
-切到 WSL 后变成：
-WSL Ubuntu：
-- Python
-- Node
-- Git
-- Docker
-- SSH
-- Linux 工具链
-
-环境边界变清晰了。
-
-四、WSL 安装与初始化wsl --install
-
-查看发行版：
-wsl -l -o
-
-安装 Ubuntu：
-wsl --install -d Ubuntu
-
-查看状态：
-wsl -l -v
-
-
-五、WSL 最大的坑：文件系统 IO最早我习惯把项目放在：
-/mnt/c/project
-
-结果是明显卡顿，尤其是：
-
-npm install
-pnpm install
-node_modules
-Python venv
-
-原因很简单：
-
-WSL 访问 Windows 文件系统有额外 IO 转换成本
-
-
-正确方式项目放在 Linux 文件系统：
-/home/user/project
-
-然后直接用 VSCode Remote 打开。
-体验差距非常明显。
-
-六、Shell 体系混乱问题一开始我经常混用：
-cmd / powershell / git bash / wsl bash
-
-后来才逐渐理清：
-CMD基本废弃状态，能力有限。
-PowerShellWindows 现代自动化 shell（对象模型，不是纯文本流）。
-BashLinux 标准 shell，服务器环境核心。
-
-七、SSH：开始真正接触服务器最典型入口：
-ssh root@ip
-
-
-SSH 本质SSH 是加密的远程 shell 通道：
-本地终端 → 加密 → 服务器 shell
-
-
-常用操作登录：
-ssh root@ip
-
-指定端口：
-ssh -p 2222 root@ip
-
-免密：
-ssh-keygen
-ssh-copy-id root@ip
-
-
-常见坑1. key 权限过宽Permissions 0777 are too open
-
-修复：
-chmod 600 ~/.ssh/id_rsa
-
-
-2. known_hosts 冲突ssh-keygen -R ip
-
-
-八、systemd 与服务管理开始接触 Linux 后，我逐渐不再是“启动程序”，而是“管理服务”。
-
-systemctl启动：
-systemctl start nginx
-
-状态：
-systemctl status nginx
-
-开机自启：
-systemctl enable nginx
-
-
-九、screen：解决 SSH 断线问题最早踩坑是：
-python main.py
-
-SSH 一断进程直接死。
-
-screen 使用创建：
-screen -S job
-
-恢复：
-screen -r job
-
-后台退出：
-Ctrl + A + D
-
-
-十、日志排查方式实时日志：
-tail -f app.log
-
-过滤：
-grep ERROR app.log
-
-组合：
-tail -f app.log | grep ERROR
-
-
-十一、环境变量问题典型现象：
-本地能跑，服务器不能跑
-
-最终大概率是：
-PATH 不一致
-
-检查：
-echo $PATH
-which python
-which node
-
-
-十二、换行符问题（经典坑）Windows：
-CRLF
-
-Linux：
-LF
-
-报错：
-/bin/bash^M: bad interpreter
-
-
-修复方式：
-dos2unix script.sh
-
-或 VSCode 切 LF。
-
-十三、权限模型Linux 权限问题是一个持续踩坑点。
-chmod +x run.sh
-chown user:user file
-
-很多“无法写 &#x2F; 无法删 &#x2F; 无法执行”本质都是权限问题。
-
-十四、端口与进程排查查端口：
-lsof -i:8000
-
-或：
-netstat -tunlp
-
-杀进程：
-kill -9 pid
-
-
-十五、开发环境分层意识后面我逐渐开始强制区分环境：
-
-
-
-环境
-用途
-
-
-
-local
-本地开发
-
-
-dev
-开发环境
-
-
-test
-测试环境
-
-
-staging
-预发布
-
-
-prod
-生产
-
-
-避免直接把本地逻辑带到生产环境。
-
-十六、最终稳定的开发结构最后我的结构固定为：
-Windows
- ├─ 浏览器 / IM
- ├─ VSCode
- └─ WSL Ubuntu
-      ├─ Python
-      ├─ Node
-      ├─ Docker
-      ├─ Git
-      ├─ Redis
-      ├─ PostgreSQL
-      └─ 项目运行环境
-
-远程：
-SSH → Linux Server
-
-部署：
-Docker Compose
-
-
-十七、总结性认知变化整个过程下来，认知变化大致是：
-1. 从“会用工具”变成理解：
-
-文件系统
-权限系统
-进程模型
-网络模型
-
-
-2. 从“跑代码”变成理解：
-
-runtime
-PATH
-dependency
-shell 执行机制
-
-
-3. 从“部署应用”变成理解：
-
-服务化
-守护进程
-容器化
-自动化运行机制
-
-
-很多以前觉得是“玄学”的问题，最后都会收敛成：
-路径 / 权限 / 环境变量 / 系统差异
-
-而在完整经历 WSL + SSH + Linux + Docker 之后，程序“怎么跑起来的”这件事会变得非常具体。
-]]></content>
-      <categories>
-        <category>运维</category>
-      </categories>
-      <tags>
-        <tag>Linux</tag>
-        <tag>WSL</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>从 Git 到 GitHub：我终于理解了现代协作开发</title>
     <url>/2020/10/03/ops/Git-To-Github/</url>
     <content><![CDATA[背景最开始接触 GitHub，其实和“会不会 Git”没什么关系。
@@ -11952,6 +11007,262 @@ Git 并不只是工具。
       </tags>
   </entry>
   <entry>
+    <title>刷题一年后，我对算法学习的理解</title>
+    <url>/2023/11/13/other/Algorithm-understanding/</url>
+    <content><![CDATA[背景刷题这件事一直比较矛盾。
+一方面知道它重要，尤其在：
+
+校招
+面试
+笔试
+
+另一方面，真正进入工程开发之后，会更容易被：
+
+项目开发
+接口实现
+自动化工具
+后端系统设计
+
+这些更“可见结果”的事情吸引。
+相比之下，刷题的反馈确实更弱。
+
+最开始为什么开始刷题原因很直接：
+
+求职需要。
+
+尤其在面试体系里：
+
+算法题是常规环节
+笔试基本绕不开
+
+所以最初目标并不复杂，就是应付面试要求。
+
+刚开始刷题的感受最直观的感受是：
+
+不适应 + 挫败感明显
+
+原因主要在于：
+
+学校数据结构更偏概念
+工程刷题是直接解问题
+没有“标准模板路径”
+
+两者之间差距很大。
+
+学校知识 vs 刷题本质可以简单区分：
+学校阶段
+记概念
+写固定结构
+偏考试导向
+
+刷题阶段
+识别问题模型
+选择合适算法
+自己构造解法
+
+核心差异是：
+
+从“知道”变成“能识别并使用”。
+
+
+最大的误解之一早期有一个很典型的误区：
+
+算法强 &#x3D; 数学好
+
+实际刷题后会发现：
+工程面试中的算法更偏：
+
+模式识别
+数据结构选择
+边界处理能力
+代码实现能力
+
+数学能力反而不是核心门槛。
+
+数组与基础问题数组是最常见的起点。
+但实际上数组题覆盖了很多核心思想：
+
+双指针
+滑动窗口
+前缀和
+二分
+哈希
+
+看似简单，但结构很完整。
+
+双指针的转折理解早期思路通常是暴力：
+idO(n²) 遍历
+
+后来双指针出现后，结构变为：
+idO(n) 扫描
+
+核心变化不是“技巧”，而是：
+
+减少重复计算。
+
+
+字符串问题的复杂性字符串问题容易低估。
+但实际经常涉及：
+
+边界控制
+子串处理
+状态维护
+索引管理
+
+很多错误来自细节，而不是思路。
+
+树结构的第一次转变树结构开始引入递归思维。
+DFS 的关键理解点是：
+iddef dfs(node):
+    ...
+
+核心不是语法，而是：
+
+假设子问题已经被解决。
+
+
+递归思维的本质变化递归真正难点不在“调用自己”，而在于：
+
+接受问题可以被拆解并递归成立。
+
+这是思维习惯的变化。
+
+树结构的工程意义树不仅仅是算法结构，也广泛存在于：
+
+文件系统
+DOM 结构
+AST
+组织结构
+
+本质是：
+
+层级关系表达方式。
+
+
+图结构的复杂度提升图结构相比树增加了：
+
+环
+多路径
+权重
+方向
+
+复杂度明显上升。
+搜索问题通常变成：
+
+状态空间遍历问题
+
+
+BFS 与 DFS两种核心思想：
+
+DFS：深度探索
+BFS：层级扩展
+
+本质都是：
+
+状态搜索策略差异
+
+
+动态规划的困难点动态规划的难点不在实现，而在建模。
+核心问题通常是：
+
+状态无法定义
+转移关系不清晰
+
+
+动态规划的基本结构DP 的基本组成：
+id状态定义
+状态转移
+初始条件
+
+其中最难的是：
+
+状态设计
+
+
+为什么动态规划难因为它不符合直觉：
+
+直觉：一步一步做
+DP：先抽象结构再推导
+
+这是思维模式差异。
+
+刷题中断的原因长期刷不下去通常有几个原因：
+1. 反馈周期长项目：
+
+做完能看到结果
+
+刷题：
+
+很多时候只有失败反馈
+
+
+2. 现实感不足很多人会产生疑问：
+
+工作中是否真的用得到？
+
+尤其在 Web &#x2F; CRUD 场景下。
+
+3. 成长感不明显刷题进步不容易直观感知，容易出现：
+
+“感觉一直没变强”
+
+
+算法与工程的关系后期逐渐会发现：
+算法并不完全独立于工程。
+例如：
+
+缓存策略
+路由匹配
+搜索排序
+限流机制
+调度系统
+
+本质都有算法思想参与。
+
+对算法作用的重新理解算法训练更核心的价值是：
+
+抽象能力
+边界意识
+状态建模
+时间复杂度敏感度
+
+这些能力会间接影响工程质量。
+
+大厂为什么仍然考算法算法题的作用并不是评估“工程能力本身”，而是用于筛选：
+
+学习能力
+基础编码能力
+抽象能力
+思维稳定性
+
+尤其在现场编码环境下更明显。
+
+当前对刷题的态度不再是高强度刷题模式。
+更接近：
+
+持续维护状态
+间歇性练习
+保持基本熟练度
+
+重点不再是数量，而是持续性。
+
+总结算法更像一种长期训练工具。
+它不直接等价于工程能力，但会影响：
+
+思维方式与问题处理方式
+
+因此更适合作为长期维持的基础能力，而不是短期任务。
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>算法</tag>
+        <tag>LeetCode</tag>
+        <tag>动态规划</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>记一次 Serverless 的认识与实践</title>
     <url>/2026/03/09/ops/Serverless-Practice/</url>
     <content><![CDATA[记一次 Serverless 的认识与实践前几年刚开始做 Web 项目时，我对“部署”的理解基本停留在一套固定流程：
@@ -12236,527 +11547,2152 @@ Prompt 处理
       </tags>
   </entry>
   <entry>
-    <title>刷题一年后，我对算法学习的理解</title>
-    <url>/2023/11/13/other/Algorithm-understanding/</url>
-    <content><![CDATA[背景刷题这件事一直比较矛盾。
-一方面知道它重要，尤其在：
-
-校招
-面试
-笔试
-
-另一方面，真正进入工程开发之后，会更容易被：
-
-项目开发
-接口实现
-自动化工具
-后端系统设计
-
-这些更“可见结果”的事情吸引。
-相比之下，刷题的反馈确实更弱。
-
-最开始为什么开始刷题原因很直接：
-
-求职需要。
-
-尤其在面试体系里：
-
-算法题是常规环节
-笔试基本绕不开
-
-所以最初目标并不复杂，就是应付面试要求。
-
-刚开始刷题的感受最直观的感受是：
-
-不适应 + 挫败感明显
-
-原因主要在于：
-
-学校数据结构更偏概念
-工程刷题是直接解问题
-没有“标准模板路径”
-
-两者之间差距很大。
-
-学校知识 vs 刷题本质可以简单区分：
-学校阶段
-记概念
-写固定结构
-偏考试导向
-
-刷题阶段
-识别问题模型
-选择合适算法
-自己构造解法
-
-核心差异是：
-
-从“知道”变成“能识别并使用”。
+    <title></title>
+    <url>/2026/05/12/other/Job-Questions-Answer/</url>
+    <content><![CDATA[Redis
+1. Redis 五种常用数据结构及场景（必背）涉及知识点Redis 常用数据结构：
 
 
-最大的误解之一早期有一个很典型的误区：
 
-算法强 &#x3D; 数学好
-
-实际刷题后会发现：
-工程面试中的算法更偏：
-
-模式识别
-数据结构选择
-边界处理能力
-代码实现能力
-
-数学能力反而不是核心门槛。
-
-数组与基础问题数组是最常见的起点。
-但实际上数组题覆盖了很多核心思想：
-
-双指针
-滑动窗口
-前缀和
-二分
-哈希
-
-看似简单，但结构很完整。
-
-双指针的转折理解早期思路通常是暴力：
-idO(n²) 遍历
-
-后来双指针出现后，结构变为：
-idO(n) 扫描
-
-核心变化不是“技巧”，而是：
-
-减少重复计算。
+类型
+特点
+常见场景
 
 
-字符串问题的复杂性字符串问题容易低估。
-但实际经常涉及：
 
-边界控制
-子串处理
-状态维护
-索引管理
-
-很多错误来自细节，而不是思路。
-
-树结构的第一次转变树结构开始引入递归思维。
-DFS 的关键理解点是：
-iddef dfs(node):
-    ...
-
-核心不是语法，而是：
-
-假设子问题已经被解决。
+String
+最常用，支持数字&#x2F;字符串
+缓存、计数器、分布式锁
 
 
-递归思维的本质变化递归真正难点不在“调用自己”，而在于：
-
-接受问题可以被拆解并递归成立。
-
-这是思维习惯的变化。
-
-树结构的工程意义树不仅仅是算法结构，也广泛存在于：
-
-文件系统
-DOM 结构
-AST
-组织结构
-
-本质是：
-
-层级关系表达方式。
+Hash
+类似对象
+用户信息、商品信息
 
 
-图结构的复杂度提升图结构相比树增加了：
-
-环
-多路径
-权重
-方向
-
-复杂度明显上升。
-搜索问题通常变成：
-
-状态空间遍历问题
+List
+有序可重复
+消息队列、评论列表
 
 
-BFS 与 DFS两种核心思想：
+Set
+无序去重
+点赞、标签、共同好友
 
-DFS：深度探索
-BFS：层级扩展
+
+ZSet
+带分数自动排序
+排行榜、延迟队列
+
+
+
+实际项目场景String项目里最常用。
+例如：
+
+登录 token 缓存
+短信验证码
+接口限流计数
+
+比如：
+idtoken:用户id -> jwt信息
+
+
+Hash缓存用户资料：
+iduser:1001
+
+字段：
+
+nickname
+avatar
+level
+
+修改头像时只更新一个字段，不用整个 JSON 重存。
+
+List异步日志队列。
+请求先写 Redis：
+idLPUSH queue
+
+消费者后台批量写数据库。
+作用：
+
+削峰
+减少数据库压力
+
+
+Set文章点赞去重。
+idarticle:1:likes
+
+存 userId。
+特点：
+
+自动去重
+判断是否点赞速度快
+
+
+ZSet积分排行榜。
+score 存积分。
+可以快速：
+
+排序
+查前十
+查排名
+
+
+白话回答（面试可直接说）
+“Redis 常用的数据结构有 String、Hash、List、Set 和 ZSet。
+String 一般做缓存、计数器和 token；Hash 适合存用户对象；List 常做异步队列；Set 适合点赞去重；ZSet 常做排行榜。
+我项目里主要用 Redis 做热点缓存、登录 token、排行榜和异步削峰。”
+
+
+2. 缓存穿透、击穿、雪崩（必背）缓存穿透什么是穿透请求的数据：
+
+Redis 没有
+MySQL 也没有
+
+请求直接打数据库。
+
+场景恶意请求：
+iduserId=-1
+
+数据库根本不存在。
+大量请求会把数据库打崩。
+
+解决方案布隆过滤器提前判断数据是否存在。
+不存在直接拦截。
+
+缓存空值数据库查不到：也缓存 null。
+避免反复查数据库。
+
+缓存击穿什么是击穿某个热点 key 突然过期。
+大量请求同时访问数据库。
+
+场景热门商品缓存失效。
+10 万请求同时查 MySQL。
+
+解决方案互斥锁只有一个线程查数据库。
+其他线程等待。
+
+逻辑过期热点数据不过期。
+后台异步更新缓存。
+
+缓存雪崩什么是雪崩大量缓存同一时间失效。
+数据库瞬间压力暴增。
+
+解决方案过期时间随机化不要统一：
+id3600秒
+
+而是：
+id3600 + random
+
+
+Redis 高可用比如：
+
+Redis Sentinel
+Redis Cluster
+
+避免 Redis 整体挂掉。
+
+限流降级限制请求量。
+保护数据库。
+
+顺带解释几个词热点 Key访问量特别高的数据。
+例如：
+
+秒杀商品
+热门文章
+
+
+限流限制单位时间请求数量。
+防止系统被打爆。
+
+降级系统压力太大时：关闭部分非核心功能。
+
+白话回答（高频标准答案）
+“缓存穿透是查不存在的数据，缓存和数据库都没有；一般用布隆过滤器或者缓存空值解决。
+缓存击穿是热点 key 失效导致大量请求同时打数据库；一般用互斥锁或者逻辑过期。
+缓存雪崩是大量缓存同时过期；一般通过随机过期时间、Redis 高可用和限流降级解决。”
+
+
+3. Redis 持久化：RDB &#x2F; AOF
+涉及知识点
+
+
+方式
+原理
+优点
+缺点
+
+
+
+RDB
+定时快照
+恢复快、文件小
+可能丢数据
+
+
+AOF
+记录写命令
+数据更安全
+文件更大
+
+
+
+AOF 补充默认：
+ideverysec
+
+每秒刷盘一次。
+最多丢 1 秒数据。
+生产环境通常：
+idRDB + AOF
+
+一起用。
+
+白话回答
+“Redis 持久化主要有 RDB 和 AOF。
+RDB 是定时生成数据快照，恢复速度快但可能丢数据；AOF 是记录写命令，数据更安全。
+生产环境一般两者一起使用，AOF 通常配置 everysec，最多丢 1 秒数据。”
+
+
+4. 淘汰策略、LRU 原理
+涉及知识点Redis 内存满了后：会根据淘汰策略删除数据。
+
+常见策略
+
+
+策略
+含义
+
+
+
+noeviction
+不淘汰，直接报错
+
+
+allkeys-lru
+淘汰最近最少使用的数据（最常用）
+
+
+volatile-lru
+只淘汰设置过期时间的数据
+
+
+
+什么是 LRULeast Recently Used。
+最近最少使用。
+认为：
+
+很久没访问的数据
+未来大概率也不会访问
+
+优先淘汰。
+
+实际项目场景用户缓存系统：
+
+热门用户经常访问
+冷数据自动淘汰
+
+一般会配置：
+idallkeys-lru
+
+
+白话回答
+“Redis 内存满了会根据淘汰策略删除数据。生产环境最常用的是 allkeys-lru，也就是优先淘汰最近最少使用的数据。”
+
+
+5. 如何保证消息一致性这个问题面试里通常在问：
+缓存和数据库一致性
+涉及知识点最常见方案：
+id先更新数据库
+再删除缓存
+
+
+为什么不是先删缓存如果：
+
+删缓存后
+数据库还没更新
+其他线程读到旧数据
+
+旧数据会重新写回缓存。
+导致脏数据。
+
+什么是脏数据Redis 和数据库数据不一致。
+例如：
+
+MySQL 是新值
+Redis 还是旧值
+
+
+高并发优化延迟双删id更新DB
+删缓存
+sleep
+再删一次
+
+避免并发情况下旧数据回写。
+
+MQ 重试删除 Redis 失败：发送 MQ 重试。
+
+什么是 MQ消息队列。
+例如：
+
+Kafka
+RabbitMQ
+RocketMQ
+
+用于：
+
+异步
+解耦
+削峰
+
+
+实际项目场景订单状态更新：
+id更新MySQL
+删除Redis缓存
+
+如果 Redis 删除失败：
+
+发送 RocketMQ 重试
+
+保证最终一致性。
+
+白话回答
+“缓存一致性一般采用先更新数据库，再删除缓存。
+高并发下会配合延迟双删或者 MQ 重试机制，保证 Redis 和 MySQL 最终一致。”
+
+
+6. 项目中哪里实际用了 Redis这个问题重点：不要只说“做缓存”。
+一定要说：
+
+用在哪
+为什么用
+效果是什么
+
+
+实际项目回答模板
+“项目里 Redis 主要用于：
+
+登录 token 缓存
+热点数据缓存
+接口限流
+异步队列削峰
+排行榜
+
+例如商品详情页，我们把热点商品缓存到 Redis，减少 MySQL 查询压力。
+登录鉴权则把 token 存 Redis，支持单点登录和踢下线。
+此外日志系统用了 Redis List 做异步队列，避免高并发时频繁写数据库。”
+
+MySQL（几乎每场都问）1. InnoDB 索引结构知识点
+InnoDB 默认存储引擎
+
+索引类型：
+
+B+ 树索引（InnoDB 默认）
+B 树索引（概念上类似，但 B+ 树存储方式不同）
+
+
+B+ 树 vs B 树区别：
+
+所有叶子节点形成链表，便于范围查询
+非叶子节点只存 key，不存数据（减少层数，增加效率）
+B 树非叶子节点就存数据
+
+
+
+白话回答示例
+“InnoDB 默认使用 B+ 树作为索引结构。B+ 树和普通 B 树的区别在于：B+ 树的所有数据都在叶子节点，非叶子节点只保存索引，叶子节点之间用链表串起来，这样做可以高效支持范围查询；而普通 B 树非叶子节点也存数据，会导致查找效率稍低。”
+
+
+2. 聚簇索引 &#x2F; 非聚簇索引 &#x2F; 覆盖索引 &#x2F; 联合索引知识点
+聚簇索引（Clustered Index）
+
+表数据和索引存放在一起（InnoDB PK 默认聚簇索引）
+一张表只能有一个聚簇索引
+
+
+非聚簇索引（Secondary Index）
+
+索引节点保存主键，数据不在索引中，需要回表查询
+
+
+覆盖索引（Covering Index）
+
+查询所需字段都包含在索引中，无需回表
+
+
+联合索引（Composite Index）
+
+多列组成的索引，涉及最左前缀原则
+
+
+
+白话回答示例
+“聚簇索引就是数据和索引放在一起，比如主键索引；非聚簇索引单独存，查不到数据要回表。覆盖索引则是查询的字段全被索引覆盖，不用回表，查询效率更高。联合索引是多列组合索引，但要遵循最左匹配原则。”
+
+
+3. 最左匹配原则知识点
+联合索引：(a,b,c)
+查询条件用到最左的连续前缀才会使用索引
+示例：
+WHERE a=1 AND b=2 → 使用索引
+WHERE b=2 → 不用索引
+
+
+
+白话回答示例
+“联合索引查询时，必须从索引最左边的列开始匹配，否则索引失效。比如索引是(a,b,c)，如果查询只用 b 列，就走不了索引。”
+
+
+4. 事务四大特性 ACID &amp; 实现原理知识点
+A: 原子性（Atomic） → 回滚日志
+C: 一致性（Consistency） → 约束、触发器保证
+I: 隔离性（Isolation） → 锁或 MVCC
+D: 持久性（Durability） → redo log 保证
+
+白话回答示例
+“事务的 ACID 保证数据库操作安全：原子性保证要么全成功要么全失败，一致性保证操作后数据符合规则，隔离性防止并发冲突，持久性保证提交的数据不会丢失。InnoDB 通过 undo&#x2F;redo 日志、锁和 MVCC 实现这些特性。”
+
+
+5. 四大隔离级别 &amp; MVCC知识点
+
+
+隔离级别
+脏读
+不可重复读
+幻读
+
+
+
+READ UNCOMMITTED
+✔
+✔
+✔
+
+
+READ COMMITTED
+✖
+✔
+✔
+
+
+REPEATABLE READ
+✖
+✖
+✔
+
+
+SERIALIZABLE
+✖
+✖
+✖
+
+
+
+MVCC（多版本并发控制）
+通过存储行的多个版本（undo log）实现
+查询读取快照版本，保证非锁操作下的一致性
+
+
+
+白话回答示例
+“MySQL 的四种隔离级别从低到高是 READ UNCOMMITTED、READ COMMITTED、REPEATABLE READ 和 SERIALIZABLE。默认 InnoDB 是 REPEATABLE READ，避免不可重复读。MVCC 是通过保存行的历史版本实现的，读操作不加锁，只看快照版本，提高并发。”
+
+
+6. 慢查询排查步骤知识点
+开启慢查询日志：slow_query_log=ON
+定位慢 SQL：long_query_time
+分析执行计划：EXPLAIN SELECT ...
+优化手段：
+索引优化
+避免全表扫描
+查询拆分、分页
+SQL 调整
+数据库参数调优（缓存、并发）
+
+
+
+白话回答示例
+“排查慢查询一般先开慢查询日志，找到慢 SQL，然后用 EXPLAIN 看执行计划，看是走索引还是全表扫描。慢查询常用优化手段包括加索引、拆分查询、优化 SQL、调缓存或者调整参数。”
+
+
+7. 实际项目慢查询优化示例知识点
+找出慢查询：show processlist &#x2F; 慢查询日志
+用索引覆盖查询字段
+避免 SELECT *，只取必要字段
+大表分页优化（id 范围分页）
+SQL 重写（IN → JOIN &#x2F; EXISTS）
+
+白话回答示例
+“在项目中，我遇到过用户表的大表查询特别慢。我先开启慢查询日志，定位慢 SQL，然后加了联合索引覆盖查询字段，同时优化了分页逻辑，用 id 范围代替 OFFSET 分页。优化后查询速度提升了 5 倍。”
+
+
+8. 常用慢查询定位工具及使用方式工具
+EXPLAIN → 查看执行计划
+SHOW PROFILE &#x2F; SHOW STATUS → 查看 SQL 执行耗时
+pt-query-digest (Percona Toolkit) → 分析慢查询日志
+MySQL Workbench &#x2F; Navicat → GUI 可视化分析
+
+白话回答示例
+“我常用 EXPLAIN 看 SQL 执行计划，确认索引是否命中。复杂慢查询，我会用 pt-query-digest 分析慢查询日志，找出最耗时的 SQL，然后针对性优化。必要时也用 SHOW PROFILE 或 GUI 工具可视化分析。”
+
+
+AI &#x2F; 大语言模型RAG（检索增强生成）
+1. 什么是 RAG？完整流程是什么？涉及知识点RAG（Retrieval-Augmented Generation）：
+核心思想：
+id先检索知识
+再让模型生成答案
+
+而不是只依赖模型训练时学到的内容。
+完整流程：
+id文档导入
+↓
+Chunk切分
+↓
+Embedding向量化
+↓
+存入向量数据库
+↓
+用户提问
+↓
+问题向量化
+↓
+向量检索TopK
+↓
+拼接Prompt
+↓
+LLM生成答案
+
+
+实际工程（LangChain）例如：
+idfrom langchain_community.document_loaders import TextLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import Chroma
+
+# 1. 加载文档
+loader = TextLoader("data.txt", encoding="utf-8")
+docs = loader.load()
+
+# 2. chunk切分
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500,
+    chunk_overlap=100
+)
+
+chunks = splitter.split_documents(docs)
+
+# 3. embedding
+embedding = OpenAIEmbeddings()
+
+# 4. 存入向量数据库
+db = Chroma.from_documents(
+    chunks,
+    embedding=embedding,
+    persist_directory="./chroma_db"
+)
+
+
+顺带解释几个词Embedding把文本转成向量。
+语义越接近：向量距离越近。
+
+向量数据库用于：
+id相似度检索
+
+例如：
+
+Chroma
+Milvus
+pgvector
+
+
+白话回答
+“RAG 本质是先检索知识，再让模型生成答案。
+我实际项目里用 LangChain 做文档加载和 chunk 切分，用 embedding 做向量化，再存到 Chroma 向量数据库，查询时先召回相关内容，再拼接 Prompt 给模型。”
+
+
+2. 文档分块（Chunk）怎么做？涉及知识点为什么要切块：
+因为：
+
+embedding 有长度限制
+整篇文档太长
+检索粒度会太粗
+
+
+Chunk 原则太小：
+
+上下文断裂
+信息不完整
+
+
+太大：
+
+检索不精准
+token 成本高
+
+
+常见工程方案例如：
+idchunk_size = 500
+chunk_overlap = 100
+
+
+overlap 是什么Chunk 之间保留重叠区域。
+避免上下文被截断。
+
+LangChain 实践代码idfrom langchain.text_splitter import RecursiveCharacterTextSplitter
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500,
+    chunk_overlap=100,
+    separators=["\n\n", "\n", "。", " "]
+)
+
+
+为什么用 RecursiveCharacterTextSplitter因为它会：
+id优先按语义切
+再按长度切
+
+例如优先：
+
+标题
+段落
+换行
+
+比纯固定长度效果更好。
+
+白话回答
+“Chunk 我一般控制在 300~800 token，并设置 overlap 防止上下文断裂。
+实际项目里我用 LangChain 的 RecursiveCharacterTextSplitter，优先按段落和换行做语义切分，而不是纯固定长度切割。”
+
+
+3. RAG 检索做了哪些优化？涉及知识点实际项目里：不能只做向量检索。
+否则容易：
+
+语义漂移
+召回不准
+噪声太多
+
+
+常见优化Chunk 优化控制：
+
+chunk 大小
+overlap
+
+
+双路检索（重点）同时做：
+id关键词检索（BM25）
++
+向量检索（Embedding）
+
+
+Rerank（重排序）第一次召回后：再重新排序。
+提高准确率。
+
+Metadata Filter先过滤：
+
+文档类型
+时间
+标签
+
+再检索。
+
+LangChain 实践代码向量检索idretriever = db.as_retriever(
+    search_kwargs=&#123;"k": 6&#125;
+)
+
+
+Metadata 过滤idretriever.invoke(
+    "mysql事务",
+    filter=&#123;"type": "mysql"&#125;
+)
+
+
+什么是语义漂移用户问：
+idmysql锁
+
+结果召回：
+id操作系统锁
+
+方向偏了。
+
+白话回答
+“RAG 检索我主要做了 chunk 优化、双路检索、metadata 过滤和 rerank。
+因为纯向量检索容易语义漂移，所以我会结合 BM25 做混合召回。”
+
+
+4. 双重检索（语义检索 + 关键词检索）讲一下涉及知识点实际项目里：
+通常不会只做 embedding 检索。
+而是：
+idBM25关键词检索
++
+向量语义检索
+
+一起做。
+
+为什么要双路检索
+BM25 优点适合：
+
+API 名称
+专业术语
+缩写词
+
+例如：
+idJWT
+Redis
+MySQL
+
+关键词匹配更稳定。
+
+向量检索优点适合：
+
+自然语言
+相似表达
+
+例如：
+id“mysql索引”
+“数据库index”
+
+
+LangChain 实践代码BM25idfrom langchain_community.retrievers import BM25Retriever
+
+bm25 = BM25Retriever.from_documents(chunks)
+bm25.k = 3
+
+
+向量检索idvector_retriever = db.as_retriever(
+    search_kwargs=&#123;"k": 3&#125;
+)
+
+
+混合召回iddocs1 = bm25.invoke(query)
+docs2 = vector_retriever.invoke(query)
+
+docs = docs1 + docs2
+
+
+白话回答
+“双重检索一般是 BM25 加 embedding 向量检索。
+因为纯向量检索容易语义漂移，而 BM25 对专业术语更稳定，所以实际项目通常会混合召回。”
+
+
+5. TopK 怎么定的？为什么是 6？涉及知识点TopK：表示召回多少条 chunk。
+
+为什么不能太小太小：
+
+信息不足
+容易漏召回
+
+
+为什么不能太大太大：
+
+噪声增加
+token 成本上涨
+
+
+为什么很多项目是 5~10工程经验值。
+
+LangChain 实践代码idretriever = db.as_retriever(
+    search_kwargs=&#123;"k": 6&#125;
+)
+
+
+为什么是 6（标准回答）
+“我测试过不同 TopK。
+太小容易漏信息，太大又会引入噪声和额外 token 成本。
+后来发现 5~8 区间效果比较稳定，所以最终选了 6，在召回率和生成质量之间比较平衡。”
+
+
+6. 相似度阈值和过滤策略是什么？涉及知识点向量检索会返回：
+idsimilarity score
+
+例如：
+id0.92
+0.83
+0.31
+
+
+为什么需要阈值避免召回无关内容。
+例如：
+id0.2
+
+通常已经不相关。
+
+常见阈值通常：
+id0.7 ~ 0.85
+
+
+LangChain 实践代码iddocs = db.similarity_search_with_score(query, k=6)
+
+result = [
+    doc for doc, score in docs
+    if score > 0.75
+]
+
+
+过滤策略除了相似度：
+还会过滤：
+
+文档类型
+时间
+用户权限
+
+
+白话回答
+“相似度阈值主要是避免召回无关内容。
+我一般会设置在 0.75 左右，再结合 metadata 过滤，提高检索准确率。”
+
+Spring 全家桶
+1. Spring IOC 容器初始化流程（必背）涉及知识点IOC：
+id控制反转
+
+核心思想：
+对象不再自己创建。
+而是交给 Spring 容器管理。
+
+IOC 初始化核心流程id启动 Spring
+↓
+读取配置类 / XML
+↓
+扫描 Bean
+↓
+BeanDefinition 注册
+↓
+实例化 Bean
+↓
+依赖注入（DI）
+↓
+初始化 Bean
+↓
+放入 IOC 容器
+
+
+顺带解释几个词BeanDefinitionBean 的定义信息。
+里面保存：
+
+类名
+作用域
+是否懒加载
+初始化方法
+
+Spring 真正管理的是 BeanDefinition。
+不是直接管理对象。
+
+DI（依赖注入）例如：
+id@Autowired
+private UserService userService;
+
+Spring 自动把依赖对象注入进来。
+
+实际项目场景例如：
+id@Service
+public class UserService &#123;&#125;
+
+启动时：Spring 会自动：
+
+扫描
+创建对象
+注入依赖
+
+开发者不用自己 new。
+
+白话回答
+“IOC 就是对象交给 Spring 管理。
+Spring 启动后会先扫描 Bean，生成 BeanDefinition，然后实例化 Bean，完成依赖注入和初始化，最后放入 IOC 容器统一管理。”
+
+
+2. Bean 生命周期涉及知识点Bean 生命周期核心流程：
+id实例化
+↓
+属性注入
+↓
+Aware接口回调
+↓
+BeanPostProcessor前置处理
+↓
+初始化方法
+↓
+BeanPostProcessor后置处理
+↓
+Bean可使用
+↓
+销毁
+
+
+顺带解释几个词BeanPostProcessorBean 后置处理器。
+Spring 很多功能都基于它。
+例如：
+
+AOP
+自动代理
+
+
+Aware 接口让 Bean 获取 Spring 内部资源。
+例如：
+idBeanNameAware
+ApplicationContextAware
+
+
+初始化方法例如：
+id@PostConstruct
+
+或者：
+idinit-method
+
+
+实际项目场景例如：
+数据库连接池初始化：
+id@PostConstruct
+public void init() &#123;&#125;
+
+项目启动时：自动执行初始化逻辑。
+
+白话回答
+“Bean 生命周期主要包括实例化、依赖注入、初始化和销毁。
+Spring 在初始化过程中还会执行 BeanPostProcessor，这也是 AOP 和自动代理实现的重要基础。”
+
+
+3. 循环依赖：三级缓存原理涉及知识点循环依赖：
+例如：
+idA 依赖 B
+B 又依赖 A
+
+
+为什么会有问题创建 A：需要 B。
+创建 B：又需要 A。
+互相等待。
+
+Spring 如何解决核心：
+id三级缓存
+
+
+三级缓存一级缓存idsingletonObjects
+
+已经完成初始化的 Bean。
+
+二级缓存idearlySingletonObjects
+
+提前暴露的 Bean。
+半成品对象。
+
+三级缓存idsingletonFactories
+
+对象工厂。
+用于生成代理对象。
+
+为什么需要三级缓存因为 Spring 不只是解决循环依赖。
+还要支持：
+idAOP代理对象
+
+
+实际流程例如：
+idA 依赖 B
+B 依赖 A
+
+创建 A 时：
+idA实例化
+↓
+提前放入三级缓存
+↓
+发现需要B
+↓
+创建B
+↓
+B发现需要A
+↓
+从三级缓存拿A
+
+这样循环就断开了。
+
+为什么构造器循环依赖解决不了因为：
+id对象都还没创建出来
+
+没法提前暴露。
+
+白话回答
+“Spring 通过三级缓存解决单例 Bean 的循环依赖。
+核心思想是 Bean 实例化后先提前暴露，再进行属性注入。
+三级缓存主要是为了支持 AOP 代理对象，否则二级缓存其实就够了。”
+
+
+4. AOP 底层：JDK 动态代理 &#x2F; CGLIB涉及知识点AOP：
+id面向切面编程
+
+用于：
+
+不修改业务代码
+统一增强功能
+
+
+常见场景例如：
+
+日志
+事务
+权限校验
+接口耗时统计
+
+
+Spring AOP 两种代理方式
+
+
+方式
+条件
+
+
+
+JDK 动态代理
+有接口
+
+
+CGLIB
+没有接口
+
+
+
+JDK 动态代理基于：
+id接口
+
+生成代理类。
+
+CGLIB基于：
+id继承
+
+生成子类代理。
+
+为什么 final 不能 AOP因为：
+idCGLIB 需要继承
+
+final 方法不能被重写。
+
+实际项目场景例如：
+id@Transactional
+
+底层就是 AOP。
+Spring 会生成代理对象：在方法前后加入事务逻辑。
+
+白话回答
+“Spring AOP 底层主要通过 JDK 动态代理和 CGLIB 实现。
+有接口默认用 JDK 动态代理，没有接口用 CGLIB。
+Spring 事务、日志、权限校验本质上都是 AOP。”
+
+
+5. Spring Boot 自动装配原理涉及知识点Spring Boot 核心：
+id自动装配
+
+目的：
+减少 XML 配置。
+
+核心注解id@SpringBootApplication
+
+本质包含：
+id@Configuration
+@EnableAutoConfiguration
+@ComponentScan
+
+
+自动装配核心流程id@EnableAutoConfiguration
+↓
+加载 META-INF/spring.factories
+↓
+读取自动配置类
+↓
+按条件装配 Bean
+
+
+为什么 Starter 能自动生效因为 Starter：
+会提前配置：
+idAutoConfiguration
+
+Spring Boot 启动时自动加载。
+
+实际项目场景例如：
+引入：
+idspring-boot-starter-web
+
+就自动配置：
+
+Tomcat
+Spring MVC
+JSON 转换器
+
+不需要自己写 XML。
+
+白话回答
+“Spring Boot 自动装配核心是 @EnableAutoConfiguration。
+启动时会读取 spring.factories 中的自动配置类，再根据条件自动创建 Bean。
+Starter 能开箱即用，本质就是提前帮我们写好了自动配置。”
+
+
+6. @Conditional 系列注解作用涉及知识点作用：
+id按条件装配Bean
+
+满足条件才创建 Bean。
+
+常见注解
+
+
+注解
+作用
+
+
+
+@ConditionalOnClass
+类存在才生效
+
+
+@ConditionalOnBean
+Bean 存在才生效
+
+
+@ConditionalOnMissingBean
+Bean 不存在才生效
+
+
+@ConditionalOnProperty
+配置项满足才生效
+
+
+
+实际项目场景例如：
+id@ConditionalOnMissingBean
+
+用户没定义 Bean：Spring 才自动创建默认 Bean。
+避免冲突。
+
+白话回答
+“@Conditional 系列注解用于条件装配。
+Spring Boot 自动配置大量依赖这些注解，满足条件才创建 Bean，避免无效配置和 Bean 冲突。”
+
+
+7. Spring MVC 执行流程涉及知识点Spring MVC 核心流程：
+id请求
+↓
+DispatcherServlet
+↓
+HandlerMapping
+↓
+Controller
+↓
+Service
+↓
+返回ModelAndView/JSON
+↓
+视图解析
+↓
+响应
+
+
+顺带解释几个词DispatcherServletSpring MVC 核心前端控制器。
+所有请求先到它。
+
+HandlerMapping负责：
+idURL -> Controller
+
+映射。
+
+ViewResolver负责页面解析。
+例如：
+idlogin
+↓
+login.jsp
+
+
+实际项目场景前后端分离里：
+通常：
+id返回JSON
+
+不走 JSP 页面。
+
+白话回答
+“Spring MVC 的核心是 DispatcherServlet。
+请求进入后会通过 HandlerMapping 找到对应 Controller，再调用业务逻辑，最后返回 JSON 或视图响应。”
+
+
+8. Spring 事务传播机制、隔离级别涉及知识点
+事务传播机制核心：
+id多个事务方法互相调用时
+事务怎么传播
+
+
+常见传播行为
+
+
+传播机制
+含义
+
+
+
+REQUIRED
+默认，有事务就加入，没有就新建
+
+
+REQUIRES_NEW
+新开事务
+
+
+SUPPORTS
+有事务就加入，没有就非事务执行
+
+
+
+实际项目场景例如：
+订单主流程失败：日志保存不能回滚。
+日志方法：
+idREQUIRES_NEW
+
+单独事务。
+
+隔离级别用于解决并发问题。
+
+并发问题
+
+
+问题
+含义
+
+
+
+脏读
+读到别人未提交数据
+
+
+不可重复读
+同一数据两次读取结果不同
+
+
+幻读
+同条件查询结果数量变化
+
+
+
+四种隔离级别
+
+
+隔离级别
+能解决什么
+
+
+
+READ_UNCOMMITTED
+最低隔离
+
+
+READ_COMMITTED
+避免脏读
+
+
+REPEATABLE_READ
+避免不可重复读（MySQL默认）
+
+
+SERIALIZABLE
+完全串行化
+
+
+
+白话回答
+“Spring 事务传播机制用于控制事务之间怎么传递。
+最常用的是 REQUIRED 和 REQUIRES_NEW。
+隔离级别则用于解决并发问题，比如脏读、不可重复读和幻读。
+MySQL 默认一般是 REPEATABLE_READ。”
+
+
+Java 基础
+1. HashMap 底层实现、扩容、哈希冲突、JDK1.7&#x2F;1.8 区别涉及知识点HashMap 底层：
+id数组 + 链表 + 红黑树（JDK1.8）
+
+
+HashMap 存储流程idkey
+↓
+hash计算
+↓
+定位数组下标
+↓
+放入桶(bucket)
+
+
+什么是哈希冲突不同 key：
+计算后落到同一个数组位置。
+例如：
+idhash(A) % 16 = 1
+hash(B) % 16 = 1
+
+这就是哈希冲突。
+
+如何解决冲突JDK1.7：
+id链表
+
+JDK1.8：
+id链表长度超过8
+↓
+转红黑树
+
+
+为什么转红黑树链表查找：
+idO(n)
+
+红黑树：
+idO(logn)
+
+
+扩容机制默认容量：
+id16
+
+默认负载因子：
+id0.75
+
+达到：
+id16 * 0.75 = 12
+
+就扩容。
+
+什么是负载因子衡量：
+id哈希表装满程度
+
+
+为什么是 0.75空间利用率和哈希冲突之间的平衡。
+
+JDK1.7 vs 1.8
+
+
+版本
+区别
+
+
+
+JDK1.7
+数组+链表
+
+
+JDK1.8
+数组+链表+红黑树
+
+
+
+1.7 为什么线程不安全更严重1.7 扩容采用：
+id头插法
+
+多线程下可能：
+id链表成环
+
+导致死循环。
+
+1.8 改进采用：
+id尾插法
+
+避免链表成环。
+
+白话回答
+“HashMap 底层是数组加链表，JDK1.8 后增加了红黑树优化。
+key 会先计算 hash，再定位数组位置。
+如果多个 key 落到同一个桶，就发生哈希冲突。
+JDK1.8 在链表过长时会转红黑树，提高查询效率。
+HashMap 达到负载因子后会扩容，默认容量16，负载因子0.75。”
+
+
+2. HashMap 和 ConcurrentHashMap 区别、锁机制涉及知识点
+HashMap特点：
+id线程不安全
+
+多线程可能：
+
+数据覆盖
+死循环
+丢数据
+
+
+ConcurrentHashMap特点：
+id线程安全
+
+适合并发场景。
+
+JDK1.7 锁机制idSegment分段锁
+
+多个 Segment 独立加锁。
+减少锁竞争。
+
+JDK1.8 锁机制取消 Segment。
+采用：
+idCAS + synchronized
+
+
+什么是 CASCompare And Swap。
+比较并交换。
+一种无锁并发机制。
+
+ConcurrentHashMap 为什么性能更高因为：
+id锁粒度更小
+
+不是整个 Map 加锁。
+
+实际项目场景例如：
+缓存统计：
+idConcurrentHashMap&lt;String, AtomicInteger>
+
+统计接口访问次数。
+
+白话回答
+“HashMap 是线程不安全的，而 ConcurrentHashMap 支持高并发。
+JDK1.7 使用 Segment 分段锁，JDK1.8 改成 CAS 加 synchronized，锁粒度更小，所以并发性能更高。”
+
+
+3. volatile、synchronized、Lock 区别涉及知识点
+volatile作用：
+id保证可见性
+禁止指令重排
+
+
+什么是可见性一个线程修改变量：
+其他线程立即可见。
+
+什么是指令重排CPU 为了优化性能：
+可能调整代码执行顺序。
+volatile 可以禁止这种重排。
+
+volatile 不能保证什么不能保证：
+id原子性
+
+
+什么是原子性操作：
+id不可被中断
+
+例如：
+idi++
+
+其实不是原子操作。
+
+synchronized作用：
+id保证线程同步
+
+底层：
+id对象监视器Monitor
+
+
+Lock（ReentrantLock）JDK 提供的显式锁。
+相比 synchronized：
+功能更多。
+例如：
+
+可中断
+超时锁
+公平锁
+
+
+区别总结
+
+
+关键字
+特点
+
+
+
+volatile
+保证可见性
+
+
+synchronized
+自动加锁释放锁
+
+
+Lock
+更灵活
+
+
+
+白话回答
+“volatile 主要保证可见性和禁止指令重排，但不能保证原子性。
+synchronized 用于线程同步，底层基于 Monitor。
+Lock 比 synchronized 更灵活，支持公平锁、可中断锁和超时机制。”
+
+
+4. 谈谈 ReentrantLock 的理解涉及知识点Reentrant：
+id可重入
+
+意思：
+同一个线程：可以重复获取同一把锁。
+
+为什么需要可重入例如：
+idA方法加锁
+↓
+调用B方法
+↓
+B方法也需要同一把锁
+
+如果不可重入：会死锁。
+
+ReentrantLock 特点相比 synchronized：
+支持：
+
+公平锁
+tryLock
+可中断锁
+Condition
+
+
+什么是公平锁先等待的线程先获得锁。
+
+什么是 Condition类似：
+idwait/notify
+
+但功能更强。
+
+实际项目场景例如：
+异步任务队列：
+idlock.tryLock(1, TimeUnit.SECONDS)
+
+避免线程长期阻塞。
+
+白话回答
+“ReentrantLock 是可重入锁，同一个线程可以重复获取锁。
+它相比 synchronized 更灵活，支持公平锁、tryLock、可中断锁等高级功能。”
+
+
+5. 线程池核心知识点涉及知识点线程池作用：
+id线程复用
+
+避免频繁：
+
+创建线程
+销毁线程
+
+降低系统开销。
+
+为什么不能一直 new Thread线程创建成本高。
+高并发下：容易：
+
+CPU 飙升
+OOM
+系统崩溃
+
+
+线程池核心流程id提交任务
+↓
+核心线程执行
+↓
+队列缓存
+↓
+创建非核心线程
+↓
+触发拒绝策略
+
+
+实际项目场景例如：
+异步日志处理：
+
+请求线程快速返回
+后台线程异步写数据库
+
+
+白话回答
+“线程池核心目的是线程复用，降低线程创建销毁开销。
+高并发项目里通常会用线程池处理异步任务，而不是频繁 new Thread。”
+
+
+6. 线程池七大参数涉及知识点idThreadPoolExecutor
+
+七大参数：
+
+
+
+参数
+含义
+
+
+
+corePoolSize
+核心线程数
+
+
+maximumPoolSize
+最大线程数
+
+
+keepAliveTime
+空闲线程存活时间
+
+
+unit
+时间单位
+
+
+workQueue
+阻塞队列
+
+
+threadFactory
+线程工厂
+
+
+handler
+拒绝策略
+
+
+
+拒绝策略
+
+
+策略
+含义
+
+
+
+AbortPolicy
+抛异常
+
+
+CallerRunsPolicy
+调用线程执行
+
+
+DiscardPolicy
+丢弃
+
+
+DiscardOldestPolicy
+丢弃最旧任务
+
+
+
+白话回答
+“线程池核心是 ThreadPoolExecutor。
+最重要的参数包括核心线程数、最大线程数、阻塞队列和拒绝策略。
+当线程和队列都满时，就会触发拒绝策略。”
+
+
+7. 线程安全集合有哪些、怎么实现安全涉及知识点
+Vector早期线程安全 List。
+方法加：
+idsynchronized
+
+性能较差。
+
+Collections.synchronizedXXX包装同步集合。
+
+ConcurrentHashMap高并发 Map。
+
+CopyOnWriteArrayList写时复制。
+适合：
+id读多写少
+
+
+什么是写时复制写数据时：复制新数组。
+读线程不加锁。
+
+实际项目场景配置缓存：
+
+很少修改
+经常读取
+
+适合：
+idCopyOnWriteArrayList
+
+
+白话回答
+“常见线程安全集合包括 Vector、ConcurrentHashMap 和 CopyOnWriteArrayList。
+ConcurrentHashMap 适合高并发场景，CopyOnWriteArrayList 适合读多写少。”
+
+Agent 岗位问题
+Python 三大器id生成器
+迭代器
+装饰器
+
+
+回答
+“Python 常说的三大器一般是生成器、迭代器和装饰器。
+迭代器核心是实现 __iter__ 和 __next__；
+生成器本质是特殊迭代器，通过 yield 实现惰性生成，适合大数据量场景；
+装饰器本质是函数增强，不修改原函数的情况下增加功能，Python Web 框架和日志、权限控制里很常见。”
+
+
+异步和多线程
+回答
+“异步主要解决 IO 等待问题，多线程主要解决任务并发问题。
+Python 由于 GIL 的存在，多线程在 CPU 密集型场景优势有限，但在网络请求、数据库访问这种 IO 密集型场景依然有效。
+AI Agent 场景里我更多会用 asyncio，比如并发调用多个 API、并发向量检索、并发 Tool Calling。”
+
+
+如何优化 SQL 查询速度
+回答
+“我一般先通过 explain 看执行计划，重点看有没有走索引、是否全表扫描。
+常见优化包括：
+
+增加索引
+联合索引
+避免 select *
+减少回表
+大分页优化
+
+如果数据量比较大，还会考虑读写分离或者缓存。”
+
+
+AI 和 Agent 的区别
+回答
+“普通 AI 更像一次性问答，输入 Prompt 返回结果。
+Agent 则更强调：
+
+自主决策
+多步骤执行
+工具调用
+状态管理
+
+比如普通 LLM 只能回答天气，而 Agent 可以：
+
+自动调用天气 API
+解析结果
+继续完成后续任务。”
+
+
+
+LangChain 常用方法
+回答
+“我实际用得比较多的是：
+
+PromptTemplate
+ChatOpenAI
+RunnableSequence
+Retriever
+Memory
+Tool
+AgentExecutor
+
+RAG 里主要会用 document loader、text splitter 和 vector store。”
+
+
+你一般怎么写 Prompt
+回答
+“我一般会把 Prompt 分成：
+
+system prompt
+user prompt
+context
+
+然后尽量：
+
+明确角色
+明确输出格式
+限制模型行为
+提供 few-shot 示例
+
+RAG 场景里还会明确要求：
+‘只能根据检索内容回答，不允许编造。’”
+
+
+常见 RAG 搜索策略
+回答
+“常见策略包括：
+
+向量检索
+BM25关键词检索
+混合检索
+rerank重排序
+metadata filter
+
+实际项目里我更倾向双路召回，因为纯向量检索容易语义漂移。”
+
+
+如何避免 AI 幻觉
+回答
+“避免幻觉主要有几个方向：
+
+RAG 提供外部知识
+Prompt 限制回答范围
+降低 temperature
+增加相似度阈值过滤
+增加 rerank
+
+对于高风险场景，还会要求模型返回引用来源。”
+
+
+多头注意力机制
+回答
+“多头注意力本质是让模型从多个不同语义角度理解文本关系。
+比如一句话里：
+
+一个 head 关注主语
+一个关注时态
+一个关注上下文关联
+
+最后再把多个 head 的结果融合，提高模型对上下文的理解能力。”
+
+
+GPT5 相比其他 AI 做了什么优化
+回答
+“我更关注实际使用体验。
+相比很多模型，GPT 系列在：
+
+长上下文
+工具调用
+推理稳定性
+指令遵循
+多轮对话
+
+上整体会更成熟。
+特别是复杂 Agent Workflow 场景，稳定性会明显更好。”
+
+
+最近写的 Agent 是什么，怎么做的
+回答
+“我最近做的是一个基于 LangChain 的 RAG Agent。
+核心功能包括：
+
+文档知识库检索
+多轮对话记忆
+Tool Calling
+SSE 流式输出
+
+技术栈是：
+
+FastAPI
+LangChain
+Chroma
+OpenAI&#x2F;Ollama
+
+文档会先 chunk 切分，再 embedding 存入向量库。
+查询时采用 BM25 + 向量检索双路召回，并增加 rerank。
+Agent 部分支持工具调用，比如联网搜索和本地知识查询。”
+
+
+LangGraph
+回答
+“LangGraph 本质是基于状态机的 Agent Workflow。
+相比 LangChain 的链式调用，LangGraph 更适合：
+
+多步骤决策
+条件分支
+状态流转
+多 Agent 协作
+
+我实际用它做过：
+
+Tool Calling
+Agent 状态管理
+多轮执行流程。”
+
+
+
+ES 搜索机制
+回答
+“ES 底层基于倒排索引。
+它会把词和文档映射关系提前建立好，所以搜索速度非常快。
+AI 场景里我更多会用 ES 做：
+
+BM25关键词检索
+Hybrid Search
+metadata filter。”
+
+
+
+Function Calling 和 MCP
+回答
+“Function Calling 本质是模型输出结构化工具调用参数，由服务端真正执行工具。
+MCP 更像统一工具协议，让模型可以标准化接入外部工具、数据库和服务。
+我理解 MCP 更偏：
+‘AI 时代的工具接口标准化。’”
+
+
+大量知识文本入库怎么处理
+回答
+“大量文本入库前，我会先做：
+
+文档清洗
+去重
+chunk切分
+metadata提取
+
+然后异步 embedding。
+检索层面会：
+
+控制 chunk 大小
+建立 metadata filter
+做混合检索
+
+避免向量库规模过大后检索效率下降。”
+
+
+最难的问题是什么
+回答
+“我之前遇到过一个比较难的问题是：
+RAG 检索结果不稳定，模型经常答非所问。
+后来排查发现：
+
+chunk 切分太粗
+纯向量检索语义漂移
+
+后面我重新设计了 chunk 策略，并增加 BM25 混合检索和 rerank，最终回答准确率明显提升。
+整个优化过程大概花了一周左右。”
+
+
+做过什么项目，有什么可复刻经验
+回答
+“我之前做过后端、自动化和 AI Agent 相关项目。
+我觉得比较能复刻的是：
+
+快速学习新技术
+工程落地能力
+异步并发和服务化经验
+
+AI 这块虽然接触时间不算特别长，但我进入状态比较快，也比较关注实际落地而不是概念。”
+
+
+和同事冲突怎么办
+推荐回答
+“我一般会先确认问题是技术分歧还是沟通问题。
+如果是技术问题，我更倾向用数据、测试结果和实际效果讨论，而不是情绪化争论。
+最终目标还是把项目做好。”
+
+
+预期薪资
+回答
+“我目前预期大概在 15K 左右，但我更看重岗位方向、成长空间和团队氛围，具体也可以结合岗位职责沟通。”
+
+
+明天能到岗么
+回答
+“如果流程确定，我这边可以尽快配合入职，一般一周内没问题。”
+
+]]></content>
+  </entry>
+  <entry>
+    <title>正则表达式在实际开发中的使用整理</title>
+    <url>/2024/09/10/other/Regex-In-Real-World-Development/</url>
+    <content><![CDATA[背景第一次接触正则表达式时，基本没有任何“工具感”，更像是在看一种陌生符号系统：
+id^ $ .* + ? [] () \d \w
+
+直观感受就是：
+
+完全不知道它在干什么。
+
+
+正则的学习阶段正则的理解一般会经历几个阶段：
+1. 完全看不懂id无法理解语法含义
+
+
+2. 直接复制现成表达式id网上找一个能用的 regex
+
+
+3. 开始做局部修改id能根据需求改一小段
+
+
+4. 能识别文本模式问题逐渐开始意识到：
+
+很多文本处理问题，本质是“模式匹配问题”。
+
+
+正则的核心价值正则真正的作用不是“写复杂表达式”，而是：
+
+批量处理文本结构化问题。
+
+常见场景包括：
+
+数据清洗
+日志分析
+表单校验
+文本提取
+IDE 批量替换
+CLI 文本处理
 
 本质都是：
 
-状态搜索策略差异
+从非结构化文本中提取结构。
 
 
-动态规划的困难点动态规划的难点不在实现，而在建模。
-核心问题通常是：
+第一次体会正则的价值最直观的体验来自批量处理文本时。
+对比非常明显：
 
-状态无法定义
-转移关系不清晰
+之前：手动复制、删除、修改
+之后：一个表达式批量处理
 
+效率差异是数量级的。
 
-动态规划的基本结构DP 的基本组成：
-id状态定义
-状态转移
-初始条件
+正则的本质可以简化为一句话：
 
-其中最难的是：
+描述字符串规则的表达式语言。
 
-状态设计
-
-
-为什么动态规划难因为它不符合直觉：
-
-直觉：一步一步做
-DP：先抽象结构再推导
-
-这是思维模式差异。
-
-刷题中断的原因长期刷不下去通常有几个原因：
-1. 反馈周期长项目：
-
-做完能看到结果
-
-刷题：
-
-很多时候只有失败反馈
-
-
-2. 现实感不足很多人会产生疑问：
-
-工作中是否真的用得到？
-
-尤其在 Web &#x2F; CRUD 场景下。
-
-3. 成长感不明显刷题进步不容易直观感知，容易出现：
-
-“感觉一直没变强”
-
-
-算法与工程的关系后期逐渐会发现：
-算法并不完全独立于工程。
 例如：
+id\d+
 
-缓存策略
-路由匹配
-搜索排序
-限流机制
-调度系统
+含义：
+id匹配一个或多个数字
 
-本质都有算法思想参与。
 
-对算法作用的重新理解算法训练更核心的价值是：
+常见基础符号数字id\d
 
-抽象能力
-边界意识
-状态建模
-时间复杂度敏感度
 
-这些能力会间接影响工程质量。
+字母数字下划线id\w
 
-大厂为什么仍然考算法算法题的作用并不是评估“工程能力本身”，而是用于筛选：
 
-学习能力
-基础编码能力
-抽象能力
-思维稳定性
+空白字符id\s
 
-尤其在现场编码环境下更明显。
 
-当前对刷题的态度不再是高强度刷题模式。
-更接近：
+任意字符id.
 
-持续维护状态
-间歇性练习
-保持基本熟练度
 
-重点不再是数量，而是持续性。
+重复控制id*  +  ?
 
-总结算法更像一种长期训练工具。
-它不直接等价于工程能力，但会影响：
+含义分别是：
+id0次或多次
+1次或多次
+0次或1次
 
-思维方式与问题处理方式
 
-因此更适合作为长期维持的基础能力，而不是短期任务。
+边界符号开头id^
+
+结尾id$
+
+含义：
+
+^ 表示字符串开始
+$ 表示字符串结束
+
+
+一个典型例子：手机号校验id^1\d&#123;10&#125;$
+
+含义：
+id以1开头 + 10位数字 + 总长度11位
+
+
+表单校验的常见场景正则最常见的入口通常来自：
+
+手机号
+邮箱
+密码规则
+身份证
+URL 校验
+
+这些场景的特点是：
+
+规则明确 + 输入格式固定。
+
+
+超长正则的问题实际开发中经常会遇到这种情况：
+id((([a-zA-Z0-9...
+
+问题不在于“能不能用”，而在于：
+
+可读性极差
+不可维护
+难以调试
+团队协作困难
+
+
+更合理的使用方式后来更倾向于：
+
+能拆逻辑就拆逻辑。
+
+避免把复杂业务逻辑压缩进一个表达式。
+
+正则的典型实战场景1. 数据清洗提取数字id\d+
+
+
+去除 HTML 标签id&lt;[^>]+>
+
+
+清理多余空行id\n+
+
+
+提取 URLidhttps?://[^\s]+
+
+
+2. IDE 批量替换典型使用方式是：
+
+利用 regex 做全局结构替换
+
+例如：
+idlog.xxx -> logger.xxx
+
+
+3. 日志分析日志通常是结构化文本，例如：
+id[ERROR] user_id=123
+
+提取字段：
+iduser_id=(\d+)
+
+
+4. 爬虫中的文本提取虽然有更专业解析工具，但 regex 在简单场景仍然常用。
+例如提取图片：
+idsrc="([^"]+)"
+
+
+不同语言中的 regexPythonidimport re
+
+re.findall(r"\d+", text)
+
+特点是：
+
+语法简洁
+使用频繁
+
+
+JavaScriptidtext.match(/\d+/g);
+
+
+JavaidPattern.compile("\\d+")
+
+特点：
+
+转义较繁琐
+
+
+Goidregexp.MustCompile(`\d+`)
+
+特点：
+
+raw string 相对友好
+
+
+C#idRegex.Match(text, @"\d+")
+
+
+regex 的局限性正则并不适合所有问题。
+不适合：
+
+嵌套结构
+递归语义
+复杂上下文依赖
+
+例如解析 HTML：
+
+并不是正则的合理使用场景。
+
+
+正则的合理边界更合适的范围是：
+
+规则明确的字符串匹配与提取
+
+而不是：
+
+复杂语义结构解析
+
+
+工程中的实际位置在实际开发中，regex 更多出现在：
+
+编辑器（VSCode &#x2F; IDEA）
+Linux 工具（grep &#x2F; sed）
+日志处理脚本
+配置处理脚本
+
+本质上属于：
+
+文本处理工具链的一部分
+
+
+总结正则表达式本质上不是“复杂技巧”，而是：
+
+一种高效处理文本规则的工具。
+
+它的价值不在于表达式本身的复杂度，而在于：
+
+提升批量处理能力
+降低重复劳动
+提高文本处理效率
+
+从工程角度看，它更像是：
+
+文本处理层的基础工具能力，而不是高级算法。
+
 ]]></content>
       <categories>
         <category>技术</category>
       </categories>
       <tags>
-        <tag>算法</tag>
-        <tag>LeetCode</tag>
-        <tag>动态规划</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Nginx 在实际开发中的用途整理</title>
-    <url>/2022/02/07/ops/Nginx-Practice-and-Configuration/</url>
-    <content><![CDATA[Nginx 在实际开发中的用途整理前言我第一次认真接触 Nginx，其实不是因为“想学 Web Server”，而是因为一堆线上问题开始集中爆发：
-
-前端部署后 404
-API 跨域
-502 Bad Gateway
-WebSocket 连不上
-Docker 容器互相访问失败
-静态资源加载异常
-
-这些问题最后都指向同一个东西：
-
-Nginx 是整个请求链路的入口。
-
-后来在实际项目里，我逐渐把它理解成一个“流量分发与边界控制层”，而不只是静态文件服务器。
-
-一、Nginx 到底是什么本质上我对它的定义是：
-
-一个高性能 HTTP 服务器 + 反向代理 + 流量入口控制器
-
-它在我的项目里通常承担这些角色：
-
-静态资源服务
-反向代理
-负载均衡
-HTTPS 终止
-API 网关雏形
-WebSocket 转发入口
-
-典型链路是：
-用户
- ↓
-Nginx
- ↓
-后端服务（FastAPI / SpringBoot / Node）
- ↓
-数据库
-
-
-二、为什么实际项目离不开 Nginx在纯开发阶段，我最初其实是直接跑后端服务的，比如：
-uvicorn main:app
-
-但一旦进入部署阶段，会立刻遇到几个现实问题：
-1. 静态资源效率问题直接用后端服务返回静态资源，性能明显不如 Nginx。
-所以我后来统一改成：
-Nginx 负责静态资源
-后端只负责 API
-
-
-2. 反向代理成为必需实际部署时，我不会直接暴露后端端口，而是：
-公网 → Nginx → 内部服务
-
-这样做的好处很直接：
-
-后端服务隐藏
-统一入口
-安全控制集中
-
-
-3. 前后端分离后的路径问题典型结构：
-Vue / React
-FastAPI / SpringBoot
-
-Nginx 负责：
-/      → 前端
-/api   → 后端
-
-
-三、我对 Nginx 工作机制的理解正向代理 vs 反向代理正向代理客户端 → 代理 → 目标网站
-
-（常见于科学上网工具）
-
-反向代理（Nginx）客户端 → Nginx → 内部服务
-
-核心区别是：
-
-用户并不知道真实后端结构
-
-
-四、Nginx 基本结构（我实际常用）配置结构通常是：
-events &#123;&#125;
-
-http &#123;
-
-    server &#123;
-
-        location / &#123;
-
-        &#125;
-
-    &#125;
-
-&#125;
-
-
-五、我最常写的几种配置场景
-1. 前端静态站点server &#123;
-    listen 80;
-    server_name localhost;
-
-    root /www/dist;
-    index index.html;
-
-    location / &#123;
-        try_files $uri $uri/ /index.html;
-    &#125;
-&#125;
-
-这里踩过的坑Vue Router history 模式下：
-/user/1
-
-如果没有：
-try_files ... /index.html
-
-刷新页面一定 404。
-
-2. FastAPI 反向代理server &#123;
-    listen 80;
-
-    location / &#123;
-        proxy_pass http://127.0.0.1:8000;
-
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    &#125;
-&#125;
-
-关键点如果不加 header：
-
-后端拿不到真实 IP
-鉴权日志会失真
-
-
-3. WebSocket 转发这是我踩坑最严重的一块：
-location /ws &#123;
-
-    proxy_pass http://127.0.0.1:8000;
-
-    proxy_http_version 1.1;
-
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-&#125;
-
-不加这段基本必炸：
-WebSocket handshake failed
-
-
-六、负载均衡配置upstream backend &#123;
-    server 127.0.0.1:8001;
-    server 127.0.0.1:8002;
-&#125;
-
-使用：
-location / &#123;
-    proxy_pass http://backend;
-&#125;
-
-
-常见策略
-轮询（默认）
-weight 权重
-ip_hash（会话一致性）
-
-
-七、HTTPS 配置（实际用法）server &#123;
-    listen 443 ssl;
-
-    ssl_certificate     /etc/ssl/fullchain.pem;
-    ssl_certificate_key /etc/ssl/private.pem;
-&#125;
-
-HTTP 强制跳转：
-server &#123;
-    listen 80;
-    return 301 https://$host$request_uri;
-&#125;
-
-
-八、我实际踩过的 Nginx 问题
-1. 502 Bad Gateway本质原因通常是：
-Nginx 连不上后端
-
-常见排查：
-
-后端是否启动
-端口是否正确
-Docker 网络是否隔离
-
-
-2. 413 请求体过大上传失败时加：
-client_max_body_size 100m;
-
-
-3. 跨域问题后来我基本不再用 CORS 单独解决，而是：
-Nginx 统一 API 入口
-
-直接变同源。
-
-4. Docker 场景 localhost 问题在容器里：
-localhost ≠ 宿主机
-
-所以我统一改成：
-proxy_pass http://service-name
-
-
-九、Docker + Nginx 实际组合services:
-  nginx:
-    image: nginx
-    ports:
-      - "80:80"
-
-  backend:
-    build: .
-
-容器内访问必须用：
-service-name:port
-
-
-十、Nginx 性能理解（实践层面）我后来理解它高性能主要来自：
-
-epoll 事件模型
-非阻塞 IO
-worker 多进程模型
-sendfile 零拷贝
-
-核心不是“快”，而是：
-
-不为每个连接创建线程
-
-
-十一、我对 Nginx 的阶段性认知变化最开始：
-只是用来放前端页面
-
-后来：
-反向代理工具
-
-再后来：
-整个系统的流量入口层
-
-最后实际变成：
-后端系统架构的一部分
-
-
-十二、总结我现在对 Nginx 的定位是：
-
-它不是一个工具，而是系统边界控制层。
-
-在实际项目里，它解决的不是“部署问题”，而是：
-
-流量如何进入系统
-请求如何被分发
-服务如何隔离
-外部如何访问内部结构
-
-当项目复杂度上来之后，这一层基本不可绕过。
-
-]]></content>
-      <categories>
-        <category>运维</category>
-      </categories>
-      <tags>
-        <tag>Linux</tag>
-        <tag>Nginx</tag>
+        <tag>正则表达式</tag>
       </tags>
   </entry>
   <entry>
@@ -13259,249 +14195,663 @@ Interceptor.attach(addr, &#123;
       </tags>
   </entry>
   <entry>
-    <title>正则表达式在实际开发中的使用整理</title>
-    <url>/2024/09/10/other/Regex-In-Real-World-Development/</url>
-    <content><![CDATA[背景第一次接触正则表达式时，基本没有任何“工具感”，更像是在看一种陌生符号系统：
-id^ $ .* + ? [] () \d \w
+    <title>HTTP、Token、JWT 与网页鉴权机制整理</title>
+    <url>/2021/09/18/network/http-token-jwt-authentication-mechanisms/</url>
+    <content><![CDATA[HTTP、Token、JWT 与网页鉴权机制整理很多人第一次做前后端分离时都会疑惑：
+用户到底是怎么“登录状态持久化”的？
 
-直观感受就是：
-
-完全不知道它在干什么。
-
-
-正则的学习阶段正则的理解一般会经历几个阶段：
-1. 完全看不懂id无法理解语法含义
+浏览器关了。
+APP 重启了。
+为什么服务端还知道我是谁？
+这背后其实就是：
+鉴权（Authentication）
 
 
-2. 直接复制现成表达式id网上找一个能用的 regex
+HTTP 为什么天然无状态HTTP 本质：
+请求 -> 响应
+
+服务端默认：
+不记得我是谁
+
+即：
+每一次请求都是独立事件
+
+所以：
+
+登录状态
+用户身份
+权限信息
+
+都必须额外设计机制来承载。
+
+Cookie：最早的状态方案最传统的方式：
+Cookie + Session
+
+流程是：
+登录成功
+    ↓
+服务端生成 Session
+    ↓
+SessionID 写入 Cookie
+    ↓
+浏览器后续自动携带 Cookie
 
 
-3. 开始做局部修改id能根据需求改一小段
+Session 本质服务端通常存：
+&#123;
+  "session_id": &#123;
+    "user_id": 123
+  &#125;
+&#125;
+
+位置可能是：
+
+内存
+Redis
+数据库
 
 
-4. 能识别文本模式问题逐渐开始意识到：
+Cookie 的核心特点浏览器会：
+自动携带 Cookie
 
-很多文本处理问题，本质是“模式匹配问题”。
+因此早期 Web 系统基本依赖它完成登录态维持。
+
+Cookie 的问题1. 跨域复杂前后端分离后常见：
+前端 localhost:5173
+后端 localhost:8000
+
+随之出现：
+
+SameSite
+CORS
+Secure
+HttpOnly
+
+一整套配置问题。
+
+Token 机制的出现移动端普及之后，Cookie 不再是唯一选择。
+因为：
+APP 没有浏览器 Cookie 机制
+
+于是 Token 成为主流方案。
+
+Token 本质服务端：
+登录成功 -> 生成字符串
+
+客户端请求：
+Authorization: Bearer xxx
+
+服务端只负责验证：
+token 是否有效
 
 
-正则的核心价值正则真正的作用不是“写复杂表达式”，而是：
+Token 与 Cookie 的区别
 
-批量处理文本结构化问题。
 
-常见场景包括：
+机制
+状态位置
 
-数据清洗
-日志分析
-表单校验
-文本提取
-IDE 批量替换
-CLI 文本处理
+
+
+Session
+服务端
+
+
+Token
+客户端
+
+
+
+JWT 为什么被广泛使用JWT（Json Web Token）核心特性：
+无状态认证
+
+
+JWT 结构典型 JWT：
+xxxxx.yyyyy.zzzzz
+
+三部分：
+
+
+
+结构
+含义
+
+
+
+Header
+算法信息
+
+
+Payload
+用户数据
+
+
+Signature
+签名校验
+
+
+
+Payload 的特点Payload 通常是：
+&#123;
+  "user_id": 1,
+  "username": "admin"
+&#125;
+
+它可以直接 Base64 解码。
+因此需要明确一点：
+JWT 默认不加密，只防篡改
+JWT 工作流程登录
+   ↓
+签发 JWT
+   ↓
+客户端保存
+   ↓
+请求携带 JWT
+   ↓
+服务端验签
+
+
+JWT 的优势在分布式系统中：
+不需要查 Session
+
+每个服务只需要：
+共享密钥
+
+即可完成验证。
+
+JWT 的核心问题无法主动失效因为：
+服务端不保存状态
+
+因此 token 一旦签发：
+理论上直到过期都有效
+
+
+Refresh Token 机制现代系统通常拆分：
+
+Access Token（短期）
+Refresh Token（长期）
+
+
+设计目的如果 Access Token 泄露：
+影响窗口较小
+
+Refresh Token 用于：
+重新获取 Access Token
+
+
+OAuth2：第三方授权体系常见场景：
+
+GitHub 登录
+Google 登录
+微信登录
+
+核心思想：
+不把密码交给第三方
+
+
+OAuth2 流程用户跳转授权页
+    ↓
+官方确认授权
+    ↓
+返回 access_token
+
+
+OAuth2 的意义本质是：
+授权代理机制
+
+而不是简单登录替代。
+
+SSO 单点登录企业系统常见：
+一次登录，多系统共享状态
+
+常见实现：
+
+CAS
+OAuth2
+SAML
+
+
+实际工程中的组合方案很多系统并不会只用 JWT。
+更常见组合是：
+JWT + Redis
+
+
+为什么需要 Redis纯 JWT 的问题：
+无法强制失效
+
+解决方式：
+
+黑名单
+token version 控制
+
+
+鉴权头的几种形式Authorization（标准）Authorization: Bearer xxx
+
+
+Cookie（传统 Web）Cookie: sessionid=xxx
+
+
+自定义 HeaderX-Token: xxx
+
+
+签名机制部分系统会引入签名：
+timestamp + nonce + sign
+
+
+为什么需要签名用于防护：
+
+重放攻击
+参数篡改
+接口伪造
+
+
+HMAC 签名模型典型方式：
+HMAC-SHA256(secret, data)
+
+客户端与服务端使用相同规则计算签名。
+
+WebSocket 鉴权长连接场景：
+WS 建立后持续通信
+
+常见做法：
+连接时携带 token
+
+例如：
+wss://xxx?token=abc
+
+
+鉴权的本质问题我在实际开发中逐渐明确的一点是：
+鉴权难点不在“登录”而在：
+
+权限边界
+数据隔离
+行为约束
+
+
+RBAC 权限模型典型结构：
+用户 -> 角色 -> 权限
+
+
+更细粒度权限系统例如：
+只能访问自己的资源
+
+或者：
+按部门 / 项目隔离
+
+
+我对鉴权体系的整体理解很多人容易把 JWT 等同于安全机制，但实际不是。
+真正的安全体系通常由以下构成：
+
+HTTPS
+服务端校验
+权限控制逻辑
+Token 生命周期管理
+风控与限流
+密钥管理
+
+
+JWT 的真实定位JWT 更准确的定位是：
+身份载体
+
+而不是安全本身。
+
+常见误区很多接口即使带 JWT：
+仍然可能越权
+
+原因通常在于：
+业务层没有做权限判断
+
+例如：
+DELETE /post/123
+
+如果没有校验：
+当前用户是否为作者
+
+鉴权体系依然是缺失的。
+
+总结HTTP 的无状态决定了：
+所有登录态必须外置设计
+
+而 Cookie、Token、JWT、OAuth2，本质都是：
+围绕“如何表达用户身份”这一问题的不同实现方案
+
+其中 JWT 解决的是：
+跨服务的身份传递问题
+
+但安全性本身仍然依赖完整的服务端权限体系。
+]]></content>
+      <categories>
+        <category>Web安全</category>
+      </categories>
+      <tags>
+        <tag>JWT</tag>
+        <tag>Token</tag>
+        <tag>OAuth</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Clash、SSR、V2RayN 与代理网络原理整理</title>
+    <url>/2020/07/17/other/VPN-Knowleage-1/</url>
+    <content><![CDATA[背景最开始接触代理，并不是出于“研究网络”。
+原因很直接：
+
+有些网站打不开。
+
+当时的理解非常粗糙，甚至可以总结成一句话：
+
+能用就行。
+
+后来接触得多了，才慢慢意识到，这套东西远不只是“能不能访问网站”。
+往底层拆，其实是一整套网络流量体系：
+
+TCP &#x2F; UDP
+DNS 解析
+路由转发
+NAT
+隧道协议
+加密传输
+流量分流
+
+再往后甚至会接触到：
+
+SD-WAN
+零信任网络
+服务网格
+企业级 VPN 架构
+
+当时并没有这些概念，但隐约能感觉到：
+
+这不是“工具”，而是“网络层能力”。
+
+
+最初的误解刚开始的理解很简单：
+Clash = 魔法开关
+
+开了就通，不开就不通。
+后来才发现完全不是这么回事。
+Clash 本身并不“负责翻越什么”，它更像：
+
+一个流量调度器。
+
+真正执行网络连接的是底层协议，例如：
+
+Shadowsocks
+VMess &#x2F; VLESS
+Trojan
+SOCKS5
+WireGuard
+Hysteria
+
+Clash 的作用是：
+
+决定“哪一类流量走哪一条通道”。
+
+
+代理的本质代理可以用一句很朴素的话描述：
+
+让一个中间节点替你访问网络。
+
+原始结构：
+id客户端 -> 目标网站
+
+代理结构：
+id客户端 -> 代理服务器 -> 目标网站
+
+目标网站看到的是：
+
+代理服务器的 IP，而不是你的真实 IP。
+
+
+HTTP 代理（早期形态）最早接触的是 HTTP 代理。
+结构很直白：
+id浏览器 -> HTTP Proxy -> 网站
+
+特点：
+
+仅支持 HTTP&#x2F;HTTPS
+配置简单
+依赖浏览器&#x2F;应用支持
+
+局限也很明显：
+
+不支持所有协议
+UDP 基本不可用
+兼容性差
+
+后面逐渐被 SOCKS5 替代。
+
+SOCKS5：通用代理基础SOCKS5 是后来真正用得最多的底层能力。
+结构：
+id应用 -> SOCKS5 -> 代理服务器 -> 目标
+
+特点很直接：
+
+不关心上层协议（HTTP &#x2F; TCP &#x2F; UDP）
+几乎所有应用都能用
+更接近“通用转发层”
+
+很多工具本质都是在本地暴露：
+127.0.0.1:7890
+
+然后所有流量走这个入口。
+
+SSR：早期常见方案SSR 是早期比较常见的一种实现。
+当时的特点：
+
+配置简单
+订阅形式传播
+客户端生态丰富
+
+常见使用方式：
+idSSR 订阅链接 -> 导入客户端 -> 直接使用
+
+但后来逐渐被替代，原因主要是：
+
+协议相对固定
+特征明显
+扩展能力有限
+
+
+V2RayN：协议认知转折点在使用 V2RayN 之后，认知发生变化。
+之前的理解是：
+
+节点就是一个“可用线路”。
+
+之后才意识到：
+节点背后是协议体系：
+
+VMess
+VLESS
+Trojan
+Shadowsocks
+SOCKS
+
+本质是：
+
+不同的加密与隧道实现方式。
+
+
+Clash：从“能用”到“可控”Clash 真正改变的点不在于“连接能力”，而在于：
+
+流量控制能力。
+
+它引入了规则分流体系。
+典型结构：
+idrules:
+  - DOMAIN-SUFFIX,google.com,Proxy
+  - DOMAIN-SUFFIX,bilibili.com,DIRECT
+  - GEOIP,CN,DIRECT
+  - MATCH,Proxy
+
+含义是：
+
+不同流量走不同出口。
+
+
+分流的重要性如果只有“全局代理”，会出现明显问题：
+
+国内网站变慢
+视频 CDN 绕路
+游戏延迟增加
+银行&#x2F;风控异常
+
+因此核心需求变成：
+
+不是“能不能代理”，而是“怎么分流”。
+
+
+DNS：容易被忽略的核心问题DNS 的问题在早期并不显眼。
+基本认知是：
+
+DNS &#x3D; 域名解析
+
+但实际情况复杂得多。
+
+DNS 泄漏问题例如访问：
+idgoogle.com
+
+如果 DNS 没有走代理：
+
+请求仍然走本地运营商
+运营商可以知道访问目标
+
+这就是：
+
+DNS 泄漏
+
+即使实际流量被代理，也仍然暴露访问意图。
+
+Clash 的 DNS 接管Clash 后来引入了 DNS 接管机制：
+iddns:
+  enable: true
+  listen: 0.0.0.0:1053
+
+作用是：
+
+统一控制域名解析路径。
+
+
+Fake-IP 模式第一次接触 Fake-IP 时基本是“看不懂状态”。
+配置类似：
+idenhanced-mode: fake-ip
+
+核心机制：
+
+伪造 IP 映射
+域名与 IP 建立内部关系
+强化分流控制能力
+
+本质是：
+
+用“虚拟 IP”控制流量路径。
+
+
+TUN 模式：系统级代理TUN 是理解代理能力的一个分界点。
+在没有 TUN 时：
+
+需要应用支持代理
+不支持的软件无法接管
+
+开启 TUN 后：
+
+系统流量被整体接管。
+
+
+TUN 的本质TUN 是虚拟网卡：
+id系统 -> 虚拟网卡 -> 代理内核
+
+所有流量包括：
+
+浏览器
+应用
+游戏
+UDP
+
+都会进入代理路径。
+
+节点的真实含义当时对“节点”的理解比较简单：
+
+一个 IP
+
+实际结构更复杂：
+
+地址 + 端口
+协议类型
+加密方式
+TLS 配置
+路由参数
+
+本质是：
+
+一个完整的隧道入口配置。
+
+
+代理链后期逐渐接触到多跳结构：
+id客户端 -> 日本节点 -> 美国节点 -> 目标网站
+
+用途主要是：
+
+多层转发
+隐藏真实出口
+特殊网络环境绕行
+
+
+认知变化早期理解：
+
+代理 &#x3D; 翻墙工具
+
+后期理解：
+
+代理 &#x3D; 网络流量调度系统
+
+很多技术后来才发现底层一致：
+
+VPN
+企业内网
+SD-WAN
+游戏加速器
+云办公网络
 
 本质都是：
 
-从非结构化文本中提取结构。
+控制流量路径。
 
 
-第一次体会正则的价值最直观的体验来自批量处理文本时。
-对比非常明显：
+Clash 配置的工程化意义第一次看到完整配置时：
+proxies:
+proxy-groups:
+rules:
+dns:
+tun:
 
-之前：手动复制、删除、修改
-之后：一个表达式批量处理
+感受到的不是“功能”，而是：
 
-效率差异是数量级的。
+网络系统工程结构。
 
-正则的本质可以简化为一句话：
 
-描述字符串规则的表达式语言。
+回头看SSR、V2RayN、Clash 这些工具真正带来的变化并不是“访问能力”。
+而是：
 
-例如：
-id\d+
+第一次开始理解网络流量是如何被构建、转发和控制的。
 
-含义：
-id匹配一个或多个数字
+后续无论是：
 
+服务器部署
+Docker 网络
+反向代理
+内网穿透
+API 转发
 
-常见基础符号数字id\d
-
-
-字母数字下划线id\w
-
-
-空白字符id\s
-
-
-任意字符id.
-
-
-重复控制id*  +  ?
-
-含义分别是：
-id0次或多次
-1次或多次
-0次或1次
-
-
-边界符号开头id^
-
-结尾id$
-
-含义：
-
-^ 表示字符串开始
-$ 表示字符串结束
-
-
-一个典型例子：手机号校验id^1\d&#123;10&#125;$
-
-含义：
-id以1开头 + 10位数字 + 总长度11位
-
-
-表单校验的常见场景正则最常见的入口通常来自：
-
-手机号
-邮箱
-密码规则
-身份证
-URL 校验
-
-这些场景的特点是：
-
-规则明确 + 输入格式固定。
-
-
-超长正则的问题实际开发中经常会遇到这种情况：
-id((([a-zA-Z0-9...
-
-问题不在于“能不能用”，而在于：
-
-可读性极差
-不可维护
-难以调试
-团队协作困难
-
-
-更合理的使用方式后来更倾向于：
-
-能拆逻辑就拆逻辑。
-
-避免把复杂业务逻辑压缩进一个表达式。
-
-正则的典型实战场景1. 数据清洗提取数字id\d+
-
-
-去除 HTML 标签id&lt;[^>]+>
-
-
-清理多余空行id\n+
-
-
-提取 URLidhttps?://[^\s]+
-
-
-2. IDE 批量替换典型使用方式是：
-
-利用 regex 做全局结构替换
-
-例如：
-idlog.xxx -> logger.xxx
-
-
-3. 日志分析日志通常是结构化文本，例如：
-id[ERROR] user_id=123
-
-提取字段：
-iduser_id=(\d+)
-
-
-4. 爬虫中的文本提取虽然有更专业解析工具，但 regex 在简单场景仍然常用。
-例如提取图片：
-idsrc="([^"]+)"
-
-
-不同语言中的 regexPythonidimport re
-
-re.findall(r"\d+", text)
-
-特点是：
-
-语法简洁
-使用频繁
-
-
-JavaScriptidtext.match(/\d+/g);
-
-
-JavaidPattern.compile("\\d+")
-
-特点：
-
-转义较繁琐
-
-
-Goidregexp.MustCompile(`\d+`)
-
-特点：
-
-raw string 相对友好
-
-
-C#idRegex.Match(text, @"\d+")
-
-
-regex 的局限性正则并不适合所有问题。
-不适合：
-
-嵌套结构
-递归语义
-复杂上下文依赖
-
-例如解析 HTML：
-
-并不是正则的合理使用场景。
-
-
-正则的合理边界更合适的范围是：
-
-规则明确的字符串匹配与提取
-
-而不是：
-
-复杂语义结构解析
-
-
-工程中的实际位置在实际开发中，regex 更多出现在：
-
-编辑器（VSCode &#x2F; IDEA）
-Linux 工具（grep &#x2F; sed）
-日志处理脚本
-配置处理脚本
-
-本质上属于：
-
-文本处理工具链的一部分
-
-
-总结正则表达式本质上不是“复杂技巧”，而是：
-
-一种高效处理文本规则的工具。
-
-它的价值不在于表达式本身的复杂度，而在于：
-
-提升批量处理能力
-降低重复劳动
-提高文本处理效率
-
-从工程角度看，它更像是：
-
-文本处理层的基础工具能力，而不是高级算法。
-
+都能在这套理解上继续扩展。
 ]]></content>
       <categories>
         <category>技术</category>
       </categories>
       <tags>
-        <tag>正则表达式</tag>
+        <tag>Clash</tag>
+        <tag>SSR</tag>
+        <tag>V2Ray</tag>
+        <tag>网络代理</tag>
       </tags>
   </entry>
   <entry>
@@ -14176,593 +15526,10 @@ Web Canvas
         <category>项目实践</category>
       </categories>
       <tags>
-        <tag>C语言</tag>
         <tag>动态规划</tag>
+        <tag>C语言</tag>
         <tag>EasyX</tag>
         <tag>黑白棋</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Clash、SSR、V2RayN 与代理网络原理整理</title>
-    <url>/2020/07/17/other/VPN-Knowleage-1/</url>
-    <content><![CDATA[背景最开始接触代理，并不是出于“研究网络”。
-原因很直接：
-
-有些网站打不开。
-
-当时的理解非常粗糙，甚至可以总结成一句话：
-
-能用就行。
-
-后来接触得多了，才慢慢意识到，这套东西远不只是“能不能访问网站”。
-往底层拆，其实是一整套网络流量体系：
-
-TCP &#x2F; UDP
-DNS 解析
-路由转发
-NAT
-隧道协议
-加密传输
-流量分流
-
-再往后甚至会接触到：
-
-SD-WAN
-零信任网络
-服务网格
-企业级 VPN 架构
-
-当时并没有这些概念，但隐约能感觉到：
-
-这不是“工具”，而是“网络层能力”。
-
-
-最初的误解刚开始的理解很简单：
-Clash = 魔法开关
-
-开了就通，不开就不通。
-后来才发现完全不是这么回事。
-Clash 本身并不“负责翻越什么”，它更像：
-
-一个流量调度器。
-
-真正执行网络连接的是底层协议，例如：
-
-Shadowsocks
-VMess &#x2F; VLESS
-Trojan
-SOCKS5
-WireGuard
-Hysteria
-
-Clash 的作用是：
-
-决定“哪一类流量走哪一条通道”。
-
-
-代理的本质代理可以用一句很朴素的话描述：
-
-让一个中间节点替你访问网络。
-
-原始结构：
-id客户端 -> 目标网站
-
-代理结构：
-id客户端 -> 代理服务器 -> 目标网站
-
-目标网站看到的是：
-
-代理服务器的 IP，而不是你的真实 IP。
-
-
-HTTP 代理（早期形态）最早接触的是 HTTP 代理。
-结构很直白：
-id浏览器 -> HTTP Proxy -> 网站
-
-特点：
-
-仅支持 HTTP&#x2F;HTTPS
-配置简单
-依赖浏览器&#x2F;应用支持
-
-局限也很明显：
-
-不支持所有协议
-UDP 基本不可用
-兼容性差
-
-后面逐渐被 SOCKS5 替代。
-
-SOCKS5：通用代理基础SOCKS5 是后来真正用得最多的底层能力。
-结构：
-id应用 -> SOCKS5 -> 代理服务器 -> 目标
-
-特点很直接：
-
-不关心上层协议（HTTP &#x2F; TCP &#x2F; UDP）
-几乎所有应用都能用
-更接近“通用转发层”
-
-很多工具本质都是在本地暴露：
-127.0.0.1:7890
-
-然后所有流量走这个入口。
-
-SSR：早期常见方案SSR 是早期比较常见的一种实现。
-当时的特点：
-
-配置简单
-订阅形式传播
-客户端生态丰富
-
-常见使用方式：
-idSSR 订阅链接 -> 导入客户端 -> 直接使用
-
-但后来逐渐被替代，原因主要是：
-
-协议相对固定
-特征明显
-扩展能力有限
-
-
-V2RayN：协议认知转折点在使用 V2RayN 之后，认知发生变化。
-之前的理解是：
-
-节点就是一个“可用线路”。
-
-之后才意识到：
-节点背后是协议体系：
-
-VMess
-VLESS
-Trojan
-Shadowsocks
-SOCKS
-
-本质是：
-
-不同的加密与隧道实现方式。
-
-
-Clash：从“能用”到“可控”Clash 真正改变的点不在于“连接能力”，而在于：
-
-流量控制能力。
-
-它引入了规则分流体系。
-典型结构：
-idrules:
-  - DOMAIN-SUFFIX,google.com,Proxy
-  - DOMAIN-SUFFIX,bilibili.com,DIRECT
-  - GEOIP,CN,DIRECT
-  - MATCH,Proxy
-
-含义是：
-
-不同流量走不同出口。
-
-
-分流的重要性如果只有“全局代理”，会出现明显问题：
-
-国内网站变慢
-视频 CDN 绕路
-游戏延迟增加
-银行&#x2F;风控异常
-
-因此核心需求变成：
-
-不是“能不能代理”，而是“怎么分流”。
-
-
-DNS：容易被忽略的核心问题DNS 的问题在早期并不显眼。
-基本认知是：
-
-DNS &#x3D; 域名解析
-
-但实际情况复杂得多。
-
-DNS 泄漏问题例如访问：
-idgoogle.com
-
-如果 DNS 没有走代理：
-
-请求仍然走本地运营商
-运营商可以知道访问目标
-
-这就是：
-
-DNS 泄漏
-
-即使实际流量被代理，也仍然暴露访问意图。
-
-Clash 的 DNS 接管Clash 后来引入了 DNS 接管机制：
-iddns:
-  enable: true
-  listen: 0.0.0.0:1053
-
-作用是：
-
-统一控制域名解析路径。
-
-
-Fake-IP 模式第一次接触 Fake-IP 时基本是“看不懂状态”。
-配置类似：
-idenhanced-mode: fake-ip
-
-核心机制：
-
-伪造 IP 映射
-域名与 IP 建立内部关系
-强化分流控制能力
-
-本质是：
-
-用“虚拟 IP”控制流量路径。
-
-
-TUN 模式：系统级代理TUN 是理解代理能力的一个分界点。
-在没有 TUN 时：
-
-需要应用支持代理
-不支持的软件无法接管
-
-开启 TUN 后：
-
-系统流量被整体接管。
-
-
-TUN 的本质TUN 是虚拟网卡：
-id系统 -> 虚拟网卡 -> 代理内核
-
-所有流量包括：
-
-浏览器
-应用
-游戏
-UDP
-
-都会进入代理路径。
-
-节点的真实含义当时对“节点”的理解比较简单：
-
-一个 IP
-
-实际结构更复杂：
-
-地址 + 端口
-协议类型
-加密方式
-TLS 配置
-路由参数
-
-本质是：
-
-一个完整的隧道入口配置。
-
-
-代理链后期逐渐接触到多跳结构：
-id客户端 -> 日本节点 -> 美国节点 -> 目标网站
-
-用途主要是：
-
-多层转发
-隐藏真实出口
-特殊网络环境绕行
-
-
-认知变化早期理解：
-
-代理 &#x3D; 翻墙工具
-
-后期理解：
-
-代理 &#x3D; 网络流量调度系统
-
-很多技术后来才发现底层一致：
-
-VPN
-企业内网
-SD-WAN
-游戏加速器
-云办公网络
-
-本质都是：
-
-控制流量路径。
-
-
-Clash 配置的工程化意义第一次看到完整配置时：
-proxies:
-proxy-groups:
-rules:
-dns:
-tun:
-
-感受到的不是“功能”，而是：
-
-网络系统工程结构。
-
-
-回头看SSR、V2RayN、Clash 这些工具真正带来的变化并不是“访问能力”。
-而是：
-
-第一次开始理解网络流量是如何被构建、转发和控制的。
-
-后续无论是：
-
-服务器部署
-Docker 网络
-反向代理
-内网穿透
-API 转发
-
-都能在这套理解上继续扩展。
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Clash</tag>
-        <tag>SSR</tag>
-        <tag>V2Ray</tag>
-        <tag>网络代理</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Hexo + Butterfly + GitHub Pages 实战搭建记录（附完整踩坑）</title>
-    <url>/2021/12/31/project/Hexo-Blog-Build/</url>
-    <content><![CDATA[前言最近开始搭建个人技术博客。
-一开始预期很简单：
-
-“静态博客 + GitHub Pages + 写 Markdown”
-
-实际操作之后才发现问题集中在三块：
-
-Node &#x2F; npm 环境兼容
-Git &#x2F; SSH 多账号冲突
-GitHub Pages + Actions 发布链路
-
-单独 Hexo 本身反而是最稳定的一环。
-
-为什么选 Hexo + Butterfly选型主要在几个方案之间：
-
-WordPress（重、依赖服务器）
-Hugo（生态偏 Go，主题习惯不匹配）
-VuePress（偏文档系统）
-Hexo（成熟 + 资料多 + 上手快）
-
-最终选：
-
-Hexo
-Butterfly
-GitHub Pages
-
-原因很直接：
-Hexo特点：
-
-Markdown 驱动
-静态站点
-GitHub Pages 直接托管
-插件生态成熟
-
-对于个人博客属于“够用且稳定”。
-
-Butterfly选择 Butterfly 主要原因：
-
-主题成熟
-配置项丰富
-文档多
-UI 现成可用
-
-属于 Hexo 中文生态里最常见的一档主题。
-
-环境准备Node.js当时环境是 Node 20 系列。
-Hexo 对 Node 版本要求比较严格，初始化时曾出现类似：
-engine "node" is incompatible
-
-原因是：
-
-Hexo 对 Node 有最低版本要求
-不同 Hexo 版本要求不同 Node 小版本
-
-处理方式：
-
-升级 Node 到当前 LTS 最新稳定版本
-使用官方推荐版本区间
-
-
-安装 Hexonpm install -g hexo-cli
-
-初始化项目：
-hexo init blog
-cd blog
-npm install
-
-
-npm &#x2F; Windows 权限问题在 Windows 环境下遇到典型问题：
-EPERM: operation not permitted
-
-常见原因：
-
-npm cache 权限问题
-杀毒软件占用文件
-全局安装路径权限不足
-
-处理方式：
-npm cache clean --force
-
-并使用管理员权限终端重新执行安装。
-
-安装 Butterfly主题安装：
-npm install hexo-theme-butterfly
-
-渲染器：
-npm install hexo-renderer-pug hexo-renderer-stylus --save
-
-
-修改主题配置theme: butterfly
-
-
-GitHub 多账号 SSH 问题当时本地存在多个 GitHub 账号，导致：
-
-push 走错账号
-commit identity 混乱
-SSH key 自动匹配错误
-
-
-生成新的 SSH Keyssh-keygen -t ed25519 -C "your_email@example.com"
-
-指定不同文件：
-~/.ssh/id_ed25519_blog
-
-
-SSH config 配置Host github-blog
-HostName github.com
-User git
-IdentityFile ~&#x2F;.ssh&#x2F;id_ed25519_blog
-
-
-测试连接ssh -T git@github-blog
-
-成功会返回认证信息。
-
-Git identity（关键区别）SSH ≠ Git 提交身份。
-需要单独设置：
-git config user.name "xxx"
-git config user.email "xxx"
-
-注意不使用 --global，避免污染其他项目。
-
-Git 初始化与忽略文件初始化：
-git init
-
-.gitignore：
-node_modules/
-public/
-.deploy_git/
-db.json
-
-
-GitHub Pages 部署链路当时踩坑点主要在两种部署模式：
-1. gh-pages 分支模式2. GitHub Actions 部署模式实际使用的是 Actions + gh-pages 混合方式。
-
-GitHub Actions 配置name: Deploy Hexo
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - run: npm install
-
-      - run: npx hexo generate
-
-      - uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: $&#123;&#123; secrets.GITHUB_TOKEN &#125;&#125;
-          publish_dir: ./public
-
-
-常见问题：Action 权限报错类型：
-Permission denied to github-actions[bot]
-
-原因：
-
-默认 Actions 没有写权限
-
-解决：
-Settings → Actions → General → Workflow permissions
-
-改为：
-Read and write permissions
-
-
-Pages 404 问题现象：
-
-Action 成功
-网站仍然 404
-
-原因：
-
-Pages 未指向正确分支
-
-解决：
-Settings → Pages
-
-设置：
-
-Branch: gh-pages
-Folder: &#x2F; (root)
-
-
-部署链路理解实际运行流程是：
-Hexo generate
-    ↓
-GitHub Actions
-    ↓
-gh-pages branch
-    ↓
-GitHub Pages 发布
-
-
-Butterfly 默认样式问题初始效果偏模板化，后续主要调整：
-
-Banner
-配色系统
-卡片样式
-顶栏透明度
-字体与间距
-
-
-简单 UI 风格调整（示例）.card-widget,
-#recent-posts > .recent-post-item &#123;
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(18px);
-  border-radius: 24px;
-&#125;
-
-
-总结整个搭建过程的核心问题不在 Hexo：
-主要复杂度来自：
-
-Node 版本兼容
-npm &#x2F; Windows 权限
-Git 多账号 SSH 管理
-GitHub Actions 权限模型
-Pages 发布配置
-
-Hexo 本身只是“静态生成器”，真正复杂的是：
-
-从本地到 GitHub Pages 的整条工程链路。
-
-
-后续扩展方向后面可以继续完善：
-
-自动化部署（CI优化）
-图片 CDN
-评论系统
-SEO 优化
-主题深度定制
-
-]]></content>
-      <categories>
-        <category>项目实践</category>
-      </categories>
-      <tags>
-        <tag>Hexo</tag>
-        <tag>GitHub Pages</tag>
-        <tag>Butterfly</tag>
-        <tag>博客</tag>
       </tags>
   </entry>
   <entry>
@@ -15245,9 +16012,882 @@ server &#123;
         <tag>SpringMVC</tag>
         <tag>MySQL</tag>
         <tag>Vue3</tag>
-        <tag>Nginx</tag>
         <tag>Java</tag>
         <tag>MyBatisPlus</tag>
+        <tag>Nginx</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo + Butterfly + GitHub Pages 实战搭建记录（附完整踩坑）</title>
+    <url>/2021/12/31/project/Hexo-Blog-Build/</url>
+    <content><![CDATA[前言最近开始搭建个人技术博客。
+一开始预期很简单：
+
+“静态博客 + GitHub Pages + 写 Markdown”
+
+实际操作之后才发现问题集中在三块：
+
+Node &#x2F; npm 环境兼容
+Git &#x2F; SSH 多账号冲突
+GitHub Pages + Actions 发布链路
+
+单独 Hexo 本身反而是最稳定的一环。
+
+为什么选 Hexo + Butterfly选型主要在几个方案之间：
+
+WordPress（重、依赖服务器）
+Hugo（生态偏 Go，主题习惯不匹配）
+VuePress（偏文档系统）
+Hexo（成熟 + 资料多 + 上手快）
+
+最终选：
+
+Hexo
+Butterfly
+GitHub Pages
+
+原因很直接：
+Hexo特点：
+
+Markdown 驱动
+静态站点
+GitHub Pages 直接托管
+插件生态成熟
+
+对于个人博客属于“够用且稳定”。
+
+Butterfly选择 Butterfly 主要原因：
+
+主题成熟
+配置项丰富
+文档多
+UI 现成可用
+
+属于 Hexo 中文生态里最常见的一档主题。
+
+环境准备Node.js当时环境是 Node 20 系列。
+Hexo 对 Node 版本要求比较严格，初始化时曾出现类似：
+engine "node" is incompatible
+
+原因是：
+
+Hexo 对 Node 有最低版本要求
+不同 Hexo 版本要求不同 Node 小版本
+
+处理方式：
+
+升级 Node 到当前 LTS 最新稳定版本
+使用官方推荐版本区间
+
+
+安装 Hexonpm install -g hexo-cli
+
+初始化项目：
+hexo init blog
+cd blog
+npm install
+
+
+npm &#x2F; Windows 权限问题在 Windows 环境下遇到典型问题：
+EPERM: operation not permitted
+
+常见原因：
+
+npm cache 权限问题
+杀毒软件占用文件
+全局安装路径权限不足
+
+处理方式：
+npm cache clean --force
+
+并使用管理员权限终端重新执行安装。
+
+安装 Butterfly主题安装：
+npm install hexo-theme-butterfly
+
+渲染器：
+npm install hexo-renderer-pug hexo-renderer-stylus --save
+
+
+修改主题配置theme: butterfly
+
+
+GitHub 多账号 SSH 问题当时本地存在多个 GitHub 账号，导致：
+
+push 走错账号
+commit identity 混乱
+SSH key 自动匹配错误
+
+
+生成新的 SSH Keyssh-keygen -t ed25519 -C "your_email@example.com"
+
+指定不同文件：
+~/.ssh/id_ed25519_blog
+
+
+SSH config 配置Host github-blog
+HostName github.com
+User git
+IdentityFile ~&#x2F;.ssh&#x2F;id_ed25519_blog
+
+
+测试连接ssh -T git@github-blog
+
+成功会返回认证信息。
+
+Git identity（关键区别）SSH ≠ Git 提交身份。
+需要单独设置：
+git config user.name "xxx"
+git config user.email "xxx"
+
+注意不使用 --global，避免污染其他项目。
+
+Git 初始化与忽略文件初始化：
+git init
+
+.gitignore：
+node_modules/
+public/
+.deploy_git/
+db.json
+
+
+GitHub Pages 部署链路当时踩坑点主要在两种部署模式：
+1. gh-pages 分支模式2. GitHub Actions 部署模式实际使用的是 Actions + gh-pages 混合方式。
+
+GitHub Actions 配置name: Deploy Hexo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm install
+
+      - run: npx hexo generate
+
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: $&#123;&#123; secrets.GITHUB_TOKEN &#125;&#125;
+          publish_dir: ./public
+
+
+常见问题：Action 权限报错类型：
+Permission denied to github-actions[bot]
+
+原因：
+
+默认 Actions 没有写权限
+
+解决：
+Settings → Actions → General → Workflow permissions
+
+改为：
+Read and write permissions
+
+
+Pages 404 问题现象：
+
+Action 成功
+网站仍然 404
+
+原因：
+
+Pages 未指向正确分支
+
+解决：
+Settings → Pages
+
+设置：
+
+Branch: gh-pages
+Folder: &#x2F; (root)
+
+
+部署链路理解实际运行流程是：
+Hexo generate
+    ↓
+GitHub Actions
+    ↓
+gh-pages branch
+    ↓
+GitHub Pages 发布
+
+
+Butterfly 默认样式问题初始效果偏模板化，后续主要调整：
+
+Banner
+配色系统
+卡片样式
+顶栏透明度
+字体与间距
+
+
+简单 UI 风格调整（示例）.card-widget,
+#recent-posts > .recent-post-item &#123;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(18px);
+  border-radius: 24px;
+&#125;
+
+
+总结整个搭建过程的核心问题不在 Hexo：
+主要复杂度来自：
+
+Node 版本兼容
+npm &#x2F; Windows 权限
+Git 多账号 SSH 管理
+GitHub Actions 权限模型
+Pages 发布配置
+
+Hexo 本身只是“静态生成器”，真正复杂的是：
+
+从本地到 GitHub Pages 的整条工程链路。
+
+
+后续扩展方向后面可以继续完善：
+
+自动化部署（CI优化）
+图片 CDN
+评论系统
+SEO 优化
+主题深度定制
+
+]]></content>
+      <categories>
+        <category>项目实践</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>GitHub Pages</tag>
+        <tag>Butterfly</tag>
+        <tag>博客</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux、WSL 与 Windows 开发环境折腾记录</title>
+    <url>/2022/07/17/ops/Linux-WSL-Windows-Dev-Environment/</url>
+    <content><![CDATA[Linux、WSL 与 Windows 开发环境折腾记录现在我的开发环境基本是：
+
+Windows 做日常使用
+WSL 跑 Linux 开发环境
+SSH 连远程服务器
+Docker 跑服务
+VSCode Remote 做远程开发
+
+于是一个很现实的问题一直存在：
+
+为什么本地能跑，服务器不能跑？
+
+随着这个问题反复出现，我开始逐步踩到一堆系统层面的差异：
+
+操作系统差异
+shell 差异
+文件系统差异
+权限模型差异
+环境变量差异
+换行符差异
+网络栈差异
+
+这篇不讲 Linux 概念本身，只记录我是怎么从 Windows 开发，一路“被迫”折腾成半个 Linux 使用者的。
+
+一、为什么最后还是绕不开 Linux最开始我的开发环境是：
+Windows + IDE + cmd
+
+但项目稍微复杂一点后，问题开始集中爆发：
+
+
+
+场景
+表现
+
+
+
+Python 依赖
+编译失败 &#x2F; wheel 构建报错
+
+
+Node 原生模块
+编译失败
+
+
+Docker
+性能和兼容问题
+
+
+shell 脚本
+不兼容
+
+
+nginx
+配置别扭
+
+
+ssh&#x2F;scp
+使用不顺手
+
+
+服务器模拟
+和本地环境不一致
+
+
+典型情况是：
+pip install xxx
+
+然后突然报：
+Microsoft Visual C++ 14.0 required
+
+这个阶段基本就会开始考虑：
+
+要不要直接上 Linux 环境算了
+
+
+二、WSL：Windows 和 Linux 的折中方案1. WSL 是什么WSL &#x3D; Windows Subsystem for Linux
+本质是：
+
+在 Windows 内运行 Linux 用户态环境（WSL2 已接近完整 Linux 内核体验）
+
+
+三、WSL 为什么最终变成主力在 WSL 之前，我的环境是：
+Windows 上混装：
+- Python
+- Node
+- Git Bash
+- Docker Desktop
+- 各种 CLI
+
+结果是：
+
+PATH 冲突
+工具链不一致
+环境污染严重
+
+切到 WSL 后变成：
+WSL Ubuntu：
+- Python
+- Node
+- Git
+- Docker
+- SSH
+- Linux 工具链
+
+环境边界变清晰了。
+
+四、WSL 安装与初始化wsl --install
+
+查看发行版：
+wsl -l -o
+
+安装 Ubuntu：
+wsl --install -d Ubuntu
+
+查看状态：
+wsl -l -v
+
+
+五、WSL 最大的坑：文件系统 IO最早我习惯把项目放在：
+/mnt/c/project
+
+结果是明显卡顿，尤其是：
+
+npm install
+pnpm install
+node_modules
+Python venv
+
+原因很简单：
+
+WSL 访问 Windows 文件系统有额外 IO 转换成本
+
+
+正确方式项目放在 Linux 文件系统：
+/home/user/project
+
+然后直接用 VSCode Remote 打开。
+体验差距非常明显。
+
+六、Shell 体系混乱问题一开始我经常混用：
+cmd / powershell / git bash / wsl bash
+
+后来才逐渐理清：
+CMD基本废弃状态，能力有限。
+PowerShellWindows 现代自动化 shell（对象模型，不是纯文本流）。
+BashLinux 标准 shell，服务器环境核心。
+
+七、SSH：开始真正接触服务器最典型入口：
+ssh root@ip
+
+
+SSH 本质SSH 是加密的远程 shell 通道：
+本地终端 → 加密 → 服务器 shell
+
+
+常用操作登录：
+ssh root@ip
+
+指定端口：
+ssh -p 2222 root@ip
+
+免密：
+ssh-keygen
+ssh-copy-id root@ip
+
+
+常见坑1. key 权限过宽Permissions 0777 are too open
+
+修复：
+chmod 600 ~/.ssh/id_rsa
+
+
+2. known_hosts 冲突ssh-keygen -R ip
+
+
+八、systemd 与服务管理开始接触 Linux 后，我逐渐不再是“启动程序”，而是“管理服务”。
+
+systemctl启动：
+systemctl start nginx
+
+状态：
+systemctl status nginx
+
+开机自启：
+systemctl enable nginx
+
+
+九、screen：解决 SSH 断线问题最早踩坑是：
+python main.py
+
+SSH 一断进程直接死。
+
+screen 使用创建：
+screen -S job
+
+恢复：
+screen -r job
+
+后台退出：
+Ctrl + A + D
+
+
+十、日志排查方式实时日志：
+tail -f app.log
+
+过滤：
+grep ERROR app.log
+
+组合：
+tail -f app.log | grep ERROR
+
+
+十一、环境变量问题典型现象：
+本地能跑，服务器不能跑
+
+最终大概率是：
+PATH 不一致
+
+检查：
+echo $PATH
+which python
+which node
+
+
+十二、换行符问题（经典坑）Windows：
+CRLF
+
+Linux：
+LF
+
+报错：
+/bin/bash^M: bad interpreter
+
+
+修复方式：
+dos2unix script.sh
+
+或 VSCode 切 LF。
+
+十三、权限模型Linux 权限问题是一个持续踩坑点。
+chmod +x run.sh
+chown user:user file
+
+很多“无法写 &#x2F; 无法删 &#x2F; 无法执行”本质都是权限问题。
+
+十四、端口与进程排查查端口：
+lsof -i:8000
+
+或：
+netstat -tunlp
+
+杀进程：
+kill -9 pid
+
+
+十五、开发环境分层意识后面我逐渐开始强制区分环境：
+
+
+
+环境
+用途
+
+
+
+local
+本地开发
+
+
+dev
+开发环境
+
+
+test
+测试环境
+
+
+staging
+预发布
+
+
+prod
+生产
+
+
+避免直接把本地逻辑带到生产环境。
+
+十六、最终稳定的开发结构最后我的结构固定为：
+Windows
+ ├─ 浏览器 / IM
+ ├─ VSCode
+ └─ WSL Ubuntu
+      ├─ Python
+      ├─ Node
+      ├─ Docker
+      ├─ Git
+      ├─ Redis
+      ├─ PostgreSQL
+      └─ 项目运行环境
+
+远程：
+SSH → Linux Server
+
+部署：
+Docker Compose
+
+
+十七、总结性认知变化整个过程下来，认知变化大致是：
+1. 从“会用工具”变成理解：
+
+文件系统
+权限系统
+进程模型
+网络模型
+
+
+2. 从“跑代码”变成理解：
+
+runtime
+PATH
+dependency
+shell 执行机制
+
+
+3. 从“部署应用”变成理解：
+
+服务化
+守护进程
+容器化
+自动化运行机制
+
+
+很多以前觉得是“玄学”的问题，最后都会收敛成：
+路径 / 权限 / 环境变量 / 系统差异
+
+而在完整经历 WSL + SSH + Linux + Docker 之后，程序“怎么跑起来的”这件事会变得非常具体。
+]]></content>
+      <categories>
+        <category>运维</category>
+      </categories>
+      <tags>
+        <tag>Linux</tag>
+        <tag>WSL</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Nginx 在实际开发中的用途整理</title>
+    <url>/2022/02/07/ops/Nginx-Practice-and-Configuration/</url>
+    <content><![CDATA[Nginx 在实际开发中的用途整理前言我第一次认真接触 Nginx，其实不是因为“想学 Web Server”，而是因为一堆线上问题开始集中爆发：
+
+前端部署后 404
+API 跨域
+502 Bad Gateway
+WebSocket 连不上
+Docker 容器互相访问失败
+静态资源加载异常
+
+这些问题最后都指向同一个东西：
+
+Nginx 是整个请求链路的入口。
+
+后来在实际项目里，我逐渐把它理解成一个“流量分发与边界控制层”，而不只是静态文件服务器。
+
+一、Nginx 到底是什么本质上我对它的定义是：
+
+一个高性能 HTTP 服务器 + 反向代理 + 流量入口控制器
+
+它在我的项目里通常承担这些角色：
+
+静态资源服务
+反向代理
+负载均衡
+HTTPS 终止
+API 网关雏形
+WebSocket 转发入口
+
+典型链路是：
+用户
+ ↓
+Nginx
+ ↓
+后端服务（FastAPI / SpringBoot / Node）
+ ↓
+数据库
+
+
+二、为什么实际项目离不开 Nginx在纯开发阶段，我最初其实是直接跑后端服务的，比如：
+uvicorn main:app
+
+但一旦进入部署阶段，会立刻遇到几个现实问题：
+1. 静态资源效率问题直接用后端服务返回静态资源，性能明显不如 Nginx。
+所以我后来统一改成：
+Nginx 负责静态资源
+后端只负责 API
+
+
+2. 反向代理成为必需实际部署时，我不会直接暴露后端端口，而是：
+公网 → Nginx → 内部服务
+
+这样做的好处很直接：
+
+后端服务隐藏
+统一入口
+安全控制集中
+
+
+3. 前后端分离后的路径问题典型结构：
+Vue / React
+FastAPI / SpringBoot
+
+Nginx 负责：
+/      → 前端
+/api   → 后端
+
+
+三、我对 Nginx 工作机制的理解正向代理 vs 反向代理正向代理客户端 → 代理 → 目标网站
+
+（常见于科学上网工具）
+
+反向代理（Nginx）客户端 → Nginx → 内部服务
+
+核心区别是：
+
+用户并不知道真实后端结构
+
+
+四、Nginx 基本结构（我实际常用）配置结构通常是：
+events &#123;&#125;
+
+http &#123;
+
+    server &#123;
+
+        location / &#123;
+
+        &#125;
+
+    &#125;
+
+&#125;
+
+
+五、我最常写的几种配置场景
+1. 前端静态站点server &#123;
+    listen 80;
+    server_name localhost;
+
+    root /www/dist;
+    index index.html;
+
+    location / &#123;
+        try_files $uri $uri/ /index.html;
+    &#125;
+&#125;
+
+这里踩过的坑Vue Router history 模式下：
+/user/1
+
+如果没有：
+try_files ... /index.html
+
+刷新页面一定 404。
+
+2. FastAPI 反向代理server &#123;
+    listen 80;
+
+    location / &#123;
+        proxy_pass http://127.0.0.1:8000;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    &#125;
+&#125;
+
+关键点如果不加 header：
+
+后端拿不到真实 IP
+鉴权日志会失真
+
+
+3. WebSocket 转发这是我踩坑最严重的一块：
+location /ws &#123;
+
+    proxy_pass http://127.0.0.1:8000;
+
+    proxy_http_version 1.1;
+
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+&#125;
+
+不加这段基本必炸：
+WebSocket handshake failed
+
+
+六、负载均衡配置upstream backend &#123;
+    server 127.0.0.1:8001;
+    server 127.0.0.1:8002;
+&#125;
+
+使用：
+location / &#123;
+    proxy_pass http://backend;
+&#125;
+
+
+常见策略
+轮询（默认）
+weight 权重
+ip_hash（会话一致性）
+
+
+七、HTTPS 配置（实际用法）server &#123;
+    listen 443 ssl;
+
+    ssl_certificate     /etc/ssl/fullchain.pem;
+    ssl_certificate_key /etc/ssl/private.pem;
+&#125;
+
+HTTP 强制跳转：
+server &#123;
+    listen 80;
+    return 301 https://$host$request_uri;
+&#125;
+
+
+八、我实际踩过的 Nginx 问题
+1. 502 Bad Gateway本质原因通常是：
+Nginx 连不上后端
+
+常见排查：
+
+后端是否启动
+端口是否正确
+Docker 网络是否隔离
+
+
+2. 413 请求体过大上传失败时加：
+client_max_body_size 100m;
+
+
+3. 跨域问题后来我基本不再用 CORS 单独解决，而是：
+Nginx 统一 API 入口
+
+直接变同源。
+
+4. Docker 场景 localhost 问题在容器里：
+localhost ≠ 宿主机
+
+所以我统一改成：
+proxy_pass http://service-name
+
+
+九、Docker + Nginx 实际组合services:
+  nginx:
+    image: nginx
+    ports:
+      - "80:80"
+
+  backend:
+    build: .
+
+容器内访问必须用：
+service-name:port
+
+
+十、Nginx 性能理解（实践层面）我后来理解它高性能主要来自：
+
+epoll 事件模型
+非阻塞 IO
+worker 多进程模型
+sendfile 零拷贝
+
+核心不是“快”，而是：
+
+不为每个连接创建线程
+
+
+十一、我对 Nginx 的阶段性认知变化最开始：
+只是用来放前端页面
+
+后来：
+反向代理工具
+
+再后来：
+整个系统的流量入口层
+
+最后实际变成：
+后端系统架构的一部分
+
+
+十二、总结我现在对 Nginx 的定位是：
+
+它不是一个工具，而是系统边界控制层。
+
+在实际项目里，它解决的不是“部署问题”，而是：
+
+流量如何进入系统
+请求如何被分发
+服务如何隔离
+外部如何访问内部结构
+
+当项目复杂度上来之后，这一层基本不可绕过。
+
+]]></content>
+      <categories>
+        <category>运维</category>
+      </categories>
+      <tags>
+        <tag>Linux</tag>
+        <tag>Nginx</tag>
       </tags>
   </entry>
   <entry>
@@ -15829,8 +17469,8 @@ API 逆向
       </categories>
       <tags>
         <tag>爬虫</tag>
-        <tag>Python</tag>
         <tag>Playwright</tag>
+        <tag>Python</tag>
         <tag>AsyncIO</tag>
         <tag>Twitter API</tag>
         <tag>工程化</tag>
@@ -16344,10 +17984,10 @@ Cloudflare
       </categories>
       <tags>
         <tag>爬虫</tag>
+        <tag>Selenium</tag>
+        <tag>Playwright</tag>
         <tag>反爬</tag>
         <tag>Python</tag>
-        <tag>Playwright</tag>
-        <tag>Selenium</tag>
       </tags>
   </entry>
   <entry>
@@ -16847,586 +18487,849 @@ Excel 的真实定位它并不是简单办公软件，而是：
       </tags>
   </entry>
   <entry>
-    <title>从 Scrapy 到 Playwright：现代 Python 爬虫技术整理</title>
-    <url>/2022/09/17/backend/Modern-Python-Web-Scraping-And-Automation/</url>
-    <content><![CDATA[从 Scrapy 到 Playwright：现代 Python 爬虫技术整理很多人第一次接触 Python。
-几乎都会接触：
-爬虫
+    <title>从 C 到 Java：我对面向对象的理解变化</title>
+    <url>/2022/11/17/backend/Java-OOP-And-Web-Stack/</url>
+    <content><![CDATA[从 C 到 Java：我对面向对象的理解变化很多人第一次学 Java 时，会觉得：
 
-因为：
-Python 在这个领域生态太强了。
-而我自己对爬虫技术的认知变化。
-其实也是：
+“不就是把函数塞进 class 里吗？”
 
-从“请求脚本小子”
-到真正理解现代 Web 自动化。
+但真正开始做项目之后会发现：
+Java 和 C 的区别，从来不只是语法。
+而是：
 
+代码组织方式
+模块协作方式
+大型项目维护方式
+团队开发思维
+软件工程体系
 
-最开始：requests + BeautifulSoup很多人入门爬虫。
-基本都从：
-requests
-BeautifulSoup
+这些东西加在一起，才是“面向对象”的真正意义。
 
-开始。
+为什么很多人学不会 OOP很多教程的问题是：
 
-requests：最经典 HTTP 库安装：
-pip install requests
+一上来讲 class
+然后讲 extends
+然后讲“万物皆对象”
 
+结果新人完全不知道这些东西到底解决了什么问题。
+实际上：
 
-最简单请求import requests
+OOP 本质是在解决“大型程序复杂度失控”的问题。
 
-resp = requests.get("https://example.com")
+小项目：
+main()
 
-print(resp.text)
+当然能跑。
+但项目越来越大后：
+用户模块
+订单模块
+权限模块
+支付模块
+消息模块
+缓存模块
+数据库模块
+日志模块
 
+如果还是：
+xxx_user()
+xxx_order()
+xxx_pay()
 
-BeautifulSoup：HTML 解析安装：
-pip install beautifulsoup4
+最后会变成：
+全局变量到处飞
+函数互相调用
+模块互相依赖
+改一个地方全崩
 
+这也是很多 C 项目后期极其痛苦的原因。
 
-最简单解析from bs4 import BeautifulSoup
+C 语言的核心思维C 的核心是：
 
-soup = BeautifulSoup(resp.text, "html.parser")
+数据结构
+内存
+指针
+过程控制
 
-title = soup.title.text
+例如：
+struct User &#123;
+    char name[20];
+    int age;
+&#125;;
 
-
-这阶段本质是什么其实：
-伪装浏览器发送HTTP请求
-
-然后：
-解析返回HTML
-
-
-为什么早期爬虫很好做因为：
-以前很多网站：
-服务端直接返回完整HTML
-
-
-浏览器拿到源码后直接：
-就有内容
-
-于是：
-requests.get()
-
-就够了。
-
-这阶段最常见技术
-请求头伪装headers = &#123;
-    "User-Agent": "Mozilla/5.0"
+void print_user(struct User* user) &#123;
+    printf("%s", user->name);
 &#125;
 
+这里：
 
-Cookie很多网站：
-登录状态依赖 Cookie。
+数据是 struct
+行为是函数
+两者分离
 
-Sessionsession = requests.Session()
+这种方式：
+优点
+性能高
+内存可控
+非常贴近底层
+非常适合系统开发
 
-自动维持会话。
+所以：
 
-POST 请求requests.post(url, data=data)
+Linux
+Redis
+Nginx
+SQLite
 
+本质上都是 C 系生态。
 
-JSON 接口resp.json()
+Java 的核心变化Java 开始强调：
+数据 + 行为
+应该绑定在一起
 
+于是：
+public class User &#123;
 
-很多人后来才发现大量网站：
-其实：
-前端页面只是壳
+    private String name;
 
-真正数据：
-来自：
-XHR / Fetch API
+    public void printUser() &#123;
+        System.out.println(name);
+    &#125;
+&#125;
 
+核心思想：
+对象 &#x3D; 状态 + 行为这件事非常关键。
+因为它开始：
 
-所以后来爬虫开始进入第二阶段即：
+限制数据访问
+控制模块边界
+减少外部破坏
 
-“抓接口”。
+这就是：
+封装（Encapsulation）
+封装到底解决了什么很多人觉得：
+private
+getter
+setter
 
+很烦。
+但它实际上是在：
+防止系统失控例如：
+user.age = -100;
 
-接口爬虫时代这时候：
-开发者工具开始变得极其重要。
+显然非法。
+于是：
+public void setAge(int age)&#123;
+    if(age &lt; 0)&#123;
+        throw new RuntimeException();
+    &#125;
+    this.age = age;
+&#125;
 
-Chrome DevTools按：
-F12
+这样：
 
-进入：
-Network
+数据合法性可控
+外部无法乱改
+模块更稳定
 
+大型系统里非常重要。
 
-真正关键的是看：
-XHR
-Fetch
+继承为什么后期越来越少初学 Java 时：
+class Cat extends Animal
 
+感觉很帅。
+但工程实践后会发现：
 
-因为很多页面：本质：
-前端调API
-
-
-例如：GET /api/list?page=1
-
-
-所以后来很多爬虫其实根本不解析 HTML。
-而是：
-直接请求后端API
-
-
-这阶段最大的提升是：
-速度极快
-
-因为：
-不用：
-
-渲染页面
-执行JS
-加载浏览器
-
-
-但问题也来了越来越多网站：
-开始：
-前端动态渲染
-
-
-什么叫动态网页例如：
-Vue &#x2F; React 页面。
-初始 HTML：
-可能只有：
-&lt;div id="app">&lt;/div>
-
-真正内容：
-靠：
-JavaScript运行后生成
-
-
-于是 requests 开始失效因为：
-requests.get()
-
-拿到的：
-只是：
-未渲染HTML
-
-
-所以后来 Selenium 开始流行
-Selenium 是什么本质：
-浏览器自动化工具
-
-
-安装pip install selenium
-
-
-Selenium 核心思想不是：
-模拟HTTP请求
-
-而是：
-真正启动浏览器
-
-
-最简单例子from selenium import webdriver
-
-driver = webdriver.Chrome()
-
-driver.get("https://example.com")
-
-print(driver.page_source)
-
-
-Selenium 真正强大的地方是：
-它会执行JS
-
-
-所以：动态网页终于能爬了。
-
-Selenium 能做什么不仅：
-
-获取HTML
-
-还可以：
-
-点击按钮
-输入文本
-登录
-上传文件
-模拟用户行为
-
-
-定位元素driver.find_element(By.ID, "username")
-
-
-点击按钮button.click()
-
-
-输入文本input.send_keys("hello")
-
-
-Selenium 为什么当年统治爬虫圈因为：
-它第一次真正解决了：
-动态网页问题
-
-
-但 Selenium 问题也很明显
-1. 太重因为：
-真浏览器
-
-资源占用巨大。
-
-2. 很慢尤其：
-批量并发。
-
-3. WebDriver 地狱这是经典噩梦。
-例如：
-Chrome版本不匹配
-
-
-常见错误session not created
-
-
-原因通常：chromedriver版本不对
-
-
-后来 webdriver-manager 才缓解一点pip install webdriver-manager
-
-
-4. 异步页面等待困难经典问题：
-元素还没加载出来
-
-
-于是：大量：
-time.sleep(5)
-
-开始出现。
-
-后来 Selenium 进入现代化阶段出现：
-WebDriverWait
-
-
-显式等待from selenium.webdriver.support.ui import WebDriverWait
-
-
-Scrapy：真正的工程化爬虫框架后来接触 Scrapy 时。
-第一次意识到：
-
-原来爬虫也能工程化。
-
-
-Scrapy 是什么本质：
-异步爬虫框架
-
-
-安装pip install scrapy
-
-
-创建项目scrapy startproject myspider
-
-
-运行爬虫scrapy crawl demo
-
-
-Scrapy 最大特点不是：
-会不会发请求
-
-而是：
-完整工程体系
-
-
-Scrapy 包含：
-调度器
-请求队列
-中间件
-Pipeline
-去重
-并发控制
-
-
-Spider负责：
-定义爬取逻辑
-
-
-Pipeline负责：
-处理数据
+继承其实耦合度非常高。
 
 例如：
-
-存数据库
-清洗
-导出
-
-
-Middleware负责：
-请求拦截
-
-例如：
-
-代理
-UA轮换
-Cookie处理
-
-
-Scrapy 最大优势
-1. 性能极强因为：
-Twisted异步架构
-
-
-2. 非常适合大规模采集例如：
-
-新闻站
-电商
-Wiki
-文档站
-
-
-3. 工程化成熟很多公司：
-内部爬虫平台：
-其实就是：
-Scrapy二次封装
-
-
-Scrapy 最大缺点就是：
-动态网页支持弱
-
-
-所以后来大量项目变成：
-Scrapy + Selenium
-
-
-即：Scrapy负责调度。
-Selenium负责渲染。
-
-但后来问题越来越明显现代网站：
-JS 越来越重。
-
-React&#x2F;Vue SPA开始普及。
-
-Cloudflare开始流行。
-
-各种反爬升级包括：
-
-指纹检测
-webdriver检测
-canvas检测
-行为分析
-
-
-Selenium 开始越来越吃力于是：
-Playwright 出现了。
-
-Playwright：现代浏览器自动化这是后来我认为：
-真正改变 Python Web 自动化体验的工具。
-
-Playwright 是什么微软推出的：
-现代浏览器自动化框架
-
-
-安装pip install playwright
-playwright install
-
-
-最简单例子from playwright.sync_api import sync_playwright
-
-with sync_playwright() as p:
-    browser = p.chromium.launch()
-
-    page = browser.new_page()
-
-    page.goto("https://example.com")
-
-    print(page.content())
-
-
-Playwright 为什么体验飞跃因为：
-它本质：
-已经不是：
-传统WebDriver体系
-
-了。
-
-最大变化是：
-直接控制浏览器协议
-
-
-Playwright 最强的地方
-1. 自动等待这是巨大提升。
-以前 Selenium：
-time.sleep()
-
-满天飞。
-
-Playwright：很多操作：
-自动等待元素加载。
-
-例如：page.click("button")
-
-内部：
-已经自动等待。
-
-2. 更稳定尤其：
-动态页面。
-
-3. 更现代天然适配：
-
-SPA
-React
-Vue
-WebSocket
-
-
-4. 多浏览器支持极好支持：
-
-Chromium
-Firefox
-WebKit
-
-
-5. API 非常统一开发体验明显比 Selenium 好。
-
-Playwright 另一个重要用途其实是：
-网页截图
-
-
-截图page.screenshot(path="test.png")
-
-
-后来很多 Bot 项目其实：
-都是：
-网页渲染 -> 截图 -> 发图片
-
-
-Playwright 最大问题
-1. 浏览器依赖重首次安装很大。
-
-2. Linux 部署复杂尤其 Docker。
-经常：
-缺依赖
-
-
-常见问题browser closed unexpectedly
-
-
-3. 并发内存高浏览器非常吃内存。
-
-所以后来大型项目通常会做：
-浏览器池
-
-
-Playwright 为什么越来越重要因为：
-现代 Web：
-已经逐渐：
-浏览器化
-
-
-很多内容：甚至：
-只有浏览器执行JS后才存在
-
-
-所以：现在越来越多“爬虫”。
-本质已经变成：
-
-Web 自动化。
-
-
-现代爬虫技术路线变化
-第一阶段requests + bs4
-
-静态网页时代。
-
-第二阶段抓XHR接口
-
-接口分析时代。
-
-第三阶段Selenium
-
-动态网页时代。
-
-第四阶段Playwright
-
-现代浏览器自动化时代。
-
-现在很多“爬虫”其实已经接近：
-自动化QA
-RPA
-浏览器机器人
-
-了。
-
-反爬也是越来越复杂现在常见：
-
-1. IP限制需要：
-
-代理
-IP池
-
-
-2. 指纹检测例如：
-
-webdriver
-canvas
-WebGL
-
-
-3. 行为检测例如：
-鼠标轨迹
-滚动行为
-点击间隔
-
-
-4. 登录验证例如：
-
-验证码
-风控
-二次验证
-
-
-所以后来我最大的认知变化以前觉得：
-爬虫 = requests.get()
-
-后来发现：
-现代爬虫本质：
-已经是：
-
-“模拟真实用户行为”。
-
-
-最后总结
-requests + bs4适合：
-简单静态网页
-
-
-Scrapy适合：
-大规模工程化采集
-
-
-Selenium适合：
-传统动态网页
-
-
-Playwright适合：
-现代Web自动化
-复杂SPA网站
-
-
-而现代爬虫技术的发展路线本质上其实是：
-从HTTP请求
-逐渐走向浏览器控制
-
-因为：
-现代互联网本身。
-已经越来越依赖：
-
-JavaScript
-前端渲染
-浏览器环境
+父类改动
+↓
+所有子类受影响
+
+尤其：
+多层继承
+
+会变成灾难。
+所以现代 Java 越来越强调：
+组合优于继承例如：
+class UserService &#123;
+    private RedisService redisService;
+&#125;
 
 而不是：
-传统静态 HTML 了。
+class UserService extends RedisService
+
+
+多态为什么是 Java 的核心真正让 Java 工程能力提升的：
+其实是：
+抽象接口例如：
+interface Storage &#123;
+    void save();
+&#125;
+
+然后：
+class MysqlStorage implements Storage
+class RedisStorage implements Storage
+class OssStorage implements Storage
+
+业务层：
+Storage storage
+
+根本不关心：
+到底是谁实现的
+
+这就是：
+解耦也是：
+
+Spring
+MyBatis
+Tomcat
+JDBC
+
+整个 Java 生态最核心的思想。
+
+为什么 Java 特别强调接口因为大型项目真正重要的是：
+规范而不是：
+某个具体实现例如：
+支付接口
+日志接口
+缓存接口
+消息接口
+
+大家只需要：
+遵守同一个协议
+
+就能协作。
+于是：
+团队开发能力会大幅提高。
+
+Java 为什么适合企业开发因为 Java 天生强调：
+工程化包括：
+
+
+
+能力
+Java生态
+
+
+
+包管理
+Maven
+
+
+IOC
+Spring
+
+
+ORM
+MyBatis&#x2F;Hibernate
+
+
+Web
+SpringMVC
+
+
+日志
+Logback
+
+
+监控
+Actuator
+
+
+构建
+Maven&#x2F;Gradle
+
+
+测试
+Junit
+
+
+它不是：
+单个语言强
+
+而是：
+整个企业开发生态成熟
+
+
+Java 与 Python 的区别后来再回头看：
+两者思维差异其实很明显。
+
+
+
+对比
+Java
+Python
+
+
+
+类型
+强类型
+动态类型
+
+
+工程约束
+强
+弱
+
+
+开发速度
+中等
+快
+
+
+大型协作
+强
+中等
+
+
+灵活性
+一般
+极强
+
+
+企业传统生态
+极强
+中等
+
+
+Python 更像：
+快速实现
+
+Java 更像：
+大型工业系统
+
+
+我后面才真正理解的东西以前觉得：
+面向对象 = class
+
+后来才发现：
+真正核心的是：
+软件复杂度管理包括：
+
+分层
+解耦
+依赖控制
+模块边界
+接口规范
+团队协作
+
+这些才是 OOP 真正重要的东西。
+
+为什么很多人学 Java 很痛苦因为：
+一开始接触的就是“工业体系”新人甚至：
+main 都没理解
+
+就开始：
+
+Spring
+Maven
+IOC
+AOP
+Bean
+注解
+
+自然会懵。
+Java 的难点：
+从来不是语法。
+而是：
+工程体系
+后来我对 Java 的理解Java 最强的地方不是：
+语言本身
+
+而是：
+一整套成熟的软件工程规范包括：
+
+怎么组织项目
+怎么管理依赖
+怎么分层
+怎么解耦
+怎么部署
+怎么团队协作
+
+这些东西结合起来：
+才构成了真正的：
+Java 企业开发体系]]></content>
+      <categories>
+        <category>后端开发</category>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>C语言</tag>
+        <tag>OOP</tag>
+        <tag>面向对象</tag>
+        <tag>软件设计</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>我用 FastAPI 开发 Web 应用的实践整理</title>
+    <url>/2022/01/07/backend/FastAPI-PostgreSQL-Practice/</url>
+    <content><![CDATA[我用 FastAPI 开发 Web 应用的实践整理这个项目本质上是一个：
+图片社区类 Web 应用
+
+功能方向类似：
+
+Pinterest
+Pixiv
+图片收藏站
+
+核心功能包括：
+
+用户注册登录
+图片上传
+点赞收藏
+评论互动
+标签系统
+图片来源管理
+用户行为记录
+
+项目重点并不在前端。
+而在于：
+id现代 Python 后端工程化
+
+包括：
+
+FastAPI
+异步 ORM
+PostgreSQL
+JWT
+Redis
+Async 架构
+
+这些完整技术链路。
+
+技术栈项目后端技术栈大致如下：
+idFastAPI
+PostgreSQL
+GINO
+asyncpg
+Redis
+JWT
+Uvicorn
+Pydantic
+
+
+为什么选择 FastAPI这个项目本质是：
+id前后端分离 API 服务
+
+因此：
+
+类型系统
+自动文档
+异步能力
+数据校验
+
+会非常重要。
+FastAPI 在这些方面体验明显优于传统 Flask。
+
+为什么选择 PostgreSQL数据库最开始考虑过 MySQL。
+但最终还是选择 PostgreSQL。
+原因主要有几个。
+
+1. JSON 能力更强很多业务数据：
+其实是：
+id弱结构化
+
+例如：
+
+标签
+扩展属性
+元数据
+图片信息
+
+使用 PostgreSQL 的 JSON 字段会非常方便。
+
+2. 类型系统更完整PostgreSQL：
+支持：
+
+JSON
+ARRAY
+UUID
+ENUM
+
+复杂业务建模会更舒服。
+
+3. asyncpg 性能很好Python 异步生态里。
+idasyncpg
+
+性能一直很强。
+而很多异步 ORM：
+底层本质也是：
+id基于 asyncpg
+
+
+为什么使用 GINO项目开发时期。
+SQLAlchemy Async：
+还不算成熟。
+因此选择了：
+idGINO
+
+
+GINO 本质是什么GINO 本质上：
+可以理解为：
+idasyncpg + ORM 封装
+
+提供：
+
+Model
+Query
+Async ORM
+
+能力。
+
+一个简单 Model例如：
+idclass User(db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer(), primary_key=True)
+    username = db.Column(db.String())
+
+
+异步查询查询时：
+iduser = await User.query.where(
+    User.id == user_id
+).gino.first()
+
+这里：
+idawait
+
+本质是在等待：
+id数据库 IO
+
+完成。
+
+Async 在 Web 服务里的意义很多人误以为：
+异步是：
+id让代码执行更快
+
+实际上：
+异步核心意义是：
+id减少 IO 阻塞
+
+
+Web 服务里真正耗时的部分通常是：
+
+数据库
+Redis
+HTTP请求
+文件读写
+
+而不是 CPU。
+
+项目目录结构项目后期基本拆成：
+idapp
+├── api
+├── models
+├── schemas
+├── services
+├── dependencies
+├── middleware
+├── utils
+└── core
+
+
+各层职责
+api负责：
+id路由与接口定义
+
+例如：
+id@router.get("/images")
+
+
+models负责：
+id数据库模型
+
+
+schemas负责：
+idPydantic 数据结构
+
+包括：
+
+请求体
+返回结构
+参数校验
+
+
+services负责：
+id业务逻辑
+
+避免：
+idrouter 里塞满业务代码
+
+
+middleware负责：
+
+日志
+JWT解析
+请求耗时
+异常处理
+
+
+Pydantic 在项目里的作用FastAPI 真正的核心之一：
+其实是：
+idPydantic
+
+
+一个用户创建 Schema例如：
+idclass UserCreate(BaseModel):
+    username: str
+    password: str
+
+接口：
+id@router.post("/register")
+async def register(user: UserCreate):
+    pass
+
+
+Pydantic 的价值它会自动处理：
+
+类型校验
+缺失字段
+JSON解析
+参数转换
+
+避免：
+大量：
+idrequest.json.get()
+
+式代码。
+
+用户系统用户系统核心包括：
+
+注册
+登录
+JWT
+权限校验
+
+
+密码为什么不能明文密码必须：
+id哈希存储
+
+常见方案：
+
+bcrypt
+argon2
+
+
+JWT 的作用前后端分离后。
+大量项目开始使用：
+idJWT
+
+作为登录态。
+
+JWT 本质JWT 本质是：
+id签名令牌
+
+不是加密。
+
+JWT 通常包含
+用户ID
+过期时间
+权限信息
+
+
+FastAPI 鉴权依赖通常会配合：
+idDepends()
+
+实现。
+例如：
+idasync def get_current_user():
+    pass
+
+
+图片上传系统图片系统实际上比 CRUD 复杂很多。
+
+需要考虑的问题包括：
+
+文件命名
+重复上传
+缩略图
+原图存储
+CDN
+图片压缩
+路径管理
+
+
+为什么后期很多项目会对象存储化因为：
+本地文件：
+很难处理：
+
+扩容
+多机器部署
+CDN
+高并发读取
+
+因此很多项目最终都会：
+idOSS化
+
+
+点赞系统的实际问题点赞并不只是：
+idcount + 1
+
+
+实际需要考虑包括：
+
+重复点赞
+取消点赞
+并发问题
+热门排序
+Redis缓存
+
+
+评论系统的问题评论系统后期会逐渐复杂。
+例如：
+
+楼中楼
+分页
+删除状态
+审核状态
+敏感词
+
+
+Redis 在项目里的作用Redis 主要用于：
+
+热门数据缓存
+登录状态
+验证码
+高频读取
+
+
+为什么需要 Redis数据库不适合：
+id高频热点读取
+
+尤其：
+排行榜。
+
+Middleware 的作用中间件负责：
+id请求生命周期处理
+
+
+常见中间件包括：
+
+请求日志
+Trace ID
+JWT解析
+异常捕获
+耗时统计
+
+
+异步项目最大的坑真正踩坑最多的地方。
+其实是：
+id同步库混入异步项目
+
+
+最典型错误例如：
+idrequests.get()
+
+出现在：
+idasync def
+
+内部。
+
+为什么危险因为：
+requests 是同步阻塞。
+会直接：
+id阻塞事件循环
+
+
+正确做法异步项目里：
+应该使用：
+idhttpx.AsyncClient
+
+等异步库。
+
+FastAPI 自动文档FastAPI 默认生成：
+
+Swagger
+OpenAPI
+
+访问：
+id/docs
+
+即可查看接口。
+
+自动文档的意义它会自动生成：
+
+请求参数
+Schema
+类型
+返回值
+
+非常适合：
+前后端协作。
+
+部署方式项目最终通常使用：
+iduvicorn
+
+启动。
+例如：
+iduvicorn main:app --host 0.0.0.0 --port 8000
+
+生产环境一般会结合：
+
+nginx
+gunicorn
+docker
+
+一起部署。
+
+后期最大的认知变化真正的 Web 项目。
+难点通常不是：
+id功能开发
+
+而是：
+id工程维护
+
+
+包括：
+项目结构
+数据一致性
+权限
+缓存
+并发
+异步
+日志
+部署
+
+这些问题。
+
+FastAPI 真正适合什么场景FastAPI 最适合：
+
+API服务
+AI服务
+微服务
+异步系统
+WebSocket
+前后端分离
+
+
+最后总结现代 Python Web 开发。
+已经越来越偏向：
+idAPI化
+异步化
+类型化
+工程化
+
+FastAPI 基本就是围绕这一趋势设计的框架。
+而：
+
+PostgreSQL
+Async ORM
+Redis
+JWT
+
+这些组件。
+共同组成了现代 Python Web 后端的核心工程体系。
 ]]></content>
       <categories>
         <category>后端开发</category>
         <category>Python</category>
+        <category>Web</category>
       </categories>
       <tags>
-        <tag>爬虫</tag>
-        <tag>Playwright</tag>
-        <tag>Selenium</tag>
-        <tag>Scrapy</tag>
+        <tag>FastAPI</tag>
+        <tag>PostgreSQL</tag>
+        <tag>ORM</tag>
       </tags>
   </entry>
 </search>

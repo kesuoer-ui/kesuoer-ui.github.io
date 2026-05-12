@@ -1,0 +1,2464 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>thchen的闲言碎语堆积处 | thchen的闲言碎语堆积处</title><meta name="author" content="thchen"><meta name="copyright" content="thchen"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Redis 1. Redis 五种常用数据结构及场景（必背）涉及知识点Redis 常用数据结构：    类型 特点 常见场景    String 最常用，支持数字&#x2F;字符串 缓存、计数器、分布式锁   Hash 类似对象 用户信息、商品信息   List 有序可重复 消息队列、评论列表   Set 无序去重 点赞、标签、共同好友   ZSet 带分数自动排序 排行榜、延迟队列    实际项">
+<meta property="og:type" content="article">
+<meta property="og:title" content="thchen的闲言碎语堆积处">
+<meta property="og:url" content="https://kesuoer-ui.github.io/2026/05/12/other/Job-Questions-Answer/index.html">
+<meta property="og:site_name" content="thchen的闲言碎语堆积处">
+<meta property="og:description" content="Redis 1. Redis 五种常用数据结构及场景（必背）涉及知识点Redis 常用数据结构：    类型 特点 常见场景    String 最常用，支持数字&#x2F;字符串 缓存、计数器、分布式锁   Hash 类似对象 用户信息、商品信息   List 有序可重复 消息队列、评论列表   Set 无序去重 点赞、标签、共同好友   ZSet 带分数自动排序 排行榜、延迟队列    实际项">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kesuoer-ui.github.io/img/avatar.png">
+<meta property="article:published_time" content="2026-05-12T07:43:19.392Z">
+<meta property="article:modified_time" content="2026-05-12T07:43:19.393Z">
+<meta property="article:author" content="thchen">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="FastAPI">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Reverse">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kesuoer-ui.github.io/img/avatar.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "",
+  "url": "https://kesuoer-ui.github.io/2026/05/12/other/Job-Questions-Answer/",
+  "image": "https://kesuoer-ui.github.io/img/avatar.png",
+  "datePublished": "2026-05-12T07:43:19.392Z",
+  "dateModified": "2026-05-12T07:43:19.393Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "thchen",
+      "url": "https://kesuoer-ui.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://kesuoer-ui.github.io/2026/05/12/other/Job-Questions-Answer/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'thchen的闲言碎语堆积处',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 8.1.2"><link rel="alternate" href="/atom.xml" title="thchen的闲言碎语堆积处" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">127</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">thchen的闲言碎语堆积处</span></a><a class="nav-page-title" href="/"><span class="site-name">thchen的闲言碎语堆积处</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">无标题</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-12T07:43:19.392Z" title="发表于 2026-05-12 15:43:19">2026-05-12</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-12T07:43:19.393Z" title="更新于 2026-05-12 15:43:19">2026-05-12</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h1><hr>
+<h2 id="1-Redis-五种常用数据结构及场景（必背）"><a href="#1-Redis-五种常用数据结构及场景（必背）" class="headerlink" title="1. Redis 五种常用数据结构及场景（必背）"></a>1. Redis 五种常用数据结构及场景（必背）</h2><h3 id="涉及知识点"><a href="#涉及知识点" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><p>Redis 常用数据结构：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>特点</th>
+<th>常见场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>String</td>
+<td>最常用，支持数字&#x2F;字符串</td>
+<td>缓存、计数器、分布式锁</td>
+</tr>
+<tr>
+<td>Hash</td>
+<td>类似对象</td>
+<td>用户信息、商品信息</td>
+</tr>
+<tr>
+<td>List</td>
+<td>有序可重复</td>
+<td>消息队列、评论列表</td>
+</tr>
+<tr>
+<td>Set</td>
+<td>无序去重</td>
+<td>点赞、标签、共同好友</td>
+</tr>
+<tr>
+<td>ZSet</td>
+<td>带分数自动排序</td>
+<td>排行榜、延迟队列</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="实际项目场景"><a href="#实际项目场景" class="headerlink" title="实际项目场景"></a>实际项目场景</h3><h4 id="String"><a href="#String" class="headerlink" title="String"></a>String</h4><p>项目里最常用。</p>
+<p>例如：</p>
+<ul>
+<li>登录 token 缓存</li>
+<li>短信验证码</li>
+<li>接口限流计数</li>
+</ul>
+<p>比如：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">token:用户id -> jwt信息<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h4 id="Hash"><a href="#Hash" class="headerlink" title="Hash"></a>Hash</h4><p>缓存用户资料：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">user:1001<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>字段：</p>
+<ul>
+<li>nickname</li>
+<li>avatar</li>
+<li>level</li>
+</ul>
+<p>修改头像时只更新一个字段，不用整个 JSON 重存。</p>
+<hr>
+<h4 id="List"><a href="#List" class="headerlink" title="List"></a>List</h4><p>异步日志队列。</p>
+<p>请求先写 Redis：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">LPUSH queue<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>消费者后台批量写数据库。</p>
+<p>作用：</p>
+<ul>
+<li>削峰</li>
+<li>减少数据库压力</li>
+</ul>
+<hr>
+<h4 id="Set"><a href="#Set" class="headerlink" title="Set"></a>Set</h4><p>文章点赞去重。</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">article:1:likes<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>存 userId。</p>
+<p>特点：</p>
+<ul>
+<li>自动去重</li>
+<li>判断是否点赞速度快</li>
+</ul>
+<hr>
+<h4 id="ZSet"><a href="#ZSet" class="headerlink" title="ZSet"></a>ZSet</h4><p>积分排行榜。</p>
+<p>score 存积分。</p>
+<p>可以快速：</p>
+<ul>
+<li>排序</li>
+<li>查前十</li>
+<li>查排名</li>
+</ul>
+<hr>
+<h3 id="白话回答（面试可直接说）"><a href="#白话回答（面试可直接说）" class="headerlink" title="白话回答（面试可直接说）"></a>白话回答（面试可直接说）</h3><blockquote>
+<p>“Redis 常用的数据结构有 String、Hash、List、Set 和 ZSet。</p>
+<p>String 一般做缓存、计数器和 token；<br>Hash 适合存用户对象；<br>List 常做异步队列；<br>Set 适合点赞去重；<br>ZSet 常做排行榜。</p>
+<p>我项目里主要用 Redis 做热点缓存、登录 token、排行榜和异步削峰。”</p>
+</blockquote>
+<hr>
+<h2 id="2-缓存穿透、击穿、雪崩（必背）"><a href="#2-缓存穿透、击穿、雪崩（必背）" class="headerlink" title="2. 缓存穿透、击穿、雪崩（必背）"></a>2. 缓存穿透、击穿、雪崩（必背）</h2><h3 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h3><h4 id="什么是穿透"><a href="#什么是穿透" class="headerlink" title="什么是穿透"></a>什么是穿透</h4><p>请求的数据：</p>
+<ul>
+<li>Redis 没有</li>
+<li>MySQL 也没有</li>
+</ul>
+<p>请求直接打数据库。</p>
+<hr>
+<h4 id="场景"><a href="#场景" class="headerlink" title="场景"></a>场景</h4><p>恶意请求：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">userId=-1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>数据库根本不存在。</p>
+<p>大量请求会把数据库打崩。</p>
+<hr>
+<h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><h5 id="布隆过滤器"><a href="#布隆过滤器" class="headerlink" title="布隆过滤器"></a>布隆过滤器</h5><p>提前判断数据是否存在。</p>
+<p>不存在直接拦截。</p>
+<hr>
+<h5 id="缓存空值"><a href="#缓存空值" class="headerlink" title="缓存空值"></a>缓存空值</h5><p>数据库查不到：<br>也缓存 null。</p>
+<p>避免反复查数据库。</p>
+<hr>
+<h3 id="缓存击穿"><a href="#缓存击穿" class="headerlink" title="缓存击穿"></a>缓存击穿</h3><h4 id="什么是击穿"><a href="#什么是击穿" class="headerlink" title="什么是击穿"></a>什么是击穿</h4><p>某个热点 key 突然过期。</p>
+<p>大量请求同时访问数据库。</p>
+<hr>
+<h4 id="场景-1"><a href="#场景-1" class="headerlink" title="场景"></a>场景</h4><p>热门商品缓存失效。</p>
+<p>10 万请求同时查 MySQL。</p>
+<hr>
+<h4 id="解决方案-1"><a href="#解决方案-1" class="headerlink" title="解决方案"></a>解决方案</h4><h5 id="互斥锁"><a href="#互斥锁" class="headerlink" title="互斥锁"></a>互斥锁</h5><p>只有一个线程查数据库。</p>
+<p>其他线程等待。</p>
+<hr>
+<h5 id="逻辑过期"><a href="#逻辑过期" class="headerlink" title="逻辑过期"></a>逻辑过期</h5><p>热点数据不过期。</p>
+<p>后台异步更新缓存。</p>
+<hr>
+<h3 id="缓存雪崩"><a href="#缓存雪崩" class="headerlink" title="缓存雪崩"></a>缓存雪崩</h3><h4 id="什么是雪崩"><a href="#什么是雪崩" class="headerlink" title="什么是雪崩"></a>什么是雪崩</h4><p>大量缓存同一时间失效。</p>
+<p>数据库瞬间压力暴增。</p>
+<hr>
+<h4 id="解决方案-2"><a href="#解决方案-2" class="headerlink" title="解决方案"></a>解决方案</h4><h5 id="过期时间随机化"><a href="#过期时间随机化" class="headerlink" title="过期时间随机化"></a>过期时间随机化</h5><p>不要统一：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">3600秒<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>而是：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">3600 + random<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h5 id="Redis-高可用"><a href="#Redis-高可用" class="headerlink" title="Redis 高可用"></a>Redis 高可用</h5><p>比如：</p>
+<ul>
+<li>Redis Sentinel</li>
+<li>Redis Cluster</li>
+</ul>
+<p>避免 Redis 整体挂掉。</p>
+<hr>
+<h5 id="限流降级"><a href="#限流降级" class="headerlink" title="限流降级"></a>限流降级</h5><p>限制请求量。</p>
+<p>保护数据库。</p>
+<hr>
+<h3 id="顺带解释几个词"><a href="#顺带解释几个词" class="headerlink" title="顺带解释几个词"></a>顺带解释几个词</h3><h4 id="热点-Key"><a href="#热点-Key" class="headerlink" title="热点 Key"></a>热点 Key</h4><p>访问量特别高的数据。</p>
+<p>例如：</p>
+<ul>
+<li>秒杀商品</li>
+<li>热门文章</li>
+</ul>
+<hr>
+<h4 id="限流"><a href="#限流" class="headerlink" title="限流"></a>限流</h4><p>限制单位时间请求数量。</p>
+<p>防止系统被打爆。</p>
+<hr>
+<h4 id="降级"><a href="#降级" class="headerlink" title="降级"></a>降级</h4><p>系统压力太大时：<br>关闭部分非核心功能。</p>
+<hr>
+<h3 id="白话回答（高频标准答案）"><a href="#白话回答（高频标准答案）" class="headerlink" title="白话回答（高频标准答案）"></a>白话回答（高频标准答案）</h3><blockquote>
+<p>“缓存穿透是查不存在的数据，缓存和数据库都没有；一般用布隆过滤器或者缓存空值解决。</p>
+<p>缓存击穿是热点 key 失效导致大量请求同时打数据库；一般用互斥锁或者逻辑过期。</p>
+<p>缓存雪崩是大量缓存同时过期；一般通过随机过期时间、Redis 高可用和限流降级解决。”</p>
+</blockquote>
+<hr>
+<h2 id="3-Redis-持久化：RDB-AOF"><a href="#3-Redis-持久化：RDB-AOF" class="headerlink" title="3. Redis 持久化：RDB &#x2F; AOF"></a>3. Redis 持久化：RDB &#x2F; AOF</h2><hr>
+<h3 id="涉及知识点-1"><a href="#涉及知识点-1" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><table>
+<thead>
+<tr>
+<th>方式</th>
+<th>原理</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RDB</td>
+<td>定时快照</td>
+<td>恢复快、文件小</td>
+<td>可能丢数据</td>
+</tr>
+<tr>
+<td>AOF</td>
+<td>记录写命令</td>
+<td>数据更安全</td>
+<td>文件更大</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="AOF-补充"><a href="#AOF-补充" class="headerlink" title="AOF 补充"></a>AOF 补充</h3><p>默认：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">everysec<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>每秒刷盘一次。</p>
+<p>最多丢 1 秒数据。</p>
+<p>生产环境通常：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">RDB + AOF<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>一起用。</p>
+<hr>
+<h3 id="白话回答"><a href="#白话回答" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“Redis 持久化主要有 RDB 和 AOF。</p>
+<p>RDB 是定时生成数据快照，恢复速度快但可能丢数据；<br>AOF 是记录写命令，数据更安全。</p>
+<p>生产环境一般两者一起使用，AOF 通常配置 everysec，最多丢 1 秒数据。”</p>
+</blockquote>
+<hr>
+<h2 id="4-淘汰策略、LRU-原理"><a href="#4-淘汰策略、LRU-原理" class="headerlink" title="4. 淘汰策略、LRU 原理"></a>4. 淘汰策略、LRU 原理</h2><hr>
+<h3 id="涉及知识点-2"><a href="#涉及知识点-2" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><p>Redis 内存满了后：<br>会根据淘汰策略删除数据。</p>
+<hr>
+<h3 id="常见策略"><a href="#常见策略" class="headerlink" title="常见策略"></a>常见策略</h3><table>
+<thead>
+<tr>
+<th>策略</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>noeviction</td>
+<td>不淘汰，直接报错</td>
+</tr>
+<tr>
+<td>allkeys-lru</td>
+<td>淘汰最近最少使用的数据（最常用）</td>
+</tr>
+<tr>
+<td>volatile-lru</td>
+<td>只淘汰设置过期时间的数据</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="什么是-LRU"><a href="#什么是-LRU" class="headerlink" title="什么是 LRU"></a>什么是 LRU</h3><p>Least Recently Used。</p>
+<p>最近最少使用。</p>
+<p>认为：</p>
+<ul>
+<li>很久没访问的数据</li>
+<li>未来大概率也不会访问</li>
+</ul>
+<p>优先淘汰。</p>
+<hr>
+<h3 id="实际项目场景-1"><a href="#实际项目场景-1" class="headerlink" title="实际项目场景"></a>实际项目场景</h3><p>用户缓存系统：</p>
+<ul>
+<li>热门用户经常访问</li>
+<li>冷数据自动淘汰</li>
+</ul>
+<p>一般会配置：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">allkeys-lru<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h3 id="白话回答-1"><a href="#白话回答-1" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“Redis 内存满了会根据淘汰策略删除数据。生产环境最常用的是 allkeys-lru，也就是优先淘汰最近最少使用的数据。”</p>
+</blockquote>
+<hr>
+<h2 id="5-如何保证消息一致性"><a href="#5-如何保证消息一致性" class="headerlink" title="5. 如何保证消息一致性"></a>5. 如何保证消息一致性</h2><p>这个问题面试里通常在问：</p>
+<h3 id="缓存和数据库一致性"><a href="#缓存和数据库一致性" class="headerlink" title="缓存和数据库一致性"></a>缓存和数据库一致性</h3><hr>
+<h3 id="涉及知识点-3"><a href="#涉及知识点-3" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><p>最常见方案：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">先更新数据库
+再删除缓存<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<h3 id="为什么不是先删缓存"><a href="#为什么不是先删缓存" class="headerlink" title="为什么不是先删缓存"></a>为什么不是先删缓存</h3><p>如果：</p>
+<ul>
+<li>删缓存后</li>
+<li>数据库还没更新</li>
+<li>其他线程读到旧数据</li>
+</ul>
+<p>旧数据会重新写回缓存。</p>
+<p>导致脏数据。</p>
+<hr>
+<h3 id="什么是脏数据"><a href="#什么是脏数据" class="headerlink" title="什么是脏数据"></a>什么是脏数据</h3><p>Redis 和数据库数据不一致。</p>
+<p>例如：</p>
+<ul>
+<li>MySQL 是新值</li>
+<li>Redis 还是旧值</li>
+</ul>
+<hr>
+<h3 id="高并发优化"><a href="#高并发优化" class="headerlink" title="高并发优化"></a>高并发优化</h3><h3 id="延迟双删"><a href="#延迟双删" class="headerlink" title="延迟双删"></a>延迟双删</h3><pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">更新DB
+删缓存
+sleep
+再删一次<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>避免并发情况下旧数据回写。</p>
+<hr>
+<h3 id="MQ-重试"><a href="#MQ-重试" class="headerlink" title="MQ 重试"></a>MQ 重试</h3><p>删除 Redis 失败：<br>发送 MQ 重试。</p>
+<hr>
+<h3 id="什么是-MQ"><a href="#什么是-MQ" class="headerlink" title="什么是 MQ"></a>什么是 MQ</h3><p>消息队列。</p>
+<p>例如：</p>
+<ul>
+<li>Kafka</li>
+<li>RabbitMQ</li>
+<li>RocketMQ</li>
+</ul>
+<p>用于：</p>
+<ul>
+<li>异步</li>
+<li>解耦</li>
+<li>削峰</li>
+</ul>
+<hr>
+<h3 id="实际项目场景-2"><a href="#实际项目场景-2" class="headerlink" title="实际项目场景"></a>实际项目场景</h3><p>订单状态更新：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">更新MySQL
+删除Redis缓存<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>如果 Redis 删除失败：</p>
+<ul>
+<li>发送 RocketMQ 重试</li>
+</ul>
+<p>保证最终一致性。</p>
+<hr>
+<h3 id="白话回答-2"><a href="#白话回答-2" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“缓存一致性一般采用先更新数据库，再删除缓存。</p>
+<p>高并发下会配合延迟双删或者 MQ 重试机制，保证 Redis 和 MySQL 最终一致。”</p>
+</blockquote>
+<hr>
+<h2 id="6-项目中哪里实际用了-Redis"><a href="#6-项目中哪里实际用了-Redis" class="headerlink" title="6. 项目中哪里实际用了 Redis"></a>6. 项目中哪里实际用了 Redis</h2><p>这个问题重点：<br>不要只说“做缓存”。</p>
+<p>一定要说：</p>
+<ul>
+<li>用在哪</li>
+<li>为什么用</li>
+<li>效果是什么</li>
+</ul>
+<hr>
+<h3 id="实际项目回答模板"><a href="#实际项目回答模板" class="headerlink" title="实际项目回答模板"></a>实际项目回答模板</h3><blockquote>
+<p>“项目里 Redis 主要用于：</p>
+<ol>
+<li>登录 token 缓存</li>
+<li>热点数据缓存</li>
+<li>接口限流</li>
+<li>异步队列削峰</li>
+<li>排行榜</li>
+</ol>
+<p>例如商品详情页，我们把热点商品缓存到 Redis，减少 MySQL 查询压力。</p>
+<p>登录鉴权则把 token 存 Redis，支持单点登录和踢下线。</p>
+<p>此外日志系统用了 Redis List 做异步队列，避免高并发时频繁写数据库。”</p>
+</blockquote>
+<h1 id="MySQL（几乎每场都问）"><a href="#MySQL（几乎每场都问）" class="headerlink" title="MySQL（几乎每场都问）"></a>MySQL（几乎每场都问）</h1><h2 id="1-InnoDB-索引结构"><a href="#1-InnoDB-索引结构" class="headerlink" title="1. InnoDB 索引结构"></a>1. InnoDB 索引结构</h2><h3 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h3><ul>
+<li><p>InnoDB 默认存储引擎</p>
+</li>
+<li><p>索引类型：</p>
+<ul>
+<li><strong>B+ 树索引</strong>（InnoDB 默认）</li>
+<li><strong>B 树索引</strong>（概念上类似，但 B+ 树存储方式不同）</li>
+</ul>
+</li>
+<li><p>B+ 树 vs B 树区别：</p>
+<ul>
+<li>所有叶子节点形成链表，便于范围查询</li>
+<li>非叶子节点只存 key，不存数据（减少层数，增加效率）</li>
+<li>B 树非叶子节点就存数据</li>
+</ul>
+</li>
+</ul>
+<h3 id="白话回答示例"><a href="#白话回答示例" class="headerlink" title="白话回答示例"></a>白话回答示例</h3><blockquote>
+<p>“InnoDB 默认使用 B+ 树作为索引结构。B+ 树和普通 B 树的区别在于：B+ 树的所有数据都在叶子节点，非叶子节点只保存索引，叶子节点之间用链表串起来，这样做可以高效支持范围查询；而普通 B 树非叶子节点也存数据，会导致查找效率稍低。”</p>
+</blockquote>
+<hr>
+<h2 id="2-聚簇索引-非聚簇索引-覆盖索引-联合索引"><a href="#2-聚簇索引-非聚簇索引-覆盖索引-联合索引" class="headerlink" title="2. 聚簇索引 &#x2F; 非聚簇索引 &#x2F; 覆盖索引 &#x2F; 联合索引"></a>2. 聚簇索引 &#x2F; 非聚簇索引 &#x2F; 覆盖索引 &#x2F; 联合索引</h2><h3 id="知识点-1"><a href="#知识点-1" class="headerlink" title="知识点"></a>知识点</h3><ul>
+<li><p><strong>聚簇索引（Clustered Index）</strong></p>
+<ul>
+<li>表数据和索引存放在一起（InnoDB PK 默认聚簇索引）</li>
+<li>一张表只能有一个聚簇索引</li>
+</ul>
+</li>
+<li><p><strong>非聚簇索引（Secondary Index）</strong></p>
+<ul>
+<li>索引节点保存主键，数据不在索引中，需要回表查询</li>
+</ul>
+</li>
+<li><p><strong>覆盖索引（Covering Index）</strong></p>
+<ul>
+<li>查询所需字段都包含在索引中，无需回表</li>
+</ul>
+</li>
+<li><p><strong>联合索引（Composite Index）</strong></p>
+<ul>
+<li>多列组成的索引，涉及最左前缀原则</li>
+</ul>
+</li>
+</ul>
+<h3 id="白话回答示例-1"><a href="#白话回答示例-1" class="headerlink" title="白话回答示例"></a>白话回答示例</h3><blockquote>
+<p>“聚簇索引就是数据和索引放在一起，比如主键索引；非聚簇索引单独存，查不到数据要回表。覆盖索引则是查询的字段全被索引覆盖，不用回表，查询效率更高。联合索引是多列组合索引，但要遵循最左匹配原则。”</p>
+</blockquote>
+<hr>
+<h2 id="3-最左匹配原则"><a href="#3-最左匹配原则" class="headerlink" title="3. 最左匹配原则"></a>3. 最左匹配原则</h2><h3 id="知识点-2"><a href="#知识点-2" class="headerlink" title="知识点"></a>知识点</h3><ul>
+<li>联合索引：<code>(a,b,c)</code></li>
+<li>查询条件用到最左的连续前缀才会使用索引</li>
+<li>示例：<ul>
+<li><code>WHERE a=1 AND b=2</code> → 使用索引</li>
+<li><code>WHERE b=2</code> → 不用索引</li>
+</ul>
+</li>
+</ul>
+<h3 id="白话回答示例-2"><a href="#白话回答示例-2" class="headerlink" title="白话回答示例"></a>白话回答示例</h3><blockquote>
+<p>“联合索引查询时，必须从索引最左边的列开始匹配，否则索引失效。比如索引是(a,b,c)，如果查询只用 b 列，就走不了索引。”</p>
+</blockquote>
+<hr>
+<h2 id="4-事务四大特性-ACID-实现原理"><a href="#4-事务四大特性-ACID-实现原理" class="headerlink" title="4. 事务四大特性 ACID &amp; 实现原理"></a>4. 事务四大特性 ACID &amp; 实现原理</h2><h3 id="知识点-3"><a href="#知识点-3" class="headerlink" title="知识点"></a>知识点</h3><ul>
+<li><strong>A</strong>: 原子性（Atomic） → 回滚日志</li>
+<li><strong>C</strong>: 一致性（Consistency） → 约束、触发器保证</li>
+<li><strong>I</strong>: 隔离性（Isolation） → 锁或 MVCC</li>
+<li><strong>D</strong>: 持久性（Durability） → redo log 保证</li>
+</ul>
+<h3 id="白话回答示例-3"><a href="#白话回答示例-3" class="headerlink" title="白话回答示例"></a>白话回答示例</h3><blockquote>
+<p>“事务的 ACID 保证数据库操作安全：原子性保证要么全成功要么全失败，一致性保证操作后数据符合规则，隔离性防止并发冲突，持久性保证提交的数据不会丢失。InnoDB 通过 undo&#x2F;redo 日志、锁和 MVCC 实现这些特性。”</p>
+</blockquote>
+<hr>
+<h2 id="5-四大隔离级别-MVCC"><a href="#5-四大隔离级别-MVCC" class="headerlink" title="5. 四大隔离级别 &amp; MVCC"></a>5. 四大隔离级别 &amp; MVCC</h2><h3 id="知识点-4"><a href="#知识点-4" class="headerlink" title="知识点"></a>知识点</h3><table>
+<thead>
+<tr>
+<th>隔离级别</th>
+<th>脏读</th>
+<th>不可重复读</th>
+<th>幻读</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>READ UNCOMMITTED</td>
+<td>✔</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr>
+<td>READ COMMITTED</td>
+<td>✖</td>
+<td>✔</td>
+<td>✔</td>
+</tr>
+<tr>
+<td>REPEATABLE READ</td>
+<td>✖</td>
+<td>✖</td>
+<td>✔</td>
+</tr>
+<tr>
+<td>SERIALIZABLE</td>
+<td>✖</td>
+<td>✖</td>
+<td>✖</td>
+</tr>
+</tbody></table>
+<ul>
+<li><strong>MVCC（多版本并发控制）</strong><ul>
+<li>通过存储行的多个版本（undo log）实现</li>
+<li>查询读取快照版本，保证非锁操作下的一致性</li>
+</ul>
+</li>
+</ul>
+<h3 id="白话回答示例-4"><a href="#白话回答示例-4" class="headerlink" title="白话回答示例"></a>白话回答示例</h3><blockquote>
+<p>“MySQL 的四种隔离级别从低到高是 READ UNCOMMITTED、READ COMMITTED、REPEATABLE READ 和 SERIALIZABLE。默认 InnoDB 是 REPEATABLE READ，避免不可重复读。MVCC 是通过保存行的历史版本实现的，读操作不加锁，只看快照版本，提高并发。”</p>
+</blockquote>
+<hr>
+<h2 id="6-慢查询排查步骤"><a href="#6-慢查询排查步骤" class="headerlink" title="6. 慢查询排查步骤"></a>6. 慢查询排查步骤</h2><h3 id="知识点-5"><a href="#知识点-5" class="headerlink" title="知识点"></a>知识点</h3><ol>
+<li><strong>开启慢查询日志</strong>：<code>slow_query_log=ON</code></li>
+<li><strong>定位慢 SQL</strong>：<code>long_query_time</code></li>
+<li><strong>分析执行计划</strong>：<code>EXPLAIN SELECT ...</code></li>
+<li><strong>优化手段</strong>：<ul>
+<li>索引优化</li>
+<li>避免全表扫描</li>
+<li>查询拆分、分页</li>
+<li>SQL 调整</li>
+<li>数据库参数调优（缓存、并发）</li>
+</ul>
+</li>
+</ol>
+<h3 id="白话回答示例-5"><a href="#白话回答示例-5" class="headerlink" title="白话回答示例"></a>白话回答示例</h3><blockquote>
+<p>“排查慢查询一般先开慢查询日志，找到慢 SQL，然后用 EXPLAIN 看执行计划，看是走索引还是全表扫描。慢查询常用优化手段包括加索引、拆分查询、优化 SQL、调缓存或者调整参数。”</p>
+</blockquote>
+<hr>
+<h2 id="7-实际项目慢查询优化示例"><a href="#7-实际项目慢查询优化示例" class="headerlink" title="7. 实际项目慢查询优化示例"></a>7. 实际项目慢查询优化示例</h2><h3 id="知识点-6"><a href="#知识点-6" class="headerlink" title="知识点"></a>知识点</h3><ul>
+<li>找出慢查询：<code>show processlist</code> &#x2F; 慢查询日志</li>
+<li>用索引覆盖查询字段</li>
+<li>避免 SELECT *，只取必要字段</li>
+<li>大表分页优化（id 范围分页）</li>
+<li>SQL 重写（IN → JOIN &#x2F; EXISTS）</li>
+</ul>
+<h3 id="白话回答示例-6"><a href="#白话回答示例-6" class="headerlink" title="白话回答示例"></a>白话回答示例</h3><blockquote>
+<p>“在项目中，我遇到过用户表的大表查询特别慢。我先开启慢查询日志，定位慢 SQL，然后加了联合索引覆盖查询字段，同时优化了分页逻辑，用 id 范围代替 OFFSET 分页。优化后查询速度提升了 5 倍。”</p>
+</blockquote>
+<hr>
+<h2 id="8-常用慢查询定位工具及使用方式"><a href="#8-常用慢查询定位工具及使用方式" class="headerlink" title="8. 常用慢查询定位工具及使用方式"></a>8. 常用慢查询定位工具及使用方式</h2><h3 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h3><ul>
+<li><strong>EXPLAIN</strong> → 查看执行计划</li>
+<li><strong>SHOW PROFILE &#x2F; SHOW STATUS</strong> → 查看 SQL 执行耗时</li>
+<li><strong>pt-query-digest (Percona Toolkit)</strong> → 分析慢查询日志</li>
+<li><strong>MySQL Workbench &#x2F; Navicat</strong> → GUI 可视化分析</li>
+</ul>
+<h3 id="白话回答示例-7"><a href="#白话回答示例-7" class="headerlink" title="白话回答示例"></a>白话回答示例</h3><blockquote>
+<p>“我常用 EXPLAIN 看 SQL 执行计划，确认索引是否命中。复杂慢查询，我会用 pt-query-digest 分析慢查询日志，找出最耗时的 SQL，然后针对性优化。必要时也用 SHOW PROFILE 或 GUI 工具可视化分析。”</p>
+</blockquote>
+<hr>
+<h1 id="AI-大语言模型"><a href="#AI-大语言模型" class="headerlink" title="AI &#x2F; 大语言模型"></a>AI &#x2F; 大语言模型</h1><h2 id="RAG（检索增强生成）"><a href="#RAG（检索增强生成）" class="headerlink" title="RAG（检索增强生成）"></a>RAG（检索增强生成）</h2><hr>
+<h3 id="1-什么是-RAG？完整流程是什么？"><a href="#1-什么是-RAG？完整流程是什么？" class="headerlink" title="1. 什么是 RAG？完整流程是什么？"></a>1. 什么是 RAG？完整流程是什么？</h3><h4 id="涉及知识点-4"><a href="#涉及知识点-4" class="headerlink" title="涉及知识点"></a>涉及知识点</h4><p>RAG（Retrieval-Augmented Generation）：</p>
+<p>核心思想：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">先检索知识
+再让模型生成答案<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>而不是只依赖模型训练时学到的内容。</p>
+<p>完整流程：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">文档导入
+↓
+Chunk切分
+↓
+Embedding向量化
+↓
+存入向量数据库
+↓
+用户提问
+↓
+问题向量化
+↓
+向量检索TopK
+↓
+拼接Prompt
+↓
+LLM生成答案<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h4 id="实际工程（LangChain）"><a href="#实际工程（LangChain）" class="headerlink" title="实际工程（LangChain）"></a>实际工程（LangChain）</h4><p>例如：</p>
+<pre class="line-numbers language-python" data-language="python"><div class="caption"><span>id</span></div><code class="language-python"><span class="token keyword">from</span> langchain_community<span class="token punctuation">.</span>document_loaders <span class="token keyword">import</span> TextLoader
+<span class="token keyword">from</span> langchain<span class="token punctuation">.</span>text_splitter <span class="token keyword">import</span> RecursiveCharacterTextSplitter
+<span class="token keyword">from</span> langchain_openai <span class="token keyword">import</span> OpenAIEmbeddings
+<span class="token keyword">from</span> langchain_community<span class="token punctuation">.</span>vectorstores <span class="token keyword">import</span> Chroma
+
+<span class="token comment"># 1. 加载文档</span>
+loader <span class="token operator">=</span> TextLoader<span class="token punctuation">(</span><span class="token string">"data.txt"</span><span class="token punctuation">,</span> encoding<span class="token operator">=</span><span class="token string">"utf-8"</span><span class="token punctuation">)</span>
+docs <span class="token operator">=</span> loader<span class="token punctuation">.</span>load<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment"># 2. chunk切分</span>
+splitter <span class="token operator">=</span> RecursiveCharacterTextSplitter<span class="token punctuation">(</span>
+    chunk_size<span class="token operator">=</span><span class="token number">500</span><span class="token punctuation">,</span>
+    chunk_overlap<span class="token operator">=</span><span class="token number">100</span>
+<span class="token punctuation">)</span>
+
+chunks <span class="token operator">=</span> splitter<span class="token punctuation">.</span>split_documents<span class="token punctuation">(</span>docs<span class="token punctuation">)</span>
+
+<span class="token comment"># 3. embedding</span>
+embedding <span class="token operator">=</span> OpenAIEmbeddings<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment"># 4. 存入向量数据库</span>
+db <span class="token operator">=</span> Chroma<span class="token punctuation">.</span>from_documents<span class="token punctuation">(</span>
+    chunks<span class="token punctuation">,</span>
+    embedding<span class="token operator">=</span>embedding<span class="token punctuation">,</span>
+    persist_directory<span class="token operator">=</span><span class="token string">"./chroma_db"</span>
+<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h4 id="顺带解释几个词-1"><a href="#顺带解释几个词-1" class="headerlink" title="顺带解释几个词"></a>顺带解释几个词</h4><h5 id="Embedding"><a href="#Embedding" class="headerlink" title="Embedding"></a>Embedding</h5><p>把文本转成向量。</p>
+<p>语义越接近：<br>向量距离越近。</p>
+<hr>
+<h5 id="向量数据库"><a href="#向量数据库" class="headerlink" title="向量数据库"></a>向量数据库</h5><p>用于：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">相似度检索<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>例如：</p>
+<ul>
+<li>Chroma</li>
+<li>Milvus</li>
+<li>pgvector</li>
+</ul>
+<hr>
+<h4 id="白话回答-3"><a href="#白话回答-3" class="headerlink" title="白话回答"></a>白话回答</h4><blockquote>
+<p>“RAG 本质是先检索知识，再让模型生成答案。</p>
+<p>我实际项目里用 LangChain 做文档加载和 chunk 切分，用 embedding 做向量化，再存到 Chroma 向量数据库，查询时先召回相关内容，再拼接 Prompt 给模型。”</p>
+</blockquote>
+<hr>
+<h3 id="2-文档分块（Chunk）怎么做？"><a href="#2-文档分块（Chunk）怎么做？" class="headerlink" title="2. 文档分块（Chunk）怎么做？"></a>2. 文档分块（Chunk）怎么做？</h3><h4 id="涉及知识点-5"><a href="#涉及知识点-5" class="headerlink" title="涉及知识点"></a>涉及知识点</h4><p>为什么要切块：</p>
+<p>因为：</p>
+<ul>
+<li>embedding 有长度限制</li>
+<li>整篇文档太长</li>
+<li>检索粒度会太粗</li>
+</ul>
+<hr>
+<h4 id="Chunk-原则"><a href="#Chunk-原则" class="headerlink" title="Chunk 原则"></a>Chunk 原则</h4><p>太小：</p>
+<ul>
+<li>上下文断裂</li>
+<li>信息不完整</li>
+</ul>
+<hr>
+<p>太大：</p>
+<ul>
+<li>检索不精准</li>
+<li>token 成本高</li>
+</ul>
+<hr>
+<h4 id="常见工程方案"><a href="#常见工程方案" class="headerlink" title="常见工程方案"></a>常见工程方案</h4><p>例如：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">chunk_size = 500
+chunk_overlap = 100<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<h4 id="overlap-是什么"><a href="#overlap-是什么" class="headerlink" title="overlap 是什么"></a>overlap 是什么</h4><p>Chunk 之间保留重叠区域。</p>
+<p>避免上下文被截断。</p>
+<hr>
+<h4 id="LangChain-实践代码"><a href="#LangChain-实践代码" class="headerlink" title="LangChain 实践代码"></a>LangChain 实践代码</h4><pre class="line-numbers language-python" data-language="python"><div class="caption"><span>id</span></div><code class="language-python"><span class="token keyword">from</span> langchain<span class="token punctuation">.</span>text_splitter <span class="token keyword">import</span> RecursiveCharacterTextSplitter
+
+splitter <span class="token operator">=</span> RecursiveCharacterTextSplitter<span class="token punctuation">(</span>
+    chunk_size<span class="token operator">=</span><span class="token number">500</span><span class="token punctuation">,</span>
+    chunk_overlap<span class="token operator">=</span><span class="token number">100</span><span class="token punctuation">,</span>
+    separators<span class="token operator">=</span><span class="token punctuation">[</span><span class="token string">"\n\n"</span><span class="token punctuation">,</span> <span class="token string">"\n"</span><span class="token punctuation">,</span> <span class="token string">"。"</span><span class="token punctuation">,</span> <span class="token string">" "</span><span class="token punctuation">]</span>
+<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h4 id="为什么用-RecursiveCharacterTextSplitter"><a href="#为什么用-RecursiveCharacterTextSplitter" class="headerlink" title="为什么用 RecursiveCharacterTextSplitter"></a>为什么用 RecursiveCharacterTextSplitter</h4><p>因为它会：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">优先按语义切
+再按长度切<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>例如优先：</p>
+<ul>
+<li>标题</li>
+<li>段落</li>
+<li>换行</li>
+</ul>
+<p>比纯固定长度效果更好。</p>
+<hr>
+<h4 id="白话回答-4"><a href="#白话回答-4" class="headerlink" title="白话回答"></a>白话回答</h4><blockquote>
+<p>“Chunk 我一般控制在 300~800 token，并设置 overlap 防止上下文断裂。</p>
+<p>实际项目里我用 LangChain 的 RecursiveCharacterTextSplitter，优先按段落和换行做语义切分，而不是纯固定长度切割。”</p>
+</blockquote>
+<hr>
+<h3 id="3-RAG-检索做了哪些优化？"><a href="#3-RAG-检索做了哪些优化？" class="headerlink" title="3. RAG 检索做了哪些优化？"></a>3. RAG 检索做了哪些优化？</h3><h4 id="涉及知识点-6"><a href="#涉及知识点-6" class="headerlink" title="涉及知识点"></a>涉及知识点</h4><p>实际项目里：<br>不能只做向量检索。</p>
+<p>否则容易：</p>
+<ul>
+<li>语义漂移</li>
+<li>召回不准</li>
+<li>噪声太多</li>
+</ul>
+<hr>
+<h4 id="常见优化"><a href="#常见优化" class="headerlink" title="常见优化"></a>常见优化</h4><h5 id="Chunk-优化"><a href="#Chunk-优化" class="headerlink" title="Chunk 优化"></a>Chunk 优化</h5><p>控制：</p>
+<ul>
+<li>chunk 大小</li>
+<li>overlap</li>
+</ul>
+<hr>
+<h5 id="双路检索（重点）"><a href="#双路检索（重点）" class="headerlink" title="双路检索（重点）"></a>双路检索（重点）</h5><p>同时做：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">关键词检索（BM25）
++
+向量检索（Embedding）<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h5 id="Rerank（重排序）"><a href="#Rerank（重排序）" class="headerlink" title="Rerank（重排序）"></a>Rerank（重排序）</h5><p>第一次召回后：<br>再重新排序。</p>
+<p>提高准确率。</p>
+<hr>
+<h5 id="Metadata-Filter"><a href="#Metadata-Filter" class="headerlink" title="Metadata Filter"></a>Metadata Filter</h5><p>先过滤：</p>
+<ul>
+<li>文档类型</li>
+<li>时间</li>
+<li>标签</li>
+</ul>
+<p>再检索。</p>
+<hr>
+<h4 id="LangChain-实践代码-1"><a href="#LangChain-实践代码-1" class="headerlink" title="LangChain 实践代码"></a>LangChain 实践代码</h4><h5 id="向量检索"><a href="#向量检索" class="headerlink" title="向量检索"></a>向量检索</h5><pre class="line-numbers language-python" data-language="python"><div class="caption"><span>id</span></div><code class="language-python">retriever <span class="token operator">=</span> db<span class="token punctuation">.</span>as_retriever<span class="token punctuation">(</span>
+    search_kwargs<span class="token operator">=</span><span class="token punctuation">&#123;</span><span class="token string">"k"</span><span class="token punctuation">:</span> <span class="token number">6</span><span class="token punctuation">&#125;</span>
+<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h5 id="Metadata-过滤"><a href="#Metadata-过滤" class="headerlink" title="Metadata 过滤"></a>Metadata 过滤</h5><pre class="line-numbers language-python" data-language="python"><div class="caption"><span>id</span></div><code class="language-python">retriever<span class="token punctuation">.</span>invoke<span class="token punctuation">(</span>
+    <span class="token string">"mysql事务"</span><span class="token punctuation">,</span>
+    <span class="token builtin">filter</span><span class="token operator">=</span><span class="token punctuation">&#123;</span><span class="token string">"type"</span><span class="token punctuation">:</span> <span class="token string">"mysql"</span><span class="token punctuation">&#125;</span>
+<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h4 id="什么是语义漂移"><a href="#什么是语义漂移" class="headerlink" title="什么是语义漂移"></a>什么是语义漂移</h4><p>用户问：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">mysql锁<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>结果召回：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">操作系统锁<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>方向偏了。</p>
+<hr>
+<h4 id="白话回答-5"><a href="#白话回答-5" class="headerlink" title="白话回答"></a>白话回答</h4><blockquote>
+<p>“RAG 检索我主要做了 chunk 优化、双路检索、metadata 过滤和 rerank。</p>
+<p>因为纯向量检索容易语义漂移，所以我会结合 BM25 做混合召回。”</p>
+</blockquote>
+<hr>
+<h3 id="4-双重检索（语义检索-关键词检索）讲一下"><a href="#4-双重检索（语义检索-关键词检索）讲一下" class="headerlink" title="4. 双重检索（语义检索 + 关键词检索）讲一下"></a>4. 双重检索（语义检索 + 关键词检索）讲一下</h3><h4 id="涉及知识点-7"><a href="#涉及知识点-7" class="headerlink" title="涉及知识点"></a>涉及知识点</h4><p>实际项目里：</p>
+<p>通常不会只做 embedding 检索。</p>
+<p>而是：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">BM25关键词检索
++
+向量语义检索<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>一起做。</p>
+<hr>
+<h4 id="为什么要双路检索"><a href="#为什么要双路检索" class="headerlink" title="为什么要双路检索"></a>为什么要双路检索</h4><hr>
+<h4 id="BM25-优点"><a href="#BM25-优点" class="headerlink" title="BM25 优点"></a>BM25 优点</h4><p>适合：</p>
+<ul>
+<li>API 名称</li>
+<li>专业术语</li>
+<li>缩写词</li>
+</ul>
+<p>例如：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">JWT
+Redis
+MySQL<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>关键词匹配更稳定。</p>
+<hr>
+<h4 id="向量检索优点"><a href="#向量检索优点" class="headerlink" title="向量检索优点"></a>向量检索优点</h4><p>适合：</p>
+<ul>
+<li>自然语言</li>
+<li>相似表达</li>
+</ul>
+<p>例如：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">“mysql索引”
+“数据库index”<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<h4 id="LangChain-实践代码-2"><a href="#LangChain-实践代码-2" class="headerlink" title="LangChain 实践代码"></a>LangChain 实践代码</h4><h5 id="BM25"><a href="#BM25" class="headerlink" title="BM25"></a>BM25</h5><pre class="line-numbers language-python" data-language="python"><div class="caption"><span>id</span></div><code class="language-python"><span class="token keyword">from</span> langchain_community<span class="token punctuation">.</span>retrievers <span class="token keyword">import</span> BM25Retriever
+
+bm25 <span class="token operator">=</span> BM25Retriever<span class="token punctuation">.</span>from_documents<span class="token punctuation">(</span>chunks<span class="token punctuation">)</span>
+bm25<span class="token punctuation">.</span>k <span class="token operator">=</span> <span class="token number">3</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h5 id="向量检索-1"><a href="#向量检索-1" class="headerlink" title="向量检索"></a>向量检索</h5><pre class="line-numbers language-python" data-language="python"><div class="caption"><span>id</span></div><code class="language-python">vector_retriever <span class="token operator">=</span> db<span class="token punctuation">.</span>as_retriever<span class="token punctuation">(</span>
+    search_kwargs<span class="token operator">=</span><span class="token punctuation">&#123;</span><span class="token string">"k"</span><span class="token punctuation">:</span> <span class="token number">3</span><span class="token punctuation">&#125;</span>
+<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h5 id="混合召回"><a href="#混合召回" class="headerlink" title="混合召回"></a>混合召回</h5><pre class="line-numbers language-python" data-language="python"><div class="caption"><span>id</span></div><code class="language-python">docs1 <span class="token operator">=</span> bm25<span class="token punctuation">.</span>invoke<span class="token punctuation">(</span>query<span class="token punctuation">)</span>
+docs2 <span class="token operator">=</span> vector_retriever<span class="token punctuation">.</span>invoke<span class="token punctuation">(</span>query<span class="token punctuation">)</span>
+
+docs <span class="token operator">=</span> docs1 <span class="token operator">+</span> docs2<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h4 id="白话回答-6"><a href="#白话回答-6" class="headerlink" title="白话回答"></a>白话回答</h4><blockquote>
+<p>“双重检索一般是 BM25 加 embedding 向量检索。</p>
+<p>因为纯向量检索容易语义漂移，而 BM25 对专业术语更稳定，所以实际项目通常会混合召回。”</p>
+</blockquote>
+<hr>
+<h3 id="5-TopK-怎么定的？为什么是-6？"><a href="#5-TopK-怎么定的？为什么是-6？" class="headerlink" title="5. TopK 怎么定的？为什么是 6？"></a>5. TopK 怎么定的？为什么是 6？</h3><h4 id="涉及知识点-8"><a href="#涉及知识点-8" class="headerlink" title="涉及知识点"></a>涉及知识点</h4><p>TopK：<br>表示召回多少条 chunk。</p>
+<hr>
+<h4 id="为什么不能太小"><a href="#为什么不能太小" class="headerlink" title="为什么不能太小"></a>为什么不能太小</h4><p>太小：</p>
+<ul>
+<li>信息不足</li>
+<li>容易漏召回</li>
+</ul>
+<hr>
+<h4 id="为什么不能太大"><a href="#为什么不能太大" class="headerlink" title="为什么不能太大"></a>为什么不能太大</h4><p>太大：</p>
+<ul>
+<li>噪声增加</li>
+<li>token 成本上涨</li>
+</ul>
+<hr>
+<h4 id="为什么很多项目是-5-10"><a href="#为什么很多项目是-5-10" class="headerlink" title="为什么很多项目是 5~10"></a>为什么很多项目是 5~10</h4><p>工程经验值。</p>
+<hr>
+<h4 id="LangChain-实践代码-3"><a href="#LangChain-实践代码-3" class="headerlink" title="LangChain 实践代码"></a>LangChain 实践代码</h4><pre class="line-numbers language-python" data-language="python"><div class="caption"><span>id</span></div><code class="language-python">retriever <span class="token operator">=</span> db<span class="token punctuation">.</span>as_retriever<span class="token punctuation">(</span>
+    search_kwargs<span class="token operator">=</span><span class="token punctuation">&#123;</span><span class="token string">"k"</span><span class="token punctuation">:</span> <span class="token number">6</span><span class="token punctuation">&#125;</span>
+<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h4 id="为什么是-6（标准回答）"><a href="#为什么是-6（标准回答）" class="headerlink" title="为什么是 6（标准回答）"></a>为什么是 6（标准回答）</h4><blockquote>
+<p>“我测试过不同 TopK。</p>
+<p>太小容易漏信息，太大又会引入噪声和额外 token 成本。</p>
+<p>后来发现 5~8 区间效果比较稳定，所以最终选了 6，在召回率和生成质量之间比较平衡。”</p>
+</blockquote>
+<hr>
+<h3 id="6-相似度阈值和过滤策略是什么？"><a href="#6-相似度阈值和过滤策略是什么？" class="headerlink" title="6. 相似度阈值和过滤策略是什么？"></a>6. 相似度阈值和过滤策略是什么？</h3><h4 id="涉及知识点-9"><a href="#涉及知识点-9" class="headerlink" title="涉及知识点"></a>涉及知识点</h4><p>向量检索会返回：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">similarity score<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>例如：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">0.92
+0.83
+0.31<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h4 id="为什么需要阈值"><a href="#为什么需要阈值" class="headerlink" title="为什么需要阈值"></a>为什么需要阈值</h4><p>避免召回无关内容。</p>
+<p>例如：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">0.2<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>通常已经不相关。</p>
+<hr>
+<h4 id="常见阈值"><a href="#常见阈值" class="headerlink" title="常见阈值"></a>常见阈值</h4><p>通常：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">0.7 ~ 0.85<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h4 id="LangChain-实践代码-4"><a href="#LangChain-实践代码-4" class="headerlink" title="LangChain 实践代码"></a>LangChain 实践代码</h4><pre class="line-numbers language-python" data-language="python"><div class="caption"><span>id</span></div><code class="language-python">docs <span class="token operator">=</span> db<span class="token punctuation">.</span>similarity_search_with_score<span class="token punctuation">(</span>query<span class="token punctuation">,</span> k<span class="token operator">=</span><span class="token number">6</span><span class="token punctuation">)</span>
+
+result <span class="token operator">=</span> <span class="token punctuation">[</span>
+    doc <span class="token keyword">for</span> doc<span class="token punctuation">,</span> score <span class="token keyword">in</span> docs
+    <span class="token keyword">if</span> score <span class="token operator">></span> <span class="token number">0.75</span>
+<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h4 id="过滤策略"><a href="#过滤策略" class="headerlink" title="过滤策略"></a>过滤策略</h4><p>除了相似度：</p>
+<p>还会过滤：</p>
+<ul>
+<li>文档类型</li>
+<li>时间</li>
+<li>用户权限</li>
+</ul>
+<hr>
+<h4 id="白话回答-7"><a href="#白话回答-7" class="headerlink" title="白话回答"></a>白话回答</h4><blockquote>
+<p>“相似度阈值主要是避免召回无关内容。</p>
+<p>我一般会设置在 0.75 左右，再结合 metadata 过滤，提高检索准确率。”</p>
+</blockquote>
+<h1 id="Spring-全家桶"><a href="#Spring-全家桶" class="headerlink" title="Spring 全家桶"></a>Spring 全家桶</h1><hr>
+<h2 id="1-Spring-IOC-容器初始化流程（必背）"><a href="#1-Spring-IOC-容器初始化流程（必背）" class="headerlink" title="1. Spring IOC 容器初始化流程（必背）"></a>1. Spring IOC 容器初始化流程（必背）</h2><h3 id="涉及知识点-10"><a href="#涉及知识点-10" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><p>IOC：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">控制反转<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>核心思想：</p>
+<p>对象不再自己创建。</p>
+<p>而是交给 Spring 容器管理。</p>
+<hr>
+<h3 id="IOC-初始化核心流程"><a href="#IOC-初始化核心流程" class="headerlink" title="IOC 初始化核心流程"></a>IOC 初始化核心流程</h3><pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">启动 Spring
+↓
+读取配置类 / XML
+↓
+扫描 Bean
+↓
+BeanDefinition 注册
+↓
+实例化 Bean
+↓
+依赖注入（DI）
+↓
+初始化 Bean
+↓
+放入 IOC 容器<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h3 id="顺带解释几个词-2"><a href="#顺带解释几个词-2" class="headerlink" title="顺带解释几个词"></a>顺带解释几个词</h3><h4 id="BeanDefinition"><a href="#BeanDefinition" class="headerlink" title="BeanDefinition"></a>BeanDefinition</h4><p>Bean 的定义信息。</p>
+<p>里面保存：</p>
+<ul>
+<li>类名</li>
+<li>作用域</li>
+<li>是否懒加载</li>
+<li>初始化方法</li>
+</ul>
+<p>Spring 真正管理的是 BeanDefinition。</p>
+<p>不是直接管理对象。</p>
+<hr>
+<h4 id="DI（依赖注入）"><a href="#DI（依赖注入）" class="headerlink" title="DI（依赖注入）"></a>DI（依赖注入）</h4><p>例如：</p>
+<pre class="line-numbers language-java" data-language="java"><div class="caption"><span>id</span></div><code class="language-java"><span class="token annotation punctuation">@Autowired</span>
+<span class="token keyword">private</span> <span class="token class-name">UserService</span> userService<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>Spring 自动把依赖对象注入进来。</p>
+<hr>
+<h3 id="实际项目场景-3"><a href="#实际项目场景-3" class="headerlink" title="实际项目场景"></a>实际项目场景</h3><p>例如：</p>
+<pre class="line-numbers language-java" data-language="java"><div class="caption"><span>id</span></div><code class="language-java"><span class="token annotation punctuation">@Service</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">UserService</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>启动时：<br>Spring 会自动：</p>
+<ul>
+<li>扫描</li>
+<li>创建对象</li>
+<li>注入依赖</li>
+</ul>
+<p>开发者不用自己 new。</p>
+<hr>
+<h3 id="白话回答-8"><a href="#白话回答-8" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“IOC 就是对象交给 Spring 管理。</p>
+<p>Spring 启动后会先扫描 Bean，生成 BeanDefinition，然后实例化 Bean，完成依赖注入和初始化，最后放入 IOC 容器统一管理。”</p>
+</blockquote>
+<hr>
+<h2 id="2-Bean-生命周期"><a href="#2-Bean-生命周期" class="headerlink" title="2. Bean 生命周期"></a>2. Bean 生命周期</h2><h3 id="涉及知识点-11"><a href="#涉及知识点-11" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><p>Bean 生命周期核心流程：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">实例化
+↓
+属性注入
+↓
+Aware接口回调
+↓
+BeanPostProcessor前置处理
+↓
+初始化方法
+↓
+BeanPostProcessor后置处理
+↓
+Bean可使用
+↓
+销毁<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h3 id="顺带解释几个词-3"><a href="#顺带解释几个词-3" class="headerlink" title="顺带解释几个词"></a>顺带解释几个词</h3><h4 id="BeanPostProcessor"><a href="#BeanPostProcessor" class="headerlink" title="BeanPostProcessor"></a>BeanPostProcessor</h4><p>Bean 后置处理器。</p>
+<p>Spring 很多功能都基于它。</p>
+<p>例如：</p>
+<ul>
+<li>AOP</li>
+<li>自动代理</li>
+</ul>
+<hr>
+<h4 id="Aware-接口"><a href="#Aware-接口" class="headerlink" title="Aware 接口"></a>Aware 接口</h4><p>让 Bean 获取 Spring 内部资源。</p>
+<p>例如：</p>
+<pre class="line-numbers language-java" data-language="java"><div class="caption"><span>id</span></div><code class="language-java"><span class="token class-name">BeanNameAware</span>
+<span class="token class-name">ApplicationContextAware</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<h3 id="初始化方法"><a href="#初始化方法" class="headerlink" title="初始化方法"></a>初始化方法</h3><p>例如：</p>
+<pre class="line-numbers language-java" data-language="java"><div class="caption"><span>id</span></div><code class="language-java"><span class="token annotation punctuation">@PostConstruct</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>或者：</p>
+<pre class="line-numbers language-java" data-language="java"><div class="caption"><span>id</span></div><code class="language-java">init<span class="token operator">-</span>method<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h3 id="实际项目场景-4"><a href="#实际项目场景-4" class="headerlink" title="实际项目场景"></a>实际项目场景</h3><p>例如：</p>
+<p>数据库连接池初始化：</p>
+<pre class="line-numbers language-java" data-language="java"><div class="caption"><span>id</span></div><code class="language-java"><span class="token annotation punctuation">@PostConstruct</span>
+<span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>项目启动时：<br>自动执行初始化逻辑。</p>
+<hr>
+<h3 id="白话回答-9"><a href="#白话回答-9" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“Bean 生命周期主要包括实例化、依赖注入、初始化和销毁。</p>
+<p>Spring 在初始化过程中还会执行 BeanPostProcessor，这也是 AOP 和自动代理实现的重要基础。”</p>
+</blockquote>
+<hr>
+<h2 id="3-循环依赖：三级缓存原理"><a href="#3-循环依赖：三级缓存原理" class="headerlink" title="3. 循环依赖：三级缓存原理"></a>3. 循环依赖：三级缓存原理</h2><h3 id="涉及知识点-12"><a href="#涉及知识点-12" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><p>循环依赖：</p>
+<p>例如：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">A 依赖 B
+B 又依赖 A<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<h3 id="为什么会有问题"><a href="#为什么会有问题" class="headerlink" title="为什么会有问题"></a>为什么会有问题</h3><p>创建 A：<br>需要 B。</p>
+<p>创建 B：<br>又需要 A。</p>
+<p>互相等待。</p>
+<hr>
+<h3 id="Spring-如何解决"><a href="#Spring-如何解决" class="headerlink" title="Spring 如何解决"></a>Spring 如何解决</h3><p>核心：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">三级缓存<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h3 id="三级缓存"><a href="#三级缓存" class="headerlink" title="三级缓存"></a>三级缓存</h3><h4 id="一级缓存"><a href="#一级缓存" class="headerlink" title="一级缓存"></a>一级缓存</h4><pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">singletonObjects<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>已经完成初始化的 Bean。</p>
+<hr>
+<h4 id="二级缓存"><a href="#二级缓存" class="headerlink" title="二级缓存"></a>二级缓存</h4><pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">earlySingletonObjects<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>提前暴露的 Bean。</p>
+<p>半成品对象。</p>
+<hr>
+<h4 id="三级缓存-1"><a href="#三级缓存-1" class="headerlink" title="三级缓存"></a>三级缓存</h4><pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">singletonFactories<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>对象工厂。</p>
+<p>用于生成代理对象。</p>
+<hr>
+<h4 id="为什么需要三级缓存"><a href="#为什么需要三级缓存" class="headerlink" title="为什么需要三级缓存"></a>为什么需要三级缓存</h4><p>因为 Spring 不只是解决循环依赖。</p>
+<p>还要支持：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">AOP代理对象<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h4 id="实际流程"><a href="#实际流程" class="headerlink" title="实际流程"></a>实际流程</h4><p>例如：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">A 依赖 B
+B 依赖 A<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>创建 A 时：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">A实例化
+↓
+提前放入三级缓存
+↓
+发现需要B
+↓
+创建B
+↓
+B发现需要A
+↓
+从三级缓存拿A<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>这样循环就断开了。</p>
+<hr>
+<h3 id="为什么构造器循环依赖解决不了"><a href="#为什么构造器循环依赖解决不了" class="headerlink" title="为什么构造器循环依赖解决不了"></a>为什么构造器循环依赖解决不了</h3><p>因为：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">对象都还没创建出来<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>没法提前暴露。</p>
+<hr>
+<h3 id="白话回答-10"><a href="#白话回答-10" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“Spring 通过三级缓存解决单例 Bean 的循环依赖。</p>
+<p>核心思想是 Bean 实例化后先提前暴露，再进行属性注入。</p>
+<p>三级缓存主要是为了支持 AOP 代理对象，否则二级缓存其实就够了。”</p>
+</blockquote>
+<hr>
+<h2 id="4-AOP-底层：JDK-动态代理-CGLIB"><a href="#4-AOP-底层：JDK-动态代理-CGLIB" class="headerlink" title="4. AOP 底层：JDK 动态代理 &#x2F; CGLIB"></a>4. AOP 底层：JDK 动态代理 &#x2F; CGLIB</h2><h3 id="涉及知识点-13"><a href="#涉及知识点-13" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><p>AOP：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">面向切面编程<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>用于：</p>
+<ul>
+<li>不修改业务代码</li>
+<li>统一增强功能</li>
+</ul>
+<hr>
+<h3 id="常见场景"><a href="#常见场景" class="headerlink" title="常见场景"></a>常见场景</h3><p>例如：</p>
+<ul>
+<li>日志</li>
+<li>事务</li>
+<li>权限校验</li>
+<li>接口耗时统计</li>
+</ul>
+<hr>
+<h3 id="Spring-AOP-两种代理方式"><a href="#Spring-AOP-两种代理方式" class="headerlink" title="Spring AOP 两种代理方式"></a>Spring AOP 两种代理方式</h3><table>
+<thead>
+<tr>
+<th>方式</th>
+<th>条件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>JDK 动态代理</td>
+<td>有接口</td>
+</tr>
+<tr>
+<td>CGLIB</td>
+<td>没有接口</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="JDK-动态代理"><a href="#JDK-动态代理" class="headerlink" title="JDK 动态代理"></a>JDK 动态代理</h3><p>基于：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">接口<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>生成代理类。</p>
+<hr>
+<h3 id="CGLIB"><a href="#CGLIB" class="headerlink" title="CGLIB"></a>CGLIB</h3><p>基于：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">继承<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>生成子类代理。</p>
+<hr>
+<h3 id="为什么-final-不能-AOP"><a href="#为什么-final-不能-AOP" class="headerlink" title="为什么 final 不能 AOP"></a>为什么 final 不能 AOP</h3><p>因为：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">CGLIB 需要继承<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>final 方法不能被重写。</p>
+<hr>
+<h3 id="实际项目场景-5"><a href="#实际项目场景-5" class="headerlink" title="实际项目场景"></a>实际项目场景</h3><p>例如：</p>
+<pre class="line-numbers language-java" data-language="java"><div class="caption"><span>id</span></div><code class="language-java"><span class="token annotation punctuation">@Transactional</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>底层就是 AOP。</p>
+<p>Spring 会生成代理对象：<br>在方法前后加入事务逻辑。</p>
+<hr>
+<h3 id="白话回答-11"><a href="#白话回答-11" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“Spring AOP 底层主要通过 JDK 动态代理和 CGLIB 实现。</p>
+<p>有接口默认用 JDK 动态代理，没有接口用 CGLIB。</p>
+<p>Spring 事务、日志、权限校验本质上都是 AOP。”</p>
+</blockquote>
+<hr>
+<h2 id="5-Spring-Boot-自动装配原理"><a href="#5-Spring-Boot-自动装配原理" class="headerlink" title="5. Spring Boot 自动装配原理"></a>5. Spring Boot 自动装配原理</h2><h3 id="涉及知识点-14"><a href="#涉及知识点-14" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><p>Spring Boot 核心：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">自动装配<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>目的：</p>
+<p>减少 XML 配置。</p>
+<hr>
+<h3 id="核心注解"><a href="#核心注解" class="headerlink" title="核心注解"></a>核心注解</h3><pre class="line-numbers language-java" data-language="java"><div class="caption"><span>id</span></div><code class="language-java"><span class="token annotation punctuation">@SpringBootApplication</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>本质包含：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">@Configuration
+@EnableAutoConfiguration
+@ComponentScan<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h3 id="自动装配核心流程"><a href="#自动装配核心流程" class="headerlink" title="自动装配核心流程"></a>自动装配核心流程</h3><pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">@EnableAutoConfiguration
+↓
+加载 META-INF/spring.factories
+↓
+读取自动配置类
+↓
+按条件装配 Bean<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h3 id="为什么-Starter-能自动生效"><a href="#为什么-Starter-能自动生效" class="headerlink" title="为什么 Starter 能自动生效"></a>为什么 Starter 能自动生效</h3><p>因为 Starter：</p>
+<p>会提前配置：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">AutoConfiguration<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>Spring Boot 启动时自动加载。</p>
+<hr>
+<h3 id="实际项目场景-6"><a href="#实际项目场景-6" class="headerlink" title="实际项目场景"></a>实际项目场景</h3><p>例如：</p>
+<p>引入：</p>
+<pre class="line-numbers language-markup" data-language="markup"><div class="caption"><span>id</span></div><code class="language-markup">spring-boot-starter-web<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>就自动配置：</p>
+<ul>
+<li>Tomcat</li>
+<li>Spring MVC</li>
+<li>JSON 转换器</li>
+</ul>
+<p>不需要自己写 XML。</p>
+<hr>
+<h3 id="白话回答-12"><a href="#白话回答-12" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“Spring Boot 自动装配核心是 @EnableAutoConfiguration。</p>
+<p>启动时会读取 spring.factories 中的自动配置类，再根据条件自动创建 Bean。</p>
+<p>Starter 能开箱即用，本质就是提前帮我们写好了自动配置。”</p>
+</blockquote>
+<hr>
+<h2 id="6-Conditional-系列注解作用"><a href="#6-Conditional-系列注解作用" class="headerlink" title="6. @Conditional 系列注解作用"></a>6. @Conditional 系列注解作用</h2><h3 id="涉及知识点-15"><a href="#涉及知识点-15" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><p>作用：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">按条件装配Bean<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>满足条件才创建 Bean。</p>
+<hr>
+<h3 id="常见注解"><a href="#常见注解" class="headerlink" title="常见注解"></a>常见注解</h3><table>
+<thead>
+<tr>
+<th>注解</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>@ConditionalOnClass</td>
+<td>类存在才生效</td>
+</tr>
+<tr>
+<td>@ConditionalOnBean</td>
+<td>Bean 存在才生效</td>
+</tr>
+<tr>
+<td>@ConditionalOnMissingBean</td>
+<td>Bean 不存在才生效</td>
+</tr>
+<tr>
+<td>@ConditionalOnProperty</td>
+<td>配置项满足才生效</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="实际项目场景-7"><a href="#实际项目场景-7" class="headerlink" title="实际项目场景"></a>实际项目场景</h3><p>例如：</p>
+<pre class="line-numbers language-java" data-language="java"><div class="caption"><span>id</span></div><code class="language-java"><span class="token annotation punctuation">@ConditionalOnMissingBean</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>用户没定义 Bean：<br>Spring 才自动创建默认 Bean。</p>
+<p>避免冲突。</p>
+<hr>
+<h3 id="白话回答-13"><a href="#白话回答-13" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“@Conditional 系列注解用于条件装配。</p>
+<p>Spring Boot 自动配置大量依赖这些注解，满足条件才创建 Bean，避免无效配置和 Bean 冲突。”</p>
+</blockquote>
+<hr>
+<h2 id="7-Spring-MVC-执行流程"><a href="#7-Spring-MVC-执行流程" class="headerlink" title="7. Spring MVC 执行流程"></a>7. Spring MVC 执行流程</h2><h3 id="涉及知识点-16"><a href="#涉及知识点-16" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><p>Spring MVC 核心流程：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">请求
+↓
+DispatcherServlet
+↓
+HandlerMapping
+↓
+Controller
+↓
+Service
+↓
+返回ModelAndView/JSON
+↓
+视图解析
+↓
+响应<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h3 id="顺带解释几个词-4"><a href="#顺带解释几个词-4" class="headerlink" title="顺带解释几个词"></a>顺带解释几个词</h3><h4 id="DispatcherServlet"><a href="#DispatcherServlet" class="headerlink" title="DispatcherServlet"></a>DispatcherServlet</h4><p>Spring MVC 核心前端控制器。</p>
+<p>所有请求先到它。</p>
+<hr>
+<h4 id="HandlerMapping"><a href="#HandlerMapping" class="headerlink" title="HandlerMapping"></a>HandlerMapping</h4><p>负责：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">URL -> Controller<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>映射。</p>
+<hr>
+<h4 id="ViewResolver"><a href="#ViewResolver" class="headerlink" title="ViewResolver"></a>ViewResolver</h4><p>负责页面解析。</p>
+<p>例如：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">login
+↓
+login.jsp<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h3 id="实际项目场景-8"><a href="#实际项目场景-8" class="headerlink" title="实际项目场景"></a>实际项目场景</h3><p>前后端分离里：</p>
+<p>通常：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">返回JSON<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>不走 JSP 页面。</p>
+<hr>
+<h3 id="白话回答-14"><a href="#白话回答-14" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“Spring MVC 的核心是 DispatcherServlet。</p>
+<p>请求进入后会通过 HandlerMapping 找到对应 Controller，再调用业务逻辑，最后返回 JSON 或视图响应。”</p>
+</blockquote>
+<hr>
+<h2 id="8-Spring-事务传播机制、隔离级别"><a href="#8-Spring-事务传播机制、隔离级别" class="headerlink" title="8. Spring 事务传播机制、隔离级别"></a>8. Spring 事务传播机制、隔离级别</h2><h3 id="涉及知识点-17"><a href="#涉及知识点-17" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><hr>
+<h3 id="事务传播机制"><a href="#事务传播机制" class="headerlink" title="事务传播机制"></a>事务传播机制</h3><p>核心：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">多个事务方法互相调用时
+事务怎么传播<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<h3 id="常见传播行为"><a href="#常见传播行为" class="headerlink" title="常见传播行为"></a>常见传播行为</h3><table>
+<thead>
+<tr>
+<th>传播机制</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>REQUIRED</td>
+<td>默认，有事务就加入，没有就新建</td>
+</tr>
+<tr>
+<td>REQUIRES_NEW</td>
+<td>新开事务</td>
+</tr>
+<tr>
+<td>SUPPORTS</td>
+<td>有事务就加入，没有就非事务执行</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="实际项目场景-9"><a href="#实际项目场景-9" class="headerlink" title="实际项目场景"></a>实际项目场景</h3><p>例如：</p>
+<p>订单主流程失败：<br>日志保存不能回滚。</p>
+<p>日志方法：</p>
+<pre class="line-numbers language-java" data-language="java"><div class="caption"><span>id</span></div><code class="language-java"><span class="token constant">REQUIRES_NEW</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>单独事务。</p>
+<hr>
+<h3 id="隔离级别"><a href="#隔离级别" class="headerlink" title="隔离级别"></a>隔离级别</h3><p>用于解决并发问题。</p>
+<hr>
+<h3 id="并发问题"><a href="#并发问题" class="headerlink" title="并发问题"></a>并发问题</h3><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>脏读</td>
+<td>读到别人未提交数据</td>
+</tr>
+<tr>
+<td>不可重复读</td>
+<td>同一数据两次读取结果不同</td>
+</tr>
+<tr>
+<td>幻读</td>
+<td>同条件查询结果数量变化</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="四种隔离级别"><a href="#四种隔离级别" class="headerlink" title="四种隔离级别"></a>四种隔离级别</h3><table>
+<thead>
+<tr>
+<th>隔离级别</th>
+<th>能解决什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>READ_UNCOMMITTED</td>
+<td>最低隔离</td>
+</tr>
+<tr>
+<td>READ_COMMITTED</td>
+<td>避免脏读</td>
+</tr>
+<tr>
+<td>REPEATABLE_READ</td>
+<td>避免不可重复读（MySQL默认）</td>
+</tr>
+<tr>
+<td>SERIALIZABLE</td>
+<td>完全串行化</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="白话回答-15"><a href="#白话回答-15" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“Spring 事务传播机制用于控制事务之间怎么传递。</p>
+<p>最常用的是 REQUIRED 和 REQUIRES_NEW。</p>
+<p>隔离级别则用于解决并发问题，比如脏读、不可重复读和幻读。</p>
+<p>MySQL 默认一般是 REPEATABLE_READ。”</p>
+</blockquote>
+<hr>
+<h1 id="Java-基础"><a href="#Java-基础" class="headerlink" title="Java 基础"></a>Java 基础</h1><hr>
+<h2 id="1-HashMap-底层实现、扩容、哈希冲突、JDK1-7-1-8-区别"><a href="#1-HashMap-底层实现、扩容、哈希冲突、JDK1-7-1-8-区别" class="headerlink" title="1. HashMap 底层实现、扩容、哈希冲突、JDK1.7&#x2F;1.8 区别"></a>1. HashMap 底层实现、扩容、哈希冲突、JDK1.7&#x2F;1.8 区别</h2><h3 id="涉及知识点-18"><a href="#涉及知识点-18" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><p>HashMap 底层：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">数组 + 链表 + 红黑树（JDK1.8）<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h3 id="HashMap-存储流程"><a href="#HashMap-存储流程" class="headerlink" title="HashMap 存储流程"></a>HashMap 存储流程</h3><pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">key
+↓
+hash计算
+↓
+定位数组下标
+↓
+放入桶(bucket)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h3 id="什么是哈希冲突"><a href="#什么是哈希冲突" class="headerlink" title="什么是哈希冲突"></a>什么是哈希冲突</h3><p>不同 key：</p>
+<p>计算后落到同一个数组位置。</p>
+<p>例如：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">hash(A) % 16 = 1
+hash(B) % 16 = 1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>这就是哈希冲突。</p>
+<hr>
+<h3 id="如何解决冲突"><a href="#如何解决冲突" class="headerlink" title="如何解决冲突"></a>如何解决冲突</h3><p>JDK1.7：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">链表<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>JDK1.8：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">链表长度超过8
+↓
+转红黑树<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h3 id="为什么转红黑树"><a href="#为什么转红黑树" class="headerlink" title="为什么转红黑树"></a>为什么转红黑树</h3><p>链表查找：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">O(n)<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>红黑树：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">O(logn)<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h3 id="扩容机制"><a href="#扩容机制" class="headerlink" title="扩容机制"></a>扩容机制</h3><p>默认容量：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">16<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>默认负载因子：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">0.75<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>达到：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">16 * 0.75 = 12<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>就扩容。</p>
+<hr>
+<h3 id="什么是负载因子"><a href="#什么是负载因子" class="headerlink" title="什么是负载因子"></a>什么是负载因子</h3><p>衡量：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">哈希表装满程度<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h3 id="为什么是-0-75"><a href="#为什么是-0-75" class="headerlink" title="为什么是 0.75"></a>为什么是 0.75</h3><p>空间利用率和哈希冲突之间的平衡。</p>
+<hr>
+<h3 id="JDK1-7-vs-1-8"><a href="#JDK1-7-vs-1-8" class="headerlink" title="JDK1.7 vs 1.8"></a>JDK1.7 vs 1.8</h3><table>
+<thead>
+<tr>
+<th>版本</th>
+<th>区别</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>JDK1.7</td>
+<td>数组+链表</td>
+</tr>
+<tr>
+<td>JDK1.8</td>
+<td>数组+链表+红黑树</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="1-7-为什么线程不安全更严重"><a href="#1-7-为什么线程不安全更严重" class="headerlink" title="1.7 为什么线程不安全更严重"></a>1.7 为什么线程不安全更严重</h3><p>1.7 扩容采用：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">头插法<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>多线程下可能：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">链表成环<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>导致死循环。</p>
+<hr>
+<h3 id="1-8-改进"><a href="#1-8-改进" class="headerlink" title="1.8 改进"></a>1.8 改进</h3><p>采用：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">尾插法<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>避免链表成环。</p>
+<hr>
+<h3 id="白话回答-16"><a href="#白话回答-16" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“HashMap 底层是数组加链表，JDK1.8 后增加了红黑树优化。</p>
+<p>key 会先计算 hash，再定位数组位置。</p>
+<p>如果多个 key 落到同一个桶，就发生哈希冲突。</p>
+<p>JDK1.8 在链表过长时会转红黑树，提高查询效率。</p>
+<p>HashMap 达到负载因子后会扩容，默认容量16，负载因子0.75。”</p>
+</blockquote>
+<hr>
+<h2 id="2-HashMap-和-ConcurrentHashMap-区别、锁机制"><a href="#2-HashMap-和-ConcurrentHashMap-区别、锁机制" class="headerlink" title="2. HashMap 和 ConcurrentHashMap 区别、锁机制"></a>2. HashMap 和 ConcurrentHashMap 区别、锁机制</h2><h3 id="涉及知识点-19"><a href="#涉及知识点-19" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><hr>
+<h3 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h3><p>特点：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">线程不安全<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>多线程可能：</p>
+<ul>
+<li>数据覆盖</li>
+<li>死循环</li>
+<li>丢数据</li>
+</ul>
+<hr>
+<h3 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h3><p>特点：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">线程安全<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>适合并发场景。</p>
+<hr>
+<h3 id="JDK1-7-锁机制"><a href="#JDK1-7-锁机制" class="headerlink" title="JDK1.7 锁机制"></a>JDK1.7 锁机制</h3><pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">Segment分段锁<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>多个 Segment 独立加锁。</p>
+<p>减少锁竞争。</p>
+<hr>
+<h3 id="JDK1-8-锁机制"><a href="#JDK1-8-锁机制" class="headerlink" title="JDK1.8 锁机制"></a>JDK1.8 锁机制</h3><p>取消 Segment。</p>
+<p>采用：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">CAS + synchronized<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h3 id="什么是-CAS"><a href="#什么是-CAS" class="headerlink" title="什么是 CAS"></a>什么是 CAS</h3><p>Compare And Swap。</p>
+<p>比较并交换。</p>
+<p>一种无锁并发机制。</p>
+<hr>
+<h3 id="ConcurrentHashMap-为什么性能更高"><a href="#ConcurrentHashMap-为什么性能更高" class="headerlink" title="ConcurrentHashMap 为什么性能更高"></a>ConcurrentHashMap 为什么性能更高</h3><p>因为：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">锁粒度更小<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>不是整个 Map 加锁。</p>
+<hr>
+<h3 id="实际项目场景-10"><a href="#实际项目场景-10" class="headerlink" title="实际项目场景"></a>实际项目场景</h3><p>例如：</p>
+<p>缓存统计：</p>
+<pre class="line-numbers language-java" data-language="java"><div class="caption"><span>id</span></div><code class="language-java"><span class="token class-name">ConcurrentHashMap</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">,</span> <span class="token class-name">AtomicInteger</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>统计接口访问次数。</p>
+<hr>
+<h3 id="白话回答-17"><a href="#白话回答-17" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“HashMap 是线程不安全的，而 ConcurrentHashMap 支持高并发。</p>
+<p>JDK1.7 使用 Segment 分段锁，JDK1.8 改成 CAS 加 synchronized，锁粒度更小，所以并发性能更高。”</p>
+</blockquote>
+<hr>
+<h2 id="3-volatile、synchronized、Lock-区别"><a href="#3-volatile、synchronized、Lock-区别" class="headerlink" title="3. volatile、synchronized、Lock 区别"></a>3. volatile、synchronized、Lock 区别</h2><h3 id="涉及知识点-20"><a href="#涉及知识点-20" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><hr>
+<h3 id="volatile"><a href="#volatile" class="headerlink" title="volatile"></a>volatile</h3><p>作用：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">保证可见性
+禁止指令重排<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<hr>
+<h3 id="什么是可见性"><a href="#什么是可见性" class="headerlink" title="什么是可见性"></a>什么是可见性</h3><p>一个线程修改变量：</p>
+<p>其他线程立即可见。</p>
+<hr>
+<h3 id="什么是指令重排"><a href="#什么是指令重排" class="headerlink" title="什么是指令重排"></a>什么是指令重排</h3><p>CPU 为了优化性能：</p>
+<p>可能调整代码执行顺序。</p>
+<p>volatile 可以禁止这种重排。</p>
+<hr>
+<h3 id="volatile-不能保证什么"><a href="#volatile-不能保证什么" class="headerlink" title="volatile 不能保证什么"></a>volatile 不能保证什么</h3><p>不能保证：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">原子性<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h3 id="什么是原子性"><a href="#什么是原子性" class="headerlink" title="什么是原子性"></a>什么是原子性</h3><p>操作：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">不可被中断<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>例如：</p>
+<pre class="line-numbers language-java" data-language="java"><div class="caption"><span>id</span></div><code class="language-java">i<span class="token operator">++</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>其实不是原子操作。</p>
+<hr>
+<h3 id="synchronized"><a href="#synchronized" class="headerlink" title="synchronized"></a>synchronized</h3><p>作用：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">保证线程同步<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>底层：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">对象监视器Monitor<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h3 id="Lock（ReentrantLock）"><a href="#Lock（ReentrantLock）" class="headerlink" title="Lock（ReentrantLock）"></a>Lock（ReentrantLock）</h3><p>JDK 提供的显式锁。</p>
+<p>相比 synchronized：</p>
+<p>功能更多。</p>
+<p>例如：</p>
+<ul>
+<li>可中断</li>
+<li>超时锁</li>
+<li>公平锁</li>
+</ul>
+<hr>
+<h3 id="区别总结"><a href="#区别总结" class="headerlink" title="区别总结"></a>区别总结</h3><table>
+<thead>
+<tr>
+<th>关键字</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>volatile</td>
+<td>保证可见性</td>
+</tr>
+<tr>
+<td>synchronized</td>
+<td>自动加锁释放锁</td>
+</tr>
+<tr>
+<td>Lock</td>
+<td>更灵活</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="白话回答-18"><a href="#白话回答-18" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“volatile 主要保证可见性和禁止指令重排，但不能保证原子性。</p>
+<p>synchronized 用于线程同步，底层基于 Monitor。</p>
+<p>Lock 比 synchronized 更灵活，支持公平锁、可中断锁和超时机制。”</p>
+</blockquote>
+<hr>
+<h2 id="4-谈谈-ReentrantLock-的理解"><a href="#4-谈谈-ReentrantLock-的理解" class="headerlink" title="4. 谈谈 ReentrantLock 的理解"></a>4. 谈谈 ReentrantLock 的理解</h2><h3 id="涉及知识点-21"><a href="#涉及知识点-21" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><p>Reentrant：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">可重入<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>意思：</p>
+<p>同一个线程：<br>可以重复获取同一把锁。</p>
+<hr>
+<h3 id="为什么需要可重入"><a href="#为什么需要可重入" class="headerlink" title="为什么需要可重入"></a>为什么需要可重入</h3><p>例如：</p>
+<pre class="line-numbers language-java" data-language="java"><div class="caption"><span>id</span></div><code class="language-java"><span class="token class-name">A</span>方法加锁
+↓
+调用<span class="token class-name">B</span>方法
+↓
+<span class="token class-name">B</span>方法也需要同一把锁<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>如果不可重入：<br>会死锁。</p>
+<hr>
+<h3 id="ReentrantLock-特点"><a href="#ReentrantLock-特点" class="headerlink" title="ReentrantLock 特点"></a>ReentrantLock 特点</h3><p>相比 synchronized：</p>
+<p>支持：</p>
+<ul>
+<li>公平锁</li>
+<li>tryLock</li>
+<li>可中断锁</li>
+<li>Condition</li>
+</ul>
+<hr>
+<h3 id="什么是公平锁"><a href="#什么是公平锁" class="headerlink" title="什么是公平锁"></a>什么是公平锁</h3><p>先等待的线程先获得锁。</p>
+<hr>
+<h3 id="什么是-Condition"><a href="#什么是-Condition" class="headerlink" title="什么是 Condition"></a>什么是 Condition</h3><p>类似：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">wait/notify<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>但功能更强。</p>
+<hr>
+<h3 id="实际项目场景-11"><a href="#实际项目场景-11" class="headerlink" title="实际项目场景"></a>实际项目场景</h3><p>例如：</p>
+<p>异步任务队列：</p>
+<pre class="line-numbers language-java" data-language="java"><div class="caption"><span>id</span></div><code class="language-java">lock<span class="token punctuation">.</span><span class="token function">tryLock</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token class-name">TimeUnit</span><span class="token punctuation">.</span><span class="token constant">SECONDS</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>避免线程长期阻塞。</p>
+<hr>
+<h3 id="白话回答-19"><a href="#白话回答-19" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“ReentrantLock 是可重入锁，同一个线程可以重复获取锁。</p>
+<p>它相比 synchronized 更灵活，支持公平锁、tryLock、可中断锁等高级功能。”</p>
+</blockquote>
+<hr>
+<h2 id="5-线程池核心知识点"><a href="#5-线程池核心知识点" class="headerlink" title="5. 线程池核心知识点"></a>5. 线程池核心知识点</h2><h3 id="涉及知识点-22"><a href="#涉及知识点-22" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><p>线程池作用：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">线程复用<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>避免频繁：</p>
+<ul>
+<li>创建线程</li>
+<li>销毁线程</li>
+</ul>
+<p>降低系统开销。</p>
+<hr>
+<h3 id="为什么不能一直-new-Thread"><a href="#为什么不能一直-new-Thread" class="headerlink" title="为什么不能一直 new Thread"></a>为什么不能一直 new Thread</h3><p>线程创建成本高。</p>
+<p>高并发下：<br>容易：</p>
+<ul>
+<li>CPU 飙升</li>
+<li>OOM</li>
+<li>系统崩溃</li>
+</ul>
+<hr>
+<h3 id="线程池核心流程"><a href="#线程池核心流程" class="headerlink" title="线程池核心流程"></a>线程池核心流程</h3><pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">提交任务
+↓
+核心线程执行
+↓
+队列缓存
+↓
+创建非核心线程
+↓
+触发拒绝策略<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h3 id="实际项目场景-12"><a href="#实际项目场景-12" class="headerlink" title="实际项目场景"></a>实际项目场景</h3><p>例如：</p>
+<p>异步日志处理：</p>
+<ul>
+<li>请求线程快速返回</li>
+<li>后台线程异步写数据库</li>
+</ul>
+<hr>
+<h3 id="白话回答-20"><a href="#白话回答-20" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“线程池核心目的是线程复用，降低线程创建销毁开销。</p>
+<p>高并发项目里通常会用线程池处理异步任务，而不是频繁 new Thread。”</p>
+</blockquote>
+<hr>
+<h2 id="6-线程池七大参数"><a href="#6-线程池七大参数" class="headerlink" title="6. 线程池七大参数"></a>6. 线程池七大参数</h2><h3 id="涉及知识点-23"><a href="#涉及知识点-23" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><pre class="line-numbers language-java" data-language="java"><div class="caption"><span>id</span></div><code class="language-java"><span class="token class-name">ThreadPoolExecutor</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>七大参数：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>corePoolSize</td>
+<td>核心线程数</td>
+</tr>
+<tr>
+<td>maximumPoolSize</td>
+<td>最大线程数</td>
+</tr>
+<tr>
+<td>keepAliveTime</td>
+<td>空闲线程存活时间</td>
+</tr>
+<tr>
+<td>unit</td>
+<td>时间单位</td>
+</tr>
+<tr>
+<td>workQueue</td>
+<td>阻塞队列</td>
+</tr>
+<tr>
+<td>threadFactory</td>
+<td>线程工厂</td>
+</tr>
+<tr>
+<td>handler</td>
+<td>拒绝策略</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="拒绝策略"><a href="#拒绝策略" class="headerlink" title="拒绝策略"></a>拒绝策略</h3><table>
+<thead>
+<tr>
+<th>策略</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AbortPolicy</td>
+<td>抛异常</td>
+</tr>
+<tr>
+<td>CallerRunsPolicy</td>
+<td>调用线程执行</td>
+</tr>
+<tr>
+<td>DiscardPolicy</td>
+<td>丢弃</td>
+</tr>
+<tr>
+<td>DiscardOldestPolicy</td>
+<td>丢弃最旧任务</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="白话回答-21"><a href="#白话回答-21" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“线程池核心是 ThreadPoolExecutor。</p>
+<p>最重要的参数包括核心线程数、最大线程数、阻塞队列和拒绝策略。</p>
+<p>当线程和队列都满时，就会触发拒绝策略。”</p>
+</blockquote>
+<hr>
+<h2 id="7-线程安全集合有哪些、怎么实现安全"><a href="#7-线程安全集合有哪些、怎么实现安全" class="headerlink" title="7. 线程安全集合有哪些、怎么实现安全"></a>7. 线程安全集合有哪些、怎么实现安全</h2><h3 id="涉及知识点-24"><a href="#涉及知识点-24" class="headerlink" title="涉及知识点"></a>涉及知识点</h3><hr>
+<h3 id="Vector"><a href="#Vector" class="headerlink" title="Vector"></a>Vector</h3><p>早期线程安全 List。</p>
+<p>方法加：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">synchronized<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>性能较差。</p>
+<hr>
+<h3 id="Collections-synchronizedXXX"><a href="#Collections-synchronizedXXX" class="headerlink" title="Collections.synchronizedXXX"></a>Collections.synchronizedXXX</h3><p>包装同步集合。</p>
+<hr>
+<h3 id="ConcurrentHashMap-1"><a href="#ConcurrentHashMap-1" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h3><p>高并发 Map。</p>
+<hr>
+<h3 id="CopyOnWriteArrayList"><a href="#CopyOnWriteArrayList" class="headerlink" title="CopyOnWriteArrayList"></a>CopyOnWriteArrayList</h3><p>写时复制。</p>
+<p>适合：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">读多写少<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h3 id="什么是写时复制"><a href="#什么是写时复制" class="headerlink" title="什么是写时复制"></a>什么是写时复制</h3><p>写数据时：<br>复制新数组。</p>
+<p>读线程不加锁。</p>
+<hr>
+<h3 id="实际项目场景-13"><a href="#实际项目场景-13" class="headerlink" title="实际项目场景"></a>实际项目场景</h3><p>配置缓存：</p>
+<ul>
+<li>很少修改</li>
+<li>经常读取</li>
+</ul>
+<p>适合：</p>
+<pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">CopyOnWriteArrayList<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<hr>
+<h3 id="白话回答-22"><a href="#白话回答-22" class="headerlink" title="白话回答"></a>白话回答</h3><blockquote>
+<p>“常见线程安全集合包括 Vector、ConcurrentHashMap 和 CopyOnWriteArrayList。</p>
+<p>ConcurrentHashMap 适合高并发场景，CopyOnWriteArrayList 适合读多写少。”</p>
+</blockquote>
+<h1 id="Agent-岗位问题"><a href="#Agent-岗位问题" class="headerlink" title="Agent 岗位问题"></a>Agent 岗位问题</h1><hr>
+<h2 id="Python-三大器"><a href="#Python-三大器" class="headerlink" title="Python 三大器"></a>Python 三大器</h2><pre class="line-numbers language-text" data-language="text"><div class="caption"><span>id</span></div><code class="language-text">生成器
+迭代器
+装饰器<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h3 id="回答"><a href="#回答" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“Python 常说的三大器一般是生成器、迭代器和装饰器。</p>
+<p>迭代器核心是实现 <code>__iter__</code> 和 <code>__next__</code>；</p>
+<p>生成器本质是特殊迭代器，通过 yield 实现惰性生成，适合大数据量场景；</p>
+<p>装饰器本质是函数增强，不修改原函数的情况下增加功能，Python Web 框架和日志、权限控制里很常见。”</p>
+</blockquote>
+<hr>
+<h2 id="异步和多线程"><a href="#异步和多线程" class="headerlink" title="异步和多线程"></a>异步和多线程</h2><hr>
+<h3 id="回答-1"><a href="#回答-1" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“异步主要解决 IO 等待问题，多线程主要解决任务并发问题。</p>
+<p>Python 由于 GIL 的存在，多线程在 CPU 密集型场景优势有限，但在网络请求、数据库访问这种 IO 密集型场景依然有效。</p>
+<p>AI Agent 场景里我更多会用 asyncio，比如并发调用多个 API、并发向量检索、并发 Tool Calling。”</p>
+</blockquote>
+<hr>
+<h2 id="如何优化-SQL-查询速度"><a href="#如何优化-SQL-查询速度" class="headerlink" title="如何优化 SQL 查询速度"></a>如何优化 SQL 查询速度</h2><hr>
+<h3 id="回答-2"><a href="#回答-2" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“我一般先通过 explain 看执行计划，重点看有没有走索引、是否全表扫描。</p>
+<p>常见优化包括：</p>
+<ul>
+<li>增加索引</li>
+<li>联合索引</li>
+<li>避免 select *</li>
+<li>减少回表</li>
+<li>大分页优化</li>
+</ul>
+<p>如果数据量比较大，还会考虑读写分离或者缓存。”</p>
+</blockquote>
+<hr>
+<h2 id="AI-和-Agent-的区别"><a href="#AI-和-Agent-的区别" class="headerlink" title="AI 和 Agent 的区别"></a>AI 和 Agent 的区别</h2><hr>
+<h3 id="回答-3"><a href="#回答-3" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“普通 AI 更像一次性问答，输入 Prompt 返回结果。</p>
+<p>Agent 则更强调：</p>
+<ul>
+<li>自主决策</li>
+<li>多步骤执行</li>
+<li>工具调用</li>
+<li>状态管理</li>
+</ul>
+<p>比如普通 LLM 只能回答天气，而 Agent 可以：</p>
+<ul>
+<li>自动调用天气 API</li>
+<li>解析结果</li>
+<li>继续完成后续任务。”</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="LangChain-常用方法"><a href="#LangChain-常用方法" class="headerlink" title="LangChain 常用方法"></a>LangChain 常用方法</h2><hr>
+<h3 id="回答-4"><a href="#回答-4" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“我实际用得比较多的是：</p>
+<ul>
+<li>PromptTemplate</li>
+<li>ChatOpenAI</li>
+<li>RunnableSequence</li>
+<li>Retriever</li>
+<li>Memory</li>
+<li>Tool</li>
+<li>AgentExecutor</li>
+</ul>
+<p>RAG 里主要会用 document loader、text splitter 和 vector store。”</p>
+</blockquote>
+<hr>
+<h2 id="你一般怎么写-Prompt"><a href="#你一般怎么写-Prompt" class="headerlink" title="你一般怎么写 Prompt"></a>你一般怎么写 Prompt</h2><hr>
+<h3 id="回答-5"><a href="#回答-5" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“我一般会把 Prompt 分成：</p>
+<ul>
+<li>system prompt</li>
+<li>user prompt</li>
+<li>context</li>
+</ul>
+<p>然后尽量：</p>
+<ul>
+<li>明确角色</li>
+<li>明确输出格式</li>
+<li>限制模型行为</li>
+<li>提供 few-shot 示例</li>
+</ul>
+<p>RAG 场景里还会明确要求：</p>
+<p>‘只能根据检索内容回答，不允许编造。’”</p>
+</blockquote>
+<hr>
+<h2 id="常见-RAG-搜索策略"><a href="#常见-RAG-搜索策略" class="headerlink" title="常见 RAG 搜索策略"></a>常见 RAG 搜索策略</h2><hr>
+<h3 id="回答-6"><a href="#回答-6" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“常见策略包括：</p>
+<ul>
+<li>向量检索</li>
+<li>BM25关键词检索</li>
+<li>混合检索</li>
+<li>rerank重排序</li>
+<li>metadata filter</li>
+</ul>
+<p>实际项目里我更倾向双路召回，因为纯向量检索容易语义漂移。”</p>
+</blockquote>
+<hr>
+<h2 id="如何避免-AI-幻觉"><a href="#如何避免-AI-幻觉" class="headerlink" title="如何避免 AI 幻觉"></a>如何避免 AI 幻觉</h2><hr>
+<h3 id="回答-7"><a href="#回答-7" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“避免幻觉主要有几个方向：</p>
+<ul>
+<li>RAG 提供外部知识</li>
+<li>Prompt 限制回答范围</li>
+<li>降低 temperature</li>
+<li>增加相似度阈值过滤</li>
+<li>增加 rerank</li>
+</ul>
+<p>对于高风险场景，还会要求模型返回引用来源。”</p>
+</blockquote>
+<hr>
+<h2 id="多头注意力机制"><a href="#多头注意力机制" class="headerlink" title="多头注意力机制"></a>多头注意力机制</h2><hr>
+<h3 id="回答-8"><a href="#回答-8" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“多头注意力本质是让模型从多个不同语义角度理解文本关系。</p>
+<p>比如一句话里：</p>
+<ul>
+<li>一个 head 关注主语</li>
+<li>一个关注时态</li>
+<li>一个关注上下文关联</li>
+</ul>
+<p>最后再把多个 head 的结果融合，提高模型对上下文的理解能力。”</p>
+</blockquote>
+<hr>
+<h2 id="GPT5-相比其他-AI-做了什么优化"><a href="#GPT5-相比其他-AI-做了什么优化" class="headerlink" title="GPT5 相比其他 AI 做了什么优化"></a>GPT5 相比其他 AI 做了什么优化</h2><hr>
+<h3 id="回答-9"><a href="#回答-9" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“我更关注实际使用体验。</p>
+<p>相比很多模型，GPT 系列在：</p>
+<ul>
+<li>长上下文</li>
+<li>工具调用</li>
+<li>推理稳定性</li>
+<li>指令遵循</li>
+<li>多轮对话</li>
+</ul>
+<p>上整体会更成熟。</p>
+<p>特别是复杂 Agent Workflow 场景，稳定性会明显更好。”</p>
+</blockquote>
+<hr>
+<h2 id="最近写的-Agent-是什么，怎么做的"><a href="#最近写的-Agent-是什么，怎么做的" class="headerlink" title="最近写的 Agent 是什么，怎么做的"></a>最近写的 Agent 是什么，怎么做的</h2><hr>
+<h3 id="回答-10"><a href="#回答-10" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“我最近做的是一个基于 LangChain 的 RAG Agent。</p>
+<p>核心功能包括：</p>
+<ul>
+<li>文档知识库检索</li>
+<li>多轮对话记忆</li>
+<li>Tool Calling</li>
+<li>SSE 流式输出</li>
+</ul>
+<p>技术栈是：</p>
+<ul>
+<li>FastAPI</li>
+<li>LangChain</li>
+<li>Chroma</li>
+<li>OpenAI&#x2F;Ollama</li>
+</ul>
+<p>文档会先 chunk 切分，再 embedding 存入向量库。</p>
+<p>查询时采用 BM25 + 向量检索双路召回，并增加 rerank。</p>
+<p>Agent 部分支持工具调用，比如联网搜索和本地知识查询。”</p>
+</blockquote>
+<hr>
+<h2 id="LangGraph"><a href="#LangGraph" class="headerlink" title="LangGraph"></a>LangGraph</h2><hr>
+<h3 id="回答-11"><a href="#回答-11" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“LangGraph 本质是基于状态机的 Agent Workflow。</p>
+<p>相比 LangChain 的链式调用，LangGraph 更适合：</p>
+<ul>
+<li>多步骤决策</li>
+<li>条件分支</li>
+<li>状态流转</li>
+<li>多 Agent 协作</li>
+</ul>
+<p>我实际用它做过：</p>
+<ul>
+<li>Tool Calling</li>
+<li>Agent 状态管理</li>
+<li>多轮执行流程。”</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="ES-搜索机制"><a href="#ES-搜索机制" class="headerlink" title="ES 搜索机制"></a>ES 搜索机制</h2><hr>
+<h3 id="回答-12"><a href="#回答-12" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“ES 底层基于倒排索引。</p>
+<p>它会把词和文档映射关系提前建立好，所以搜索速度非常快。</p>
+<p>AI 场景里我更多会用 ES 做：</p>
+<ul>
+<li>BM25关键词检索</li>
+<li>Hybrid Search</li>
+<li>metadata filter。”</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="Function-Calling-和-MCP"><a href="#Function-Calling-和-MCP" class="headerlink" title="Function Calling 和 MCP"></a>Function Calling 和 MCP</h2><hr>
+<h3 id="回答-13"><a href="#回答-13" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“Function Calling 本质是模型输出结构化工具调用参数，由服务端真正执行工具。</p>
+<p>MCP 更像统一工具协议，让模型可以标准化接入外部工具、数据库和服务。</p>
+<p>我理解 MCP 更偏：</p>
+<p>‘AI 时代的工具接口标准化。’”</p>
+</blockquote>
+<hr>
+<h2 id="大量知识文本入库怎么处理"><a href="#大量知识文本入库怎么处理" class="headerlink" title="大量知识文本入库怎么处理"></a>大量知识文本入库怎么处理</h2><hr>
+<h3 id="回答-14"><a href="#回答-14" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“大量文本入库前，我会先做：</p>
+<ul>
+<li>文档清洗</li>
+<li>去重</li>
+<li>chunk切分</li>
+<li>metadata提取</li>
+</ul>
+<p>然后异步 embedding。</p>
+<p>检索层面会：</p>
+<ul>
+<li>控制 chunk 大小</li>
+<li>建立 metadata filter</li>
+<li>做混合检索</li>
+</ul>
+<p>避免向量库规模过大后检索效率下降。”</p>
+</blockquote>
+<hr>
+<h2 id="最难的问题是什么"><a href="#最难的问题是什么" class="headerlink" title="最难的问题是什么"></a>最难的问题是什么</h2><hr>
+<h3 id="回答-15"><a href="#回答-15" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“我之前遇到过一个比较难的问题是：</p>
+<p>RAG 检索结果不稳定，模型经常答非所问。</p>
+<p>后来排查发现：</p>
+<ul>
+<li>chunk 切分太粗</li>
+<li>纯向量检索语义漂移</li>
+</ul>
+<p>后面我重新设计了 chunk 策略，并增加 BM25 混合检索和 rerank，最终回答准确率明显提升。</p>
+<p>整个优化过程大概花了一周左右。”</p>
+</blockquote>
+<hr>
+<h2 id="做过什么项目，有什么可复刻经验"><a href="#做过什么项目，有什么可复刻经验" class="headerlink" title="做过什么项目，有什么可复刻经验"></a>做过什么项目，有什么可复刻经验</h2><hr>
+<h3 id="回答-16"><a href="#回答-16" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“我之前做过后端、自动化和 AI Agent 相关项目。</p>
+<p>我觉得比较能复刻的是：</p>
+<ul>
+<li>快速学习新技术</li>
+<li>工程落地能力</li>
+<li>异步并发和服务化经验</li>
+</ul>
+<p>AI 这块虽然接触时间不算特别长，但我进入状态比较快，也比较关注实际落地而不是概念。”</p>
+</blockquote>
+<hr>
+<h2 id="和同事冲突怎么办"><a href="#和同事冲突怎么办" class="headerlink" title="和同事冲突怎么办"></a>和同事冲突怎么办</h2><hr>
+<h3 id="推荐回答"><a href="#推荐回答" class="headerlink" title="推荐回答"></a>推荐回答</h3><blockquote>
+<p>“我一般会先确认问题是技术分歧还是沟通问题。</p>
+<p>如果是技术问题，我更倾向用数据、测试结果和实际效果讨论，而不是情绪化争论。</p>
+<p>最终目标还是把项目做好。”</p>
+</blockquote>
+<hr>
+<h2 id="预期薪资"><a href="#预期薪资" class="headerlink" title="预期薪资"></a>预期薪资</h2><hr>
+<h3 id="回答-17"><a href="#回答-17" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“我目前预期大概在 15K 左右，但我更看重岗位方向、成长空间和团队氛围，具体也可以结合岗位职责沟通。”</p>
+</blockquote>
+<hr>
+<h2 id="明天能到岗么"><a href="#明天能到岗么" class="headerlink" title="明天能到岗么"></a>明天能到岗么</h2><hr>
+<h3 id="回答-18"><a href="#回答-18" class="headerlink" title="回答"></a>回答</h3><blockquote>
+<p>“如果流程确定，我这边可以尽快配合入职，一般一周内没问题。”</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io">thchen</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://kesuoer-ui.github.io/2026/05/12/other/Job-Questions-Answer/">https://kesuoer-ui.github.io/2026/05/12/other/Job-Questions-Answer/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://kesuoer-ui.github.io" target="_blank">thchen的闲言碎语堆积处</a>！</span></div></div><div class="tag_share"><div class="post-share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/03/31/ai/Claude-Code-Agent-Architecture-Insights/" title="Claude Code 泄露源码带给我的 Agent 启发"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Claude Code 泄露源码带给我的 Agent 启发</div></div><div class="info-2"><div class="info-item-1">Claude Code 泄露源码带来的真实启发这件事最有价值的地方，其实不是“AI 又进步了”。 而是第一次能从工业级实现里看到：  Agent 不是一个模型封装，而是一个完整的软件系统。  在这之前，大部分 Agent 项目都停留在“组合 Demo”的阶段：  LLM + Prompt LLM + Tool LLM + Memory  能跑，但不稳定，也谈不上工程体系。 Claude Code 的源码让我第一次看到另一种东西：  它不是在做 Agent，而是在做一个“受控执行系统”。   1. 早期 Agent 的问题其实很一致我之前做过不少 Agent demo，本质结构都类似： 用户输入 → LLM → Tool → 输出  或者稍微复杂一点： LLM → 判断是否调用工具 → Tool → LLM总结  问题很快就会暴露： （1）没有任务结构模型直接开始做事，没有拆解过程。 结果就是：  一步错全盘错 多步骤任务极不稳定   （2）上下文越来越脏所有历史都往 prompt 里堆：  token 爆炸 早期信息污染后续决策 模型越来越“迷”   （3）工具调用不可控典型问题...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">thchen</div><div class="author-info-description">全栈开发 / AI Agent / 系统设计</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">46</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">127</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">19</div></a></div><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/kesuoer-ui" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Redis"><span class="toc-number">1.</span> <span class="toc-text">Redis</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Redis-%E4%BA%94%E7%A7%8D%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E5%9C%BA%E6%99%AF%EF%BC%88%E5%BF%85%E8%83%8C%EF%BC%89"><span class="toc-number">1.1.</span> <span class="toc-text">1. Redis 五种常用数据结构及场景（必背）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="toc-number">1.1.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E9%A1%B9%E7%9B%AE%E5%9C%BA%E6%99%AF"><span class="toc-number">1.1.2.</span> <span class="toc-text">实际项目场景</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#String"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">String</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Hash"><span class="toc-number">1.1.2.2.</span> <span class="toc-text">Hash</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#List"><span class="toc-number">1.1.2.3.</span> <span class="toc-text">List</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Set"><span class="toc-number">1.1.2.4.</span> <span class="toc-text">Set</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ZSet"><span class="toc-number">1.1.2.5.</span> <span class="toc-text">ZSet</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94%EF%BC%88%E9%9D%A2%E8%AF%95%E5%8F%AF%E7%9B%B4%E6%8E%A5%E8%AF%B4%EF%BC%89"><span class="toc-number">1.1.3.</span> <span class="toc-text">白话回答（面试可直接说）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%E3%80%81%E5%87%BB%E7%A9%BF%E3%80%81%E9%9B%AA%E5%B4%A9%EF%BC%88%E5%BF%85%E8%83%8C%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">2. 缓存穿透、击穿、雪崩（必背）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F"><span class="toc-number">1.2.1.</span> <span class="toc-text">缓存穿透</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E7%A9%BF%E9%80%8F"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">什么是穿透</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9C%BA%E6%99%AF"><span class="toc-number">1.2.1.2.</span> <span class="toc-text">场景</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">1.2.1.3.</span> <span class="toc-text">解决方案</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8"><span class="toc-number">1.2.1.3.1.</span> <span class="toc-text">布隆过滤器</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E7%A9%BA%E5%80%BC"><span class="toc-number">1.2.1.3.2.</span> <span class="toc-text">缓存空值</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF"><span class="toc-number">1.2.2.</span> <span class="toc-text">缓存击穿</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%87%BB%E7%A9%BF"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">什么是击穿</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9C%BA%E6%99%AF-1"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">场景</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-1"><span class="toc-number">1.2.2.3.</span> <span class="toc-text">解决方案</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BA%92%E6%96%A5%E9%94%81"><span class="toc-number">1.2.2.3.1.</span> <span class="toc-text">互斥锁</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%80%BB%E8%BE%91%E8%BF%87%E6%9C%9F"><span class="toc-number">1.2.2.3.2.</span> <span class="toc-text">逻辑过期</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9"><span class="toc-number">1.2.3.</span> <span class="toc-text">缓存雪崩</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E9%9B%AA%E5%B4%A9"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">什么是雪崩</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-2"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">解决方案</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%BF%87%E6%9C%9F%E6%97%B6%E9%97%B4%E9%9A%8F%E6%9C%BA%E5%8C%96"><span class="toc-number">1.2.3.2.1.</span> <span class="toc-text">过期时间随机化</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Redis-%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="toc-number">1.2.3.2.2.</span> <span class="toc-text">Redis 高可用</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%99%90%E6%B5%81%E9%99%8D%E7%BA%A7"><span class="toc-number">1.2.3.2.3.</span> <span class="toc-text">限流降级</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%BA%E5%B8%A6%E8%A7%A3%E9%87%8A%E5%87%A0%E4%B8%AA%E8%AF%8D"><span class="toc-number">1.2.4.</span> <span class="toc-text">顺带解释几个词</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%83%AD%E7%82%B9-Key"><span class="toc-number">1.2.4.1.</span> <span class="toc-text">热点 Key</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%99%90%E6%B5%81"><span class="toc-number">1.2.4.2.</span> <span class="toc-text">限流</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%99%8D%E7%BA%A7"><span class="toc-number">1.2.4.3.</span> <span class="toc-text">降级</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94%EF%BC%88%E9%AB%98%E9%A2%91%E6%A0%87%E5%87%86%E7%AD%94%E6%A1%88%EF%BC%89"><span class="toc-number">1.2.5.</span> <span class="toc-text">白话回答（高频标准答案）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-Redis-%E6%8C%81%E4%B9%85%E5%8C%96%EF%BC%9ARDB-AOF"><span class="toc-number">1.3.</span> <span class="toc-text">3. Redis 持久化：RDB &#x2F; AOF</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-1"><span class="toc-number">1.3.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AOF-%E8%A1%A5%E5%85%85"><span class="toc-number">1.3.2.</span> <span class="toc-text">AOF 补充</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94"><span class="toc-number">1.3.3.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5%E3%80%81LRU-%E5%8E%9F%E7%90%86"><span class="toc-number">1.4.</span> <span class="toc-text">4. 淘汰策略、LRU 原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-2"><span class="toc-number">1.4.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E7%AD%96%E7%95%A5"><span class="toc-number">1.4.2.</span> <span class="toc-text">常见策略</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-LRU"><span class="toc-number">1.4.3.</span> <span class="toc-text">什么是 LRU</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E9%A1%B9%E7%9B%AE%E5%9C%BA%E6%99%AF-1"><span class="toc-number">1.4.4.</span> <span class="toc-text">实际项目场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-1"><span class="toc-number">1.4.5.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E6%B6%88%E6%81%AF%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">1.5.</span> <span class="toc-text">5. 如何保证消息一致性</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E5%92%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">1.5.1.</span> <span class="toc-text">缓存和数据库一致性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-3"><span class="toc-number">1.5.2.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E6%98%AF%E5%85%88%E5%88%A0%E7%BC%93%E5%AD%98"><span class="toc-number">1.5.3.</span> <span class="toc-text">为什么不是先删缓存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%84%8F%E6%95%B0%E6%8D%AE"><span class="toc-number">1.5.4.</span> <span class="toc-text">什么是脏数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%AB%98%E5%B9%B6%E5%8F%91%E4%BC%98%E5%8C%96"><span class="toc-number">1.5.5.</span> <span class="toc-text">高并发优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BB%B6%E8%BF%9F%E5%8F%8C%E5%88%A0"><span class="toc-number">1.5.6.</span> <span class="toc-text">延迟双删</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MQ-%E9%87%8D%E8%AF%95"><span class="toc-number">1.5.7.</span> <span class="toc-text">MQ 重试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-MQ"><span class="toc-number">1.5.8.</span> <span class="toc-text">什么是 MQ</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E9%A1%B9%E7%9B%AE%E5%9C%BA%E6%99%AF-2"><span class="toc-number">1.5.9.</span> <span class="toc-text">实际项目场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-2"><span class="toc-number">1.5.10.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E9%A1%B9%E7%9B%AE%E4%B8%AD%E5%93%AA%E9%87%8C%E5%AE%9E%E9%99%85%E7%94%A8%E4%BA%86-Redis"><span class="toc-number">1.6.</span> <span class="toc-text">6. 项目中哪里实际用了 Redis</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E9%A1%B9%E7%9B%AE%E5%9B%9E%E7%AD%94%E6%A8%A1%E6%9D%BF"><span class="toc-number">1.6.1.</span> <span class="toc-text">实际项目回答模板</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL%EF%BC%88%E5%87%A0%E4%B9%8E%E6%AF%8F%E5%9C%BA%E9%83%BD%E9%97%AE%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">MySQL（几乎每场都问）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-InnoDB-%E7%B4%A2%E5%BC%95%E7%BB%93%E6%9E%84"><span class="toc-number">2.1.</span> <span class="toc-text">1. InnoDB 索引结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="toc-number">2.1.1.</span> <span class="toc-text">知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94%E7%A4%BA%E4%BE%8B"><span class="toc-number">2.1.2.</span> <span class="toc-text">白话回答示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95-%E9%9D%9E%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95-%E8%A6%86%E7%9B%96%E7%B4%A2%E5%BC%95-%E8%81%94%E5%90%88%E7%B4%A2%E5%BC%95"><span class="toc-number">2.2.</span> <span class="toc-text">2. 聚簇索引 &#x2F; 非聚簇索引 &#x2F; 覆盖索引 &#x2F; 联合索引</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9-1"><span class="toc-number">2.2.1.</span> <span class="toc-text">知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94%E7%A4%BA%E4%BE%8B-1"><span class="toc-number">2.2.2.</span> <span class="toc-text">白话回答示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%9C%80%E5%B7%A6%E5%8C%B9%E9%85%8D%E5%8E%9F%E5%88%99"><span class="toc-number">2.3.</span> <span class="toc-text">3. 最左匹配原则</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9-2"><span class="toc-number">2.3.1.</span> <span class="toc-text">知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94%E7%A4%BA%E4%BE%8B-2"><span class="toc-number">2.3.2.</span> <span class="toc-text">白话回答示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E4%BA%8B%E5%8A%A1%E5%9B%9B%E5%A4%A7%E7%89%B9%E6%80%A7-ACID-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="toc-number">2.4.</span> <span class="toc-text">4. 事务四大特性 ACID &amp; 实现原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9-3"><span class="toc-number">2.4.1.</span> <span class="toc-text">知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94%E7%A4%BA%E4%BE%8B-3"><span class="toc-number">2.4.2.</span> <span class="toc-text">白话回答示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%9B%9B%E5%A4%A7%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB-MVCC"><span class="toc-number">2.5.</span> <span class="toc-text">5. 四大隔离级别 &amp; MVCC</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9-4"><span class="toc-number">2.5.1.</span> <span class="toc-text">知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94%E7%A4%BA%E4%BE%8B-4"><span class="toc-number">2.5.2.</span> <span class="toc-text">白话回答示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%8E%92%E6%9F%A5%E6%AD%A5%E9%AA%A4"><span class="toc-number">2.6.</span> <span class="toc-text">6. 慢查询排查步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9-5"><span class="toc-number">2.6.1.</span> <span class="toc-text">知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94%E7%A4%BA%E4%BE%8B-5"><span class="toc-number">2.6.2.</span> <span class="toc-text">白话回答示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E5%AE%9E%E9%99%85%E9%A1%B9%E7%9B%AE%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E7%A4%BA%E4%BE%8B"><span class="toc-number">2.7.</span> <span class="toc-text">7. 实际项目慢查询优化示例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9-6"><span class="toc-number">2.7.1.</span> <span class="toc-text">知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94%E7%A4%BA%E4%BE%8B-6"><span class="toc-number">2.7.2.</span> <span class="toc-text">白话回答示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-%E5%B8%B8%E7%94%A8%E6%85%A2%E6%9F%A5%E8%AF%A2%E5%AE%9A%E4%BD%8D%E5%B7%A5%E5%85%B7%E5%8F%8A%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="toc-number">2.8.</span> <span class="toc-text">8. 常用慢查询定位工具及使用方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7"><span class="toc-number">2.8.1.</span> <span class="toc-text">工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94%E7%A4%BA%E4%BE%8B-7"><span class="toc-number">2.8.2.</span> <span class="toc-text">白话回答示例</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#AI-%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B"><span class="toc-number">3.</span> <span class="toc-text">AI &#x2F; 大语言模型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#RAG%EF%BC%88%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90%EF%BC%89"><span class="toc-number">3.1.</span> <span class="toc-text">RAG（检索增强生成）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%BB%80%E4%B9%88%E6%98%AF-RAG%EF%BC%9F%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">3.1.1.</span> <span class="toc-text">1. 什么是 RAG？完整流程是什么？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-4"><span class="toc-number">3.1.1.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E5%B7%A5%E7%A8%8B%EF%BC%88LangChain%EF%BC%89"><span class="toc-number">3.1.1.2.</span> <span class="toc-text">实际工程（LangChain）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%A1%BA%E5%B8%A6%E8%A7%A3%E9%87%8A%E5%87%A0%E4%B8%AA%E8%AF%8D-1"><span class="toc-number">3.1.1.3.</span> <span class="toc-text">顺带解释几个词</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Embedding"><span class="toc-number">3.1.1.3.1.</span> <span class="toc-text">Embedding</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%90%91%E9%87%8F%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">3.1.1.3.2.</span> <span class="toc-text">向量数据库</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-3"><span class="toc-number">3.1.1.4.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%96%87%E6%A1%A3%E5%88%86%E5%9D%97%EF%BC%88Chunk%EF%BC%89%E6%80%8E%E4%B9%88%E5%81%9A%EF%BC%9F"><span class="toc-number">3.1.2.</span> <span class="toc-text">2. 文档分块（Chunk）怎么做？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-5"><span class="toc-number">3.1.2.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Chunk-%E5%8E%9F%E5%88%99"><span class="toc-number">3.1.2.2.</span> <span class="toc-text">Chunk 原则</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E5%B7%A5%E7%A8%8B%E6%96%B9%E6%A1%88"><span class="toc-number">3.1.2.3.</span> <span class="toc-text">常见工程方案</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#overlap-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">3.1.2.4.</span> <span class="toc-text">overlap 是什么</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LangChain-%E5%AE%9E%E8%B7%B5%E4%BB%A3%E7%A0%81"><span class="toc-number">3.1.2.5.</span> <span class="toc-text">LangChain 实践代码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8-RecursiveCharacterTextSplitter"><span class="toc-number">3.1.2.6.</span> <span class="toc-text">为什么用 RecursiveCharacterTextSplitter</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-4"><span class="toc-number">3.1.2.7.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-RAG-%E6%A3%80%E7%B4%A2%E5%81%9A%E4%BA%86%E5%93%AA%E4%BA%9B%E4%BC%98%E5%8C%96%EF%BC%9F"><span class="toc-number">3.1.3.</span> <span class="toc-text">3. RAG 检索做了哪些优化？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-6"><span class="toc-number">3.1.3.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E4%BC%98%E5%8C%96"><span class="toc-number">3.1.3.2.</span> <span class="toc-text">常见优化</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Chunk-%E4%BC%98%E5%8C%96"><span class="toc-number">3.1.3.2.1.</span> <span class="toc-text">Chunk 优化</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8F%8C%E8%B7%AF%E6%A3%80%E7%B4%A2%EF%BC%88%E9%87%8D%E7%82%B9%EF%BC%89"><span class="toc-number">3.1.3.2.2.</span> <span class="toc-text">双路检索（重点）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Rerank%EF%BC%88%E9%87%8D%E6%8E%92%E5%BA%8F%EF%BC%89"><span class="toc-number">3.1.3.2.3.</span> <span class="toc-text">Rerank（重排序）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Metadata-Filter"><span class="toc-number">3.1.3.2.4.</span> <span class="toc-text">Metadata Filter</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LangChain-%E5%AE%9E%E8%B7%B5%E4%BB%A3%E7%A0%81-1"><span class="toc-number">3.1.3.3.</span> <span class="toc-text">LangChain 实践代码</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2"><span class="toc-number">3.1.3.3.1.</span> <span class="toc-text">向量检索</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Metadata-%E8%BF%87%E6%BB%A4"><span class="toc-number">3.1.3.3.2.</span> <span class="toc-text">Metadata 过滤</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%AF%AD%E4%B9%89%E6%BC%82%E7%A7%BB"><span class="toc-number">3.1.3.4.</span> <span class="toc-text">什么是语义漂移</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-5"><span class="toc-number">3.1.3.5.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%8F%8C%E9%87%8D%E6%A3%80%E7%B4%A2%EF%BC%88%E8%AF%AD%E4%B9%89%E6%A3%80%E7%B4%A2-%E5%85%B3%E9%94%AE%E8%AF%8D%E6%A3%80%E7%B4%A2%EF%BC%89%E8%AE%B2%E4%B8%80%E4%B8%8B"><span class="toc-number">3.1.4.</span> <span class="toc-text">4. 双重检索（语义检索 + 关键词检索）讲一下</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-7"><span class="toc-number">3.1.4.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%8F%8C%E8%B7%AF%E6%A3%80%E7%B4%A2"><span class="toc-number">3.1.4.2.</span> <span class="toc-text">为什么要双路检索</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#BM25-%E4%BC%98%E7%82%B9"><span class="toc-number">3.1.4.3.</span> <span class="toc-text">BM25 优点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2%E4%BC%98%E7%82%B9"><span class="toc-number">3.1.4.4.</span> <span class="toc-text">向量检索优点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LangChain-%E5%AE%9E%E8%B7%B5%E4%BB%A3%E7%A0%81-2"><span class="toc-number">3.1.4.5.</span> <span class="toc-text">LangChain 实践代码</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#BM25"><span class="toc-number">3.1.4.5.1.</span> <span class="toc-text">BM25</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2-1"><span class="toc-number">3.1.4.5.2.</span> <span class="toc-text">向量检索</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B7%B7%E5%90%88%E5%8F%AC%E5%9B%9E"><span class="toc-number">3.1.4.5.3.</span> <span class="toc-text">混合召回</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-6"><span class="toc-number">3.1.4.6.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-TopK-%E6%80%8E%E4%B9%88%E5%AE%9A%E7%9A%84%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF-6%EF%BC%9F"><span class="toc-number">3.1.5.</span> <span class="toc-text">5. TopK 怎么定的？为什么是 6？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-8"><span class="toc-number">3.1.5.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E5%A4%AA%E5%B0%8F"><span class="toc-number">3.1.5.2.</span> <span class="toc-text">为什么不能太小</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E5%A4%AA%E5%A4%A7"><span class="toc-number">3.1.5.3.</span> <span class="toc-text">为什么不能太大</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BE%88%E5%A4%9A%E9%A1%B9%E7%9B%AE%E6%98%AF-5-10"><span class="toc-number">3.1.5.4.</span> <span class="toc-text">为什么很多项目是 5~10</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LangChain-%E5%AE%9E%E8%B7%B5%E4%BB%A3%E7%A0%81-3"><span class="toc-number">3.1.5.5.</span> <span class="toc-text">LangChain 实践代码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF-6%EF%BC%88%E6%A0%87%E5%87%86%E5%9B%9E%E7%AD%94%EF%BC%89"><span class="toc-number">3.1.5.6.</span> <span class="toc-text">为什么是 6（标准回答）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E7%9B%B8%E4%BC%BC%E5%BA%A6%E9%98%88%E5%80%BC%E5%92%8C%E8%BF%87%E6%BB%A4%E7%AD%96%E7%95%A5%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">3.1.6.</span> <span class="toc-text">6. 相似度阈值和过滤策略是什么？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-9"><span class="toc-number">3.1.6.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E9%98%88%E5%80%BC"><span class="toc-number">3.1.6.2.</span> <span class="toc-text">为什么需要阈值</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E9%98%88%E5%80%BC"><span class="toc-number">3.1.6.3.</span> <span class="toc-text">常见阈值</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LangChain-%E5%AE%9E%E8%B7%B5%E4%BB%A3%E7%A0%81-4"><span class="toc-number">3.1.6.4.</span> <span class="toc-text">LangChain 实践代码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%87%E6%BB%A4%E7%AD%96%E7%95%A5"><span class="toc-number">3.1.6.5.</span> <span class="toc-text">过滤策略</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-7"><span class="toc-number">3.1.6.6.</span> <span class="toc-text">白话回答</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Spring-%E5%85%A8%E5%AE%B6%E6%A1%B6"><span class="toc-number">4.</span> <span class="toc-text">Spring 全家桶</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Spring-IOC-%E5%AE%B9%E5%99%A8%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B%EF%BC%88%E5%BF%85%E8%83%8C%EF%BC%89"><span class="toc-number">4.1.</span> <span class="toc-text">1. Spring IOC 容器初始化流程（必背）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-10"><span class="toc-number">4.1.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#IOC-%E5%88%9D%E5%A7%8B%E5%8C%96%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B"><span class="toc-number">4.1.2.</span> <span class="toc-text">IOC 初始化核心流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%BA%E5%B8%A6%E8%A7%A3%E9%87%8A%E5%87%A0%E4%B8%AA%E8%AF%8D-2"><span class="toc-number">4.1.3.</span> <span class="toc-text">顺带解释几个词</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#BeanDefinition"><span class="toc-number">4.1.3.1.</span> <span class="toc-text">BeanDefinition</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#DI%EF%BC%88%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%EF%BC%89"><span class="toc-number">4.1.3.2.</span> <span class="toc-text">DI（依赖注入）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E9%A1%B9%E7%9B%AE%E5%9C%BA%E6%99%AF-3"><span class="toc-number">4.1.4.</span> <span class="toc-text">实际项目场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-8"><span class="toc-number">4.1.5.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Bean-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-number">4.2.</span> <span class="toc-text">2. Bean 生命周期</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-11"><span class="toc-number">4.2.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%BA%E5%B8%A6%E8%A7%A3%E9%87%8A%E5%87%A0%E4%B8%AA%E8%AF%8D-3"><span class="toc-number">4.2.2.</span> <span class="toc-text">顺带解释几个词</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#BeanPostProcessor"><span class="toc-number">4.2.2.1.</span> <span class="toc-text">BeanPostProcessor</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Aware-%E6%8E%A5%E5%8F%A3"><span class="toc-number">4.2.2.2.</span> <span class="toc-text">Aware 接口</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%96%B9%E6%B3%95"><span class="toc-number">4.2.3.</span> <span class="toc-text">初始化方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E9%A1%B9%E7%9B%AE%E5%9C%BA%E6%99%AF-4"><span class="toc-number">4.2.4.</span> <span class="toc-text">实际项目场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-9"><span class="toc-number">4.2.5.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%EF%BC%9A%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98%E5%8E%9F%E7%90%86"><span class="toc-number">4.3.</span> <span class="toc-text">3. 循环依赖：三级缓存原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-12"><span class="toc-number">4.3.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E6%9C%89%E9%97%AE%E9%A2%98"><span class="toc-number">4.3.2.</span> <span class="toc-text">为什么会有问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Spring-%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3"><span class="toc-number">4.3.3.</span> <span class="toc-text">Spring 如何解决</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98"><span class="toc-number">4.3.4.</span> <span class="toc-text">三级缓存</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E7%BA%A7%E7%BC%93%E5%AD%98"><span class="toc-number">4.3.4.1.</span> <span class="toc-text">一级缓存</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E7%BA%A7%E7%BC%93%E5%AD%98"><span class="toc-number">4.3.4.2.</span> <span class="toc-text">二级缓存</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98-1"><span class="toc-number">4.3.4.3.</span> <span class="toc-text">三级缓存</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98"><span class="toc-number">4.3.4.4.</span> <span class="toc-text">为什么需要三级缓存</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E6%B5%81%E7%A8%8B"><span class="toc-number">4.3.4.5.</span> <span class="toc-text">实际流程</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9E%84%E9%80%A0%E5%99%A8%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E8%A7%A3%E5%86%B3%E4%B8%8D%E4%BA%86"><span class="toc-number">4.3.5.</span> <span class="toc-text">为什么构造器循环依赖解决不了</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-10"><span class="toc-number">4.3.6.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-AOP-%E5%BA%95%E5%B1%82%EF%BC%9AJDK-%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86-CGLIB"><span class="toc-number">4.4.</span> <span class="toc-text">4. AOP 底层：JDK 动态代理 &#x2F; CGLIB</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-13"><span class="toc-number">4.4.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E5%9C%BA%E6%99%AF"><span class="toc-number">4.4.2.</span> <span class="toc-text">常见场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Spring-AOP-%E4%B8%A4%E7%A7%8D%E4%BB%A3%E7%90%86%E6%96%B9%E5%BC%8F"><span class="toc-number">4.4.3.</span> <span class="toc-text">Spring AOP 两种代理方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JDK-%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86"><span class="toc-number">4.4.4.</span> <span class="toc-text">JDK 动态代理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CGLIB"><span class="toc-number">4.4.5.</span> <span class="toc-text">CGLIB</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-final-%E4%B8%8D%E8%83%BD-AOP"><span class="toc-number">4.4.6.</span> <span class="toc-text">为什么 final 不能 AOP</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E9%A1%B9%E7%9B%AE%E5%9C%BA%E6%99%AF-5"><span class="toc-number">4.4.7.</span> <span class="toc-text">实际项目场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-11"><span class="toc-number">4.4.8.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-Spring-Boot-%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E5%8E%9F%E7%90%86"><span class="toc-number">4.5.</span> <span class="toc-text">5. Spring Boot 自动装配原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-14"><span class="toc-number">4.5.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%B3%A8%E8%A7%A3"><span class="toc-number">4.5.2.</span> <span class="toc-text">核心注解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B"><span class="toc-number">4.5.3.</span> <span class="toc-text">自动装配核心流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-Starter-%E8%83%BD%E8%87%AA%E5%8A%A8%E7%94%9F%E6%95%88"><span class="toc-number">4.5.4.</span> <span class="toc-text">为什么 Starter 能自动生效</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E9%A1%B9%E7%9B%AE%E5%9C%BA%E6%99%AF-6"><span class="toc-number">4.5.5.</span> <span class="toc-text">实际项目场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-12"><span class="toc-number">4.5.6.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-Conditional-%E7%B3%BB%E5%88%97%E6%B3%A8%E8%A7%A3%E4%BD%9C%E7%94%A8"><span class="toc-number">4.6.</span> <span class="toc-text">6. @Conditional 系列注解作用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-15"><span class="toc-number">4.6.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E6%B3%A8%E8%A7%A3"><span class="toc-number">4.6.2.</span> <span class="toc-text">常见注解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E9%A1%B9%E7%9B%AE%E5%9C%BA%E6%99%AF-7"><span class="toc-number">4.6.3.</span> <span class="toc-text">实际项目场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-13"><span class="toc-number">4.6.4.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-Spring-MVC-%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">4.7.</span> <span class="toc-text">7. Spring MVC 执行流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-16"><span class="toc-number">4.7.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%BA%E5%B8%A6%E8%A7%A3%E9%87%8A%E5%87%A0%E4%B8%AA%E8%AF%8D-4"><span class="toc-number">4.7.2.</span> <span class="toc-text">顺带解释几个词</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#DispatcherServlet"><span class="toc-number">4.7.2.1.</span> <span class="toc-text">DispatcherServlet</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#HandlerMapping"><span class="toc-number">4.7.2.2.</span> <span class="toc-text">HandlerMapping</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ViewResolver"><span class="toc-number">4.7.2.3.</span> <span class="toc-text">ViewResolver</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E9%A1%B9%E7%9B%AE%E5%9C%BA%E6%99%AF-8"><span class="toc-number">4.7.3.</span> <span class="toc-text">实际项目场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-14"><span class="toc-number">4.7.4.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-Spring-%E4%BA%8B%E5%8A%A1%E4%BC%A0%E6%92%AD%E6%9C%BA%E5%88%B6%E3%80%81%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="toc-number">4.8.</span> <span class="toc-text">8. Spring 事务传播机制、隔离级别</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-17"><span class="toc-number">4.8.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E4%BC%A0%E6%92%AD%E6%9C%BA%E5%88%B6"><span class="toc-number">4.8.2.</span> <span class="toc-text">事务传播机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E4%BC%A0%E6%92%AD%E8%A1%8C%E4%B8%BA"><span class="toc-number">4.8.3.</span> <span class="toc-text">常见传播行为</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E9%A1%B9%E7%9B%AE%E5%9C%BA%E6%99%AF-9"><span class="toc-number">4.8.4.</span> <span class="toc-text">实际项目场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="toc-number">4.8.5.</span> <span class="toc-text">隔离级别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E9%97%AE%E9%A2%98"><span class="toc-number">4.8.6.</span> <span class="toc-text">并发问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E7%A7%8D%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="toc-number">4.8.7.</span> <span class="toc-text">四种隔离级别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-15"><span class="toc-number">4.8.8.</span> <span class="toc-text">白话回答</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Java-%E5%9F%BA%E7%A1%80"><span class="toc-number">5.</span> <span class="toc-text">Java 基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-HashMap-%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E3%80%81%E6%89%A9%E5%AE%B9%E3%80%81%E5%93%88%E5%B8%8C%E5%86%B2%E7%AA%81%E3%80%81JDK1-7-1-8-%E5%8C%BA%E5%88%AB"><span class="toc-number">5.1.</span> <span class="toc-text">1. HashMap 底层实现、扩容、哈希冲突、JDK1.7&#x2F;1.8 区别</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-18"><span class="toc-number">5.1.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HashMap-%E5%AD%98%E5%82%A8%E6%B5%81%E7%A8%8B"><span class="toc-number">5.1.2.</span> <span class="toc-text">HashMap 存储流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%93%88%E5%B8%8C%E5%86%B2%E7%AA%81"><span class="toc-number">5.1.3.</span> <span class="toc-text">什么是哈希冲突</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%86%B2%E7%AA%81"><span class="toc-number">5.1.4.</span> <span class="toc-text">如何解决冲突</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BD%AC%E7%BA%A2%E9%BB%91%E6%A0%91"><span class="toc-number">5.1.5.</span> <span class="toc-text">为什么转红黑树</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A9%E5%AE%B9%E6%9C%BA%E5%88%B6"><span class="toc-number">5.1.6.</span> <span class="toc-text">扩容机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%B4%9F%E8%BD%BD%E5%9B%A0%E5%AD%90"><span class="toc-number">5.1.7.</span> <span class="toc-text">什么是负载因子</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF-0-75"><span class="toc-number">5.1.8.</span> <span class="toc-text">为什么是 0.75</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JDK1-7-vs-1-8"><span class="toc-number">5.1.9.</span> <span class="toc-text">JDK1.7 vs 1.8</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-7-%E4%B8%BA%E4%BB%80%E4%B9%88%E7%BA%BF%E7%A8%8B%E4%B8%8D%E5%AE%89%E5%85%A8%E6%9B%B4%E4%B8%A5%E9%87%8D"><span class="toc-number">5.1.10.</span> <span class="toc-text">1.7 为什么线程不安全更严重</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-8-%E6%94%B9%E8%BF%9B"><span class="toc-number">5.1.11.</span> <span class="toc-text">1.8 改进</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-16"><span class="toc-number">5.1.12.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-HashMap-%E5%92%8C-ConcurrentHashMap-%E5%8C%BA%E5%88%AB%E3%80%81%E9%94%81%E6%9C%BA%E5%88%B6"><span class="toc-number">5.2.</span> <span class="toc-text">2. HashMap 和 ConcurrentHashMap 区别、锁机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-19"><span class="toc-number">5.2.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HashMap"><span class="toc-number">5.2.2.</span> <span class="toc-text">HashMap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ConcurrentHashMap"><span class="toc-number">5.2.3.</span> <span class="toc-text">ConcurrentHashMap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JDK1-7-%E9%94%81%E6%9C%BA%E5%88%B6"><span class="toc-number">5.2.4.</span> <span class="toc-text">JDK1.7 锁机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JDK1-8-%E9%94%81%E6%9C%BA%E5%88%B6"><span class="toc-number">5.2.5.</span> <span class="toc-text">JDK1.8 锁机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-CAS"><span class="toc-number">5.2.6.</span> <span class="toc-text">什么是 CAS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ConcurrentHashMap-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%80%A7%E8%83%BD%E6%9B%B4%E9%AB%98"><span class="toc-number">5.2.7.</span> <span class="toc-text">ConcurrentHashMap 为什么性能更高</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E9%A1%B9%E7%9B%AE%E5%9C%BA%E6%99%AF-10"><span class="toc-number">5.2.8.</span> <span class="toc-text">实际项目场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-17"><span class="toc-number">5.2.9.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-volatile%E3%80%81synchronized%E3%80%81Lock-%E5%8C%BA%E5%88%AB"><span class="toc-number">5.3.</span> <span class="toc-text">3. volatile、synchronized、Lock 区别</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-20"><span class="toc-number">5.3.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#volatile"><span class="toc-number">5.3.2.</span> <span class="toc-text">volatile</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%8F%AF%E8%A7%81%E6%80%A7"><span class="toc-number">5.3.3.</span> <span class="toc-text">什么是可见性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%8C%87%E4%BB%A4%E9%87%8D%E6%8E%92"><span class="toc-number">5.3.4.</span> <span class="toc-text">什么是指令重排</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#volatile-%E4%B8%8D%E8%83%BD%E4%BF%9D%E8%AF%81%E4%BB%80%E4%B9%88"><span class="toc-number">5.3.5.</span> <span class="toc-text">volatile 不能保证什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%8E%9F%E5%AD%90%E6%80%A7"><span class="toc-number">5.3.6.</span> <span class="toc-text">什么是原子性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#synchronized"><span class="toc-number">5.3.7.</span> <span class="toc-text">synchronized</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lock%EF%BC%88ReentrantLock%EF%BC%89"><span class="toc-number">5.3.8.</span> <span class="toc-text">Lock（ReentrantLock）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8C%BA%E5%88%AB%E6%80%BB%E7%BB%93"><span class="toc-number">5.3.9.</span> <span class="toc-text">区别总结</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-18"><span class="toc-number">5.3.10.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E8%B0%88%E8%B0%88-ReentrantLock-%E7%9A%84%E7%90%86%E8%A7%A3"><span class="toc-number">5.4.</span> <span class="toc-text">4. 谈谈 ReentrantLock 的理解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-21"><span class="toc-number">5.4.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%8F%AF%E9%87%8D%E5%85%A5"><span class="toc-number">5.4.2.</span> <span class="toc-text">为什么需要可重入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ReentrantLock-%E7%89%B9%E7%82%B9"><span class="toc-number">5.4.3.</span> <span class="toc-text">ReentrantLock 特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%85%AC%E5%B9%B3%E9%94%81"><span class="toc-number">5.4.4.</span> <span class="toc-text">什么是公平锁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-Condition"><span class="toc-number">5.4.5.</span> <span class="toc-text">什么是 Condition</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E9%A1%B9%E7%9B%AE%E5%9C%BA%E6%99%AF-11"><span class="toc-number">5.4.6.</span> <span class="toc-text">实际项目场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-19"><span class="toc-number">5.4.7.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="toc-number">5.5.</span> <span class="toc-text">5. 线程池核心知识点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-22"><span class="toc-number">5.5.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E4%B8%80%E7%9B%B4-new-Thread"><span class="toc-number">5.5.2.</span> <span class="toc-text">为什么不能一直 new Thread</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B"><span class="toc-number">5.5.3.</span> <span class="toc-text">线程池核心流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E9%A1%B9%E7%9B%AE%E5%9C%BA%E6%99%AF-12"><span class="toc-number">5.5.4.</span> <span class="toc-text">实际项目场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-20"><span class="toc-number">5.5.5.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E7%BA%BF%E7%A8%8B%E6%B1%A0%E4%B8%83%E5%A4%A7%E5%8F%82%E6%95%B0"><span class="toc-number">5.6.</span> <span class="toc-text">6. 线程池七大参数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-23"><span class="toc-number">5.6.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%92%E7%BB%9D%E7%AD%96%E7%95%A5"><span class="toc-number">5.6.2.</span> <span class="toc-text">拒绝策略</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-21"><span class="toc-number">5.6.3.</span> <span class="toc-text">白话回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E9%9B%86%E5%90%88%E6%9C%89%E5%93%AA%E4%BA%9B%E3%80%81%E6%80%8E%E4%B9%88%E5%AE%9E%E7%8E%B0%E5%AE%89%E5%85%A8"><span class="toc-number">5.7.</span> <span class="toc-text">7. 线程安全集合有哪些、怎么实现安全</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%89%E5%8F%8A%E7%9F%A5%E8%AF%86%E7%82%B9-24"><span class="toc-number">5.7.1.</span> <span class="toc-text">涉及知识点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Vector"><span class="toc-number">5.7.2.</span> <span class="toc-text">Vector</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Collections-synchronizedXXX"><span class="toc-number">5.7.3.</span> <span class="toc-text">Collections.synchronizedXXX</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ConcurrentHashMap-1"><span class="toc-number">5.7.4.</span> <span class="toc-text">ConcurrentHashMap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CopyOnWriteArrayList"><span class="toc-number">5.7.5.</span> <span class="toc-text">CopyOnWriteArrayList</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%86%99%E6%97%B6%E5%A4%8D%E5%88%B6"><span class="toc-number">5.7.6.</span> <span class="toc-text">什么是写时复制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E9%A1%B9%E7%9B%AE%E5%9C%BA%E6%99%AF-13"><span class="toc-number">5.7.7.</span> <span class="toc-text">实际项目场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BD%E8%AF%9D%E5%9B%9E%E7%AD%94-22"><span class="toc-number">5.7.8.</span> <span class="toc-text">白话回答</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Agent-%E5%B2%97%E4%BD%8D%E9%97%AE%E9%A2%98"><span class="toc-number">6.</span> <span class="toc-text">Agent 岗位问题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Python-%E4%B8%89%E5%A4%A7%E5%99%A8"><span class="toc-number">6.1.</span> <span class="toc-text">Python 三大器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94"><span class="toc-number">6.1.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5%E5%92%8C%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-number">6.2.</span> <span class="toc-text">异步和多线程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-1"><span class="toc-number">6.2.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E4%BC%98%E5%8C%96-SQL-%E6%9F%A5%E8%AF%A2%E9%80%9F%E5%BA%A6"><span class="toc-number">6.3.</span> <span class="toc-text">如何优化 SQL 查询速度</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-2"><span class="toc-number">6.3.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AI-%E5%92%8C-Agent-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">6.4.</span> <span class="toc-text">AI 和 Agent 的区别</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-3"><span class="toc-number">6.4.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#LangChain-%E5%B8%B8%E7%94%A8%E6%96%B9%E6%B3%95"><span class="toc-number">6.5.</span> <span class="toc-text">LangChain 常用方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-4"><span class="toc-number">6.5.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%A0%E4%B8%80%E8%88%AC%E6%80%8E%E4%B9%88%E5%86%99-Prompt"><span class="toc-number">6.6.</span> <span class="toc-text">你一般怎么写 Prompt</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-5"><span class="toc-number">6.6.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81-RAG-%E6%90%9C%E7%B4%A2%E7%AD%96%E7%95%A5"><span class="toc-number">6.7.</span> <span class="toc-text">常见 RAG 搜索策略</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-6"><span class="toc-number">6.7.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D-AI-%E5%B9%BB%E8%A7%89"><span class="toc-number">6.8.</span> <span class="toc-text">如何避免 AI 幻觉</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-7"><span class="toc-number">6.8.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E5%A4%B4%E6%B3%A8%E6%84%8F%E5%8A%9B%E6%9C%BA%E5%88%B6"><span class="toc-number">6.9.</span> <span class="toc-text">多头注意力机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-8"><span class="toc-number">6.9.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GPT5-%E7%9B%B8%E6%AF%94%E5%85%B6%E4%BB%96-AI-%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%E4%BC%98%E5%8C%96"><span class="toc-number">6.10.</span> <span class="toc-text">GPT5 相比其他 AI 做了什么优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-9"><span class="toc-number">6.10.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E8%BF%91%E5%86%99%E7%9A%84-Agent-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%8C%E6%80%8E%E4%B9%88%E5%81%9A%E7%9A%84"><span class="toc-number">6.11.</span> <span class="toc-text">最近写的 Agent 是什么，怎么做的</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-10"><span class="toc-number">6.11.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#LangGraph"><span class="toc-number">6.12.</span> <span class="toc-text">LangGraph</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-11"><span class="toc-number">6.12.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ES-%E6%90%9C%E7%B4%A2%E6%9C%BA%E5%88%B6"><span class="toc-number">6.13.</span> <span class="toc-text">ES 搜索机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-12"><span class="toc-number">6.13.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Function-Calling-%E5%92%8C-MCP"><span class="toc-number">6.14.</span> <span class="toc-text">Function Calling 和 MCP</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-13"><span class="toc-number">6.14.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%A7%E9%87%8F%E7%9F%A5%E8%AF%86%E6%96%87%E6%9C%AC%E5%85%A5%E5%BA%93%E6%80%8E%E4%B9%88%E5%A4%84%E7%90%86"><span class="toc-number">6.15.</span> <span class="toc-text">大量知识文本入库怎么处理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-14"><span class="toc-number">6.15.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E9%9A%BE%E7%9A%84%E9%97%AE%E9%A2%98%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">6.16.</span> <span class="toc-text">最难的问题是什么</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-15"><span class="toc-number">6.16.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%81%9A%E8%BF%87%E4%BB%80%E4%B9%88%E9%A1%B9%E7%9B%AE%EF%BC%8C%E6%9C%89%E4%BB%80%E4%B9%88%E5%8F%AF%E5%A4%8D%E5%88%BB%E7%BB%8F%E9%AA%8C"><span class="toc-number">6.17.</span> <span class="toc-text">做过什么项目，有什么可复刻经验</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-16"><span class="toc-number">6.17.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%92%8C%E5%90%8C%E4%BA%8B%E5%86%B2%E7%AA%81%E6%80%8E%E4%B9%88%E5%8A%9E"><span class="toc-number">6.18.</span> <span class="toc-text">和同事冲突怎么办</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E5%9B%9E%E7%AD%94"><span class="toc-number">6.18.1.</span> <span class="toc-text">推荐回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%84%E6%9C%9F%E8%96%AA%E8%B5%84"><span class="toc-number">6.19.</span> <span class="toc-text">预期薪资</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-17"><span class="toc-number">6.19.1.</span> <span class="toc-text">回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%98%8E%E5%A4%A9%E8%83%BD%E5%88%B0%E5%B2%97%E4%B9%88"><span class="toc-number">6.20.</span> <span class="toc-text">明天能到岗么</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E7%AD%94-18"><span class="toc-number">6.20.1.</span> <span class="toc-text">回答</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/12/other/Job-Questions-Answer/" title="无标题">无标题</a><time datetime="2026-05-12T07:43:19.392Z" title="发表于 2026-05-12 15:43:19">2026-05-12</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/31/ai/Claude-Code-Agent-Architecture-Insights/" title="Claude Code 泄露源码带给我的 Agent 启发">Claude Code 泄露源码带给我的 Agent 启发</a><time datetime="2026-03-31T16:00:00.000Z" title="发表于 2026-04-01 00:00:00">2026-04-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/09/ops/Serverless-Practice/" title="记一次 Serverless 的认识与实践">记一次 Serverless 的认识与实践</a><time datetime="2026-03-09T16:00:00.000Z" title="发表于 2026-03-10 00:00:00">2026-03-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/11/19/ai/MCP-Tools-And-Prompt-Engineering-Trends/" title="MCP、Tools 与 Prompt Engineering 的工程化趋势">MCP、Tools 与 Prompt Engineering 的工程化趋势</a><time datetime="2025-11-19T16:00:00.000Z" title="发表于 2025-11-20 00:00:00">2025-11-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/15/ai/LangChain-LangGraph-Agent-Practice/" title="LangChain、LangGraph 与 AI Agent 工程实践">LangChain、LangGraph 与 AI Agent 工程实践</a><time datetime="2025-09-15T16:00:00.000Z" title="发表于 2025-09-16 00:00:00">2025-09-16</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By thchen</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'kesuoer-ui/kesuoer-ui.github.io',
+      'data-repo-id': 'R_kgDOSXiEqw',
+      'data-category-id': 'DIC_kwDOSXiEq84C8oeA',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.4"></script></div></div></body></html>
